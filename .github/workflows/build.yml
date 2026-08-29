@@ -71,7 +71,37 @@ jobs:
             https://github.com/Zaahen7/A356E-toolchain.git \
             "$toolchain_dir"
 
-          echo ""
+          LIMIT=$((50 * 1024 * 1024))
+          ROOT="${1:-.}"
+          
+          echo "========================================"
+          echo "   FILE SIZE CHECK"
+          echo "========================================"
+          echo "Directorio: $(realpath "$ROOT")"
+          echo "Límite: 50 MiB"
+          echo
+          
+          echo "========================================"
+          echo "   ARCHIVOS QUE SUPERAN 50 MiB"
+          echo "========================================"
+          
+          FOUND=0
+          
+          while IFS=$'\t' read -r SIZE FILE; do
+              if [ "$SIZE" -gt "$LIMIT" ]; then
+                  SIZE_MB=$(awk "BEGIN {printf \"%.2f\", $SIZE/1024/1024}")
+                  printf "%8s MiB  %s\n" "$SIZE_MB" "$FILE"
+                  FOUND=1
+              fi
+          done < <(find "$ROOT" -type f -printf '%s\t%p\n')
+          
+          if [ "$FOUND" -eq 0 ]; then
+              echo "✓ No hay archivos mayores de 50 MiB."
+          fi
+          
+          echo
+          echo "========================================"
+
           echo "listado:"
           ls "$toolchain_dir"
 
@@ -83,9 +113,39 @@ jobs:
             rm -f "$archive"
           done
 
-          echo ""
           echo "listado:"
           ls "$toolchain_dir"
+          
+          LIMIT=$((50 * 1024 * 1024))
+          ROOT="${1:-.}"
+          
+          echo "========================================"
+          echo "   FILE SIZE CHECK"
+          echo "========================================"
+          echo "Directorio: $(realpath "$ROOT")"
+          echo "Límite: 50 MiB"
+          echo
+          
+          echo "========================================"
+          echo "   ARCHIVOS QUE SUPERAN 50 MiB"
+          echo "========================================"
+          
+          FOUND=0
+          
+          while IFS=$'\t' read -r SIZE FILE; do
+              if [ "$SIZE" -gt "$LIMIT" ]; then
+                  SIZE_MB=$(awk "BEGIN {printf \"%.2f\", $SIZE/1024/1024}")
+                  printf "%8s MiB  %s\n" "$SIZE_MB" "$FILE"
+                  FOUND=1
+              fi
+          done < <(find "$ROOT" -type f -printf '%s\t%p\n')
+          
+          if [ "$FOUND" -eq 0 ]; then
+              echo "✓ No hay archivos mayores de 50 MiB."
+          fi
+          
+          echo
+          echo "========================================"
 
 
       - name: Build kernel
