@@ -19,14 +19,25 @@ on:
 
 
       kernel_variant:
-        description: "Select GUTS KERNEL variant"
+        description: "Select Kernel SU variant"
         required: true
         type: choice
         options:
           - none
+          - ksu
           - ksu-next
           - all
-        default: ksu-next
+        default: all
+
+      oneui_version:
+        description: "Select the One UI target to build"
+        required: true
+        type: choice
+        options:
+          - oneui8
+          - oneui8.5
+          - all
+        default: all
 
       susfs:
         description: "SUSFS"
@@ -47,44 +58,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Free Disk Space
-        uses: endersonmenezes/free-disk-space@v3
-        with:
-          remove_android: true
-          remove_dotnet: true
-          remove_haskell: true
-          remove_tool_cache: true
-          remove_swap: true
-
-      - name: Check Disk Space
+#      - name: Free Disk Space
+#        uses: endersonmenezes/free-disk-space@v3
+#        with:
+#          remove_android: true
+#          remove_dotnet: true
+#          remove_haskell: true
+#          remove_tool_cache: true
+#          remove_swap: true
+#
+      - name: Clone kernel source
         run: |
-          echo "=== Disk Space ==="
-          df -h
-
-          echo
-          echo "=== Root Filesystem ==="
-          df -h /
-          
-      - name: Check Disk Usage
-        run: |
-          echo "=== Disk Space ==="
-          df -h /
-      
-          echo
-          echo "=== /usr ==="
-          sudo du -sh /usr
-      
-          echo
-          echo "=== /opt ==="
-          sudo du -sh /opt
-      
-          echo
-          echo "=== /home ==="
-          sudo du -sh /home
-      
-          echo
-          echo "=== /tmp ==="
-          sudo du -sh /tmp
-
-          sudo du -xhd1 /tmp 2>/dev/null | sort -h
-
+          git clone --depth 1 -b oneui8 --single-branch https://github.com/Zaahen7/A356E-KernelSources.git $CONFIG
