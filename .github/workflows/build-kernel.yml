@@ -46,13 +46,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Free Disk Space
-        uses: endersonmenezes/free-disk-space@v3
-        with:
-    
-  test:
-    runs-on: ubuntu-latest
+#      - name: Free Disk Space
+#        uses: endersonmenezes/free-disk-space@v3
+#        with:
+      - name: Check Disk Space
+        run: |
+          echo "=== Disk Space ==="
+          df -h
 
-    steps:
-      - name: Hello
-        run: echo "GitHub Actions funciona!"
+          echo
+          echo "=== Root Filesystem ==="
+          df -h /
+
+          echo
+          echo "=== Disk Usage ==="
+          du -sh /home/runner/* 2>/dev/null | sort -h | tail -20
