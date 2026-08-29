@@ -61,18 +61,18 @@ jobs:
             -b "${{ inputs.branch }}" \
             https://github.com/Zaahen7/A356E-KernelSources.git \
             "$kernel_dir"
-
+            
+          echo "listado:"
           ls "$kernel_dir"
             
       - name: Clone Samsung Toolchain
         run: |
-          cd "$GITHUB_WORKSPACE/${{ inputs.branch }}-kernel"
-
           git clone \
             --depth 1 \
-            git@github.com:Zaahen7/A356E-toolchain.git \
+            https://github.com/Zaahen7/A356E-toolchain.git \
             "$toolchain_dir"
 
+          echo "listado:"
           ls "$toolchain_dir"
 
       - name: Build kernel
