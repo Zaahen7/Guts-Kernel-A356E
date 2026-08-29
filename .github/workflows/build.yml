@@ -81,9 +81,7 @@ jobs:
 
           echo "Moving toolchain to kernel source..."
           mv "$toolchain_dir/toolchain" "$kernel_dir"
-          echo "listado:"
-          ls "$toolchain_dir"
-          ls "$kernel_dir"
+          echo "Done :P"
 #         echo "listado:"
 #         ls "$toolchain_dir"
 
