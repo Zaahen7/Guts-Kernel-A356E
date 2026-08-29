@@ -28,37 +28,57 @@ on:
 
 jobs:
   build:
-    name: "Build ${{ inputs.branch }} kernels"
+    name: "Build ${{ inputs.branch }} kernel"
     runs-on: ubuntu-latest
+    
+    env:
+      kernel_dir: ${{ github.workspace }}/A356E-Kernel
+      toolchain_dir: ${{ github.workspace }}/A356E-toolchain
 
     steps:
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.REPOS_TOKEN }}
+          
+      - name: Prepare directories
+        run: |
+          echo "Removing directories..."
+          rm -rf "$kernel_dir" "$toolchain_dir"
+          
+          echo "Creating directories..."
+          mkdir "$kernel_dir" "$toolchain_dir"
+          echo "Directories created :P"
+          
       - name: Clone kernel source
         run: |
           echo "========================================"
           echo "Building: ${{ inputs.branch }} kernels"
           echo "========================================"
-          
-          rm -rf "$GITHUB_WORKSPACE/${{ inputs.branch }}-kernel"
 
           git clone \
             --depth 1 \
             --single-branch \
             -b "${{ inputs.branch }}" \
             https://github.com/Zaahen7/A356E-KernelSources.git \
-            "$GITHUB_WORKSPACE/${{ inputs.branch }}-kernel"
+            "$kernel_dir"
 
+          ls "$kernel_dir"
+            
+      - name: Clone Samsung Toolchain
+        run: |
+          cd "$GITHUB_WORKSPACE/${{ inputs.branch }}-kernel"
 
-      # ========================================================
-      # BUILD
-      # ========================================================
+          git clone \
+            --depth 1 \
+            git@github.com:Zaahen7/A356E-toolchain.git \
+            "$toolchain_dir"
+
+          ls "$toolchain_dir"
 
       - name: Build kernel
         run: |
-          cd "$GITHUB_WORKSPACE/${{ inputs.branch }}-kernel"
+          cd "$KERNEL_DIR"
 
           echo "========================================"
           echo "Build configuration"
@@ -85,8 +105,6 @@ jobs:
       - name: Cleanup kernel source
         if: always()
         run: |
-          echo "Cleaning kernel source..."
-
-          rm -rf "$GITHUB_WORKSPACE/${{ inputs.branch }}-kernel"
-
+          echo "Cleaning used directories..."
+          rm -rf "$kernel_dir" "$toolchain_dir"
           echo "Cleanup completed."
