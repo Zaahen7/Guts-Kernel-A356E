@@ -64,15 +64,30 @@ jobs:
           echo "listado:"
           ls "$kernel_dir"
             
-      - name: Clone Samsung Toolchain
+      - name: Samsung Toolchain Setup
         run: |
           git clone \
             --depth 1 \
             https://github.com/Zaahen7/A356E-toolchain.git \
             "$toolchain_dir"
 
+          echo ""
           echo "listado:"
           ls "$toolchain_dir"
+
+          echo ""
+          rm -f "$toolchain_dir/readme.md"
+          echo "Extracting .tar.xz files"
+          for archive in "$toolchain_dir"/*.tar.xz; do
+            echo "Extracting: $(basename "$archive")"
+            tar -xJf "$archive" -C "$TOOLCHAIN_DIR"
+            rm -f "$archive"
+          done
+
+          echo ""
+          echo "listado:"
+          ls "$toolchain_dir"
+
 
       - name: Build kernel
         run: |
