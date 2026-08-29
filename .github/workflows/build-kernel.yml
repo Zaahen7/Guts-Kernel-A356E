@@ -17,8 +17,17 @@ on:
           - release
         default: actions
 
-
-      kernel_variant:
+      lto:
+        description: "Choose LTO build"
+        required: true
+        type: choice
+        options:
+          - default
+          - thin
+          - full
+        default: default
+        
+      ksu_variant:
         description: "Select Kernel SU variant"
         required: true
         type: choice
@@ -67,6 +76,45 @@ jobs:
 #          remove_tool_cache: true
 #          remove_swap: true
 #
-      - name: Clone kernel source
-        run: |
-          git clone --depth 1 -b oneui8 --single-branch https://github.com/Zaahen7/A356E-KernelSources.git $CONFIG
+
+
+  # ============================================================
+  # ONE UI 8
+  # ============================================================
+  build-oneui8:
+    if: inputs.oneui_version == 'oneui8' || inputs.oneui_version == 'all'
+    uses: ./.github/workflows/build.yml
+    secrets: inherit
+
+    with:
+      branch: oneui8
+      ksu_variant: ${{ inputs.ksu_variant }}
+      susfs: ${{ inputs.susfs }}
+      lto: ${{ inputs.lto }}
+
+  # ============================================================
+  # ONE UI 8.5
+  # ============================================================
+  build-oneui85:
+    needs: build-oneui8
+    if: |
+      always() &&
+      (
+        inputs.oneui_version == 'oneui8.5' ||
+        inputs.oneui_version == 'all'
+      ) &&
+      (
+        needs.build-oneui8.result == 'success' ||
+        needs.build-oneui8.result == 'skipped'
+      )
+
+    uses: ./.github/workflows/build.yml
+    secrets: inherit
+
+    with:
+      branch: oneui8.5
+      ksu_variant: ${{ inputs.ksu_variant }}
+      susfs: ${{ inputs.susfs }}
+      lto: ${{ inputs.lto }}
+
+      
