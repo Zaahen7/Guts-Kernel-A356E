@@ -24,7 +24,7 @@ on:
 
       lto:
         required: true
-        type: boolean
+        type: string
 
 jobs:
   build:
