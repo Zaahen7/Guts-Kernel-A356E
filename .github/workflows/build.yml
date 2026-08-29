@@ -36,6 +36,10 @@ jobs:
       toolchain_dir: ${{ github.workspace }}/A356E-toolchain
 
     steps: 
+      - name: Configure Git authentication
+        run: |
+          git config --global url."https://x-access-token:${{ secrets.REPOS_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
       - name: Prepare directories
         run: |
           echo "Removing directories..."
