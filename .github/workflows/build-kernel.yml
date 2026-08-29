@@ -1,9 +1,55 @@
-name: Test Build
+name: Build Kernel
 
+permissions:
+  contents: write
+  actions: write
+  
 on:
   workflow_dispatch:
+    inputs:
+      release_type:
+        description: "Select the release type"
+        required: true
+        type: choice
+        options:
+          - actions
+          - prerelease
+          - release
+        default: actions
 
+
+      kernel_variant:
+        description: "Select GUTS KERNEL variant"
+        required: true
+        type: choice
+        options:
+          - none
+          - ksu-next
+          - all
+        default: ksu-next
+
+      susfs:
+        description: "SUSFS"
+        required: false
+        type: boolean
+        default: true
+
+concurrency:
+    group: build-kernels-${{ github.ref }}
+    cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+    
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Free Disk Space
+        uses: endersonmenezes/free-disk-space@v3
+        with:
+    
   test:
     runs-on: ubuntu-latest
 
