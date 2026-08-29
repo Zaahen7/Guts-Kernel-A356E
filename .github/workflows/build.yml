@@ -32,20 +32,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.REPOS_TOKEN }}
       - name: Clone kernel source
         run: |
           echo "========================================"
           echo "Building: ${{ inputs.branch }} kernels"
           echo "========================================"
           
-          rm -rf "$CONFIG"
+          rm -rf "$GITHUB_WORKSPACE/${{ inputs.branch }}-kernel"
 
           git clone \
             --depth 1 \
             --single-branch \
             -b "${{ inputs.branch }}" \
             https://github.com/Zaahen7/A356E-KernelSources.git \
-            "$CONFIG"
+            "$GITHUB_WORKSPACE/${{ inputs.branch }}-kernel"
 
 
       # ========================================================
@@ -54,7 +58,7 @@ jobs:
 
       - name: Build kernel
         run: |
-          cd "$CONFIG"
+          cd "$GITHUB_WORKSPACE/${{ inputs.branch }}-kernel"
 
           echo "========================================"
           echo "Build configuration"
@@ -83,6 +87,6 @@ jobs:
         run: |
           echo "Cleaning kernel source..."
 
-          rm -rf "$CONFIG"
+          rm -rf "$GITHUB_WORKSPACE/${{ inputs.branch }}-kernel"
 
           echo "Cleanup completed."
