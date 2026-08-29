@@ -45,10 +45,12 @@ defaults:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-#      - name: Free Disk Space
-#        uses: endersonmenezes/free-disk-space@v3
-#        with:
+      # - name: Free Disk Space
+      #   uses: endersonmenezes/free-disk-space@v3
+      #   with:
+
       - name: Check Disk Space
         run: |
           echo "=== Disk Space ==="
@@ -58,23 +60,24 @@ jobs:
           echo "=== Root Filesystem ==="
           df -h /
 
-          echo
-          echo "=== Disk Usage ==="
-          du -sh /home/runner/* 2>/dev/null | sort -h | tail -20
-          
-      - name: CHekc disk
+      - name: Check Disk Usage
         run: |
           echo "=== Top-level disk usage ==="
           sudo du -xhd1 / 2>/dev/null | sort -h
-          
+
           echo
           echo "=== /usr ==="
           sudo du -xhd1 /usr 2>/dev/null | sort -h
-          
+
           echo
           echo "=== /opt ==="
           sudo du -xhd1 /opt 2>/dev/null | sort -h
-          
+
           echo
           echo "=== /home ==="
           sudo du -xhd1 /home 2>/dev/null | sort -h
+
+          echo
+          echo "=== /tmp ==="
+          sudo du -xhd1 /tmp 2>/dev/null | sort -h
+
