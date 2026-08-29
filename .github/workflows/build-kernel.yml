@@ -59,25 +59,27 @@ jobs:
           echo
           echo "=== Root Filesystem ==="
           df -h /
-
+          
       - name: Check Disk Usage
         run: |
-          echo "=== Top-level disk usage ==="
-          sudo du -xhd1 / 2>/dev/null | sort -h
-
+          echo "=== Disk Space ==="
+          df -h /
+      
           echo
           echo "=== /usr ==="
-          sudo du -xhd1 /usr 2>/dev/null | sort -h
-
+          sudo du -sh /usr
+      
           echo
           echo "=== /opt ==="
-          sudo du -xhd1 /opt 2>/dev/null | sort -h
-
+          sudo du -sh /opt
+      
           echo
           echo "=== /home ==="
-          sudo du -xhd1 /home 2>/dev/null | sort -h
-
+          sudo du -sh /home
+      
           echo
           echo "=== /tmp ==="
+          sudo du -sh /tmp
+
           sudo du -xhd1 /tmp 2>/dev/null | sort -h
 
