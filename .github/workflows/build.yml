@@ -76,7 +76,6 @@ jobs:
           ls "$toolchain_dir"
 
           echo ""
-          rm -f "$toolchain_dir/readme.md"
           echo "Extracting .tar.xz files"
           for archive in "$toolchain_dir"/*.tar.xz; do
             echo "Extracting: $(basename "$archive")"
