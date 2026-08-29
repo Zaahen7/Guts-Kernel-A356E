@@ -1,0 +1,88 @@
+name: Build Kernel
+
+permissions:
+  contents: write
+  actions: write
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        description: "Kernel source branch"
+        required: true
+        type: string
+
+      ksu_variant:
+        description: "KernelSU variant"
+        required: true
+        type: string
+
+      susfs:
+        description: "Enable SUSFS"
+        required: true
+        type: boolean
+
+      lto:
+        required: true
+        type: boolean
+
+jobs:
+  build:
+    name: "Build ${{ inputs.branch }} kernels"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone kernel source
+        run: |
+          echo "========================================"
+          echo "Building: ${{ inputs.branch }} kernels"
+          echo "========================================"
+          
+          rm -rf "$CONFIG"
+
+          git clone \
+            --depth 1 \
+            --single-branch \
+            -b "${{ inputs.branch }}" \
+            https://github.com/Zaahen7/A356E-KernelSources.git \
+            "$CONFIG"
+
+
+      # ========================================================
+      # BUILD
+      # ========================================================
+
+      - name: Build kernel
+        run: |
+          cd "$CONFIG"
+
+          echo "========================================"
+          echo "Build configuration"
+          echo "========================================"
+
+          echo "Branch:        ${{ inputs.branch }}"
+          echo "KernelSU:      ${{ inputs.ksu_variant }}"
+          echo "SUSFS:         ${{ inputs.susfs }}"
+          echo "LTO:           ${{ inputs.lto }}"
+
+          echo "========================================"
+
+          # ==================================================
+          # TU COMANDO DE BUILD VA ACÁ
+          # ==================================================
+
+          # ./build.sh
+
+
+      # ========================================================
+      # CLEANUP
+      # ========================================================
+
+      - name: Cleanup kernel source
+        if: always()
+        run: |
+          echo "Cleaning kernel source..."
+
+          rm -rf "$CONFIG"
+
+          echo "Cleanup completed."
