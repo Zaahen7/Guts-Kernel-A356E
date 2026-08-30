@@ -122,3 +122,5 @@ jobs:
 
       - name: Export Artifacts to github
         uses: ./.github/actions/export-artifacts
+        with:
+          build-type: raw
