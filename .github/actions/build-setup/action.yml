@@ -10,6 +10,10 @@ inputs:
     description: "Branch to clone"
     required: true
     
+  output-files:
+    description: "Files to upload in artifacts"
+    required: true
+    
   #lto:
     #description: "LTO mode"
     #required: true
@@ -36,10 +40,10 @@ runs:
       shell: bash
       run: |
         echo "Removing directories..."
-        rm -rf "$KERNEL_DIR" "$TOOLCHAIN_DIR"
+        rm -rf "$KERNEL_DIR" "$TOOLCHAIN_DIR" "ANYKERNEL3_DIR"
         
         echo "Creating directories..."
-        mkdir "$KERNEL_DIR" "$TOOLCHAIN_DIR"
+        mkdir "$KERNEL_DIR" "$TOOLCHAIN_DIR" "ANYKERNEL3_DIR"
         echo "Directories created :P"
         
     - name: Clone kernel source
@@ -75,7 +79,13 @@ runs:
         echo "Moving toolchain to kernel source..."
         mv "$TOOLCHAIN_DIR/toolchain" "$KERNEL_DIR"
         echo "Done :P"
-          
-        echo "listado:"
-        ls "$TOOLCHAIN_DIR"
-        ls "$KERNEL_DIR"
+
+    - name: Clone anykernel3
+      if: inputs.output-files == 'flashable-zip' || inputs.output-files == 'both'
+      shell: bash
+      run: |
+        echo "Cloning anykernel3..."
+        git clone \
+          --depth 1 \
+          https://github.com/Zaahen7/AK3.git \
+          "$ANYKERNEL3_DIR"
