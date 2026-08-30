@@ -119,3 +119,6 @@ jobs:
           
       - name: Build kernel
         uses: ./.github/actions/build-kernel
+
+      - name: Export Artifacts to github
+        uses: ./.github/actions/export-artifacts
