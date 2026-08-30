@@ -36,10 +36,10 @@ runs:
       shell: bash
       run: |
         echo "Removing directories..."
-        rm -rf "$kernel_dir" "$toolchain_dir"
+        rm -rf "$KERNEL_DIR" "$TOOLCHAIN_DIR"
         
         echo "Creating directories..."
-        mkdir "$kernel_dir" "$toolchain_dir"
+        mkdir "$KERNEL_DIR" "$TOOLCHAIN_DIR"
         echo "Directories created :P"
         
     - name: Clone kernel source
@@ -54,10 +54,10 @@ runs:
           --single-branch \
           -b "${{ inputs.branch }}" \
           https://github.com/Zaahen7/A356E-KernelSources.git \
-          "$kernel_dir"
+          "$KERNEL_DIR"
             
           echo "listado:"
-          ls "$kernel_dir"
+          ls "$KERNEL_DIR"
           
     - name: Samsung Toolchain Setup
       shell: bash
@@ -66,17 +66,17 @@ runs:
         git clone \
           --depth 1 \
           https://github.com/Zaahen7/A356E-toolchain.git \
-          "$toolchain_dir"
+          "$TOOLCHAIN_DIR"
           
         echo "Extracting .tar.xz files"
-        for archive in "$toolchain_dir"/*.tar.xz; do
+        for archive in "$TOOLCHAIN_DIR"/*.tar.xz; do
           echo "Extracting: $(basename "$archive")"
-          tar -xJf "$archive" -C "$toolchain_dir"
+          tar -xJf "$archive" -C "$TOOLCHAIN_DIR"
           rm -f "$archive"
         done
 
           echo "Moving toolchain to kernel source..."
-          mv "$toolchain_dir/toolchain" "$kernel_dir"
+          mv "$TOOLCHAIN_DIR/toolchain" "$KERNEL_DIR"
           echo "Done :P"
 #         echo "listado:"
 #         ls "$toolchain_dir"
