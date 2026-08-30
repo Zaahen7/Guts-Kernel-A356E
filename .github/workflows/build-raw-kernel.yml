@@ -101,7 +101,8 @@ jobs:
     env:
       KERNEL_DIR: ${{ github.workspace }}/A356E-Kernel
       TOOLCHAIN_DIR: ${{ github.workspace }}/A356E-toolchain
-
+      ANYKERNEL3_DIR: ${{ github.workspace }}/A356E-Anykernel3
+      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
