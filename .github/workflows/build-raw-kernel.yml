@@ -91,11 +91,11 @@ jobs:
   # ONE UI 8.5
   # ============================================================
   build_oneui8-5:
-    needs: build-oneui8
+    needs: build_oneui8
     if: |
       always() &&
       (inputs.oneui_version == 'oneui8.5' || inputs.oneui_version == 'all') &&
-      (needs.build-oneui8.result == 'success' || needs.build-oneui8.result == 'skipped')
+      (needs.build_oneui8.result == 'success' || needs.build_oneui8.result == 'skipped')
     runs-on: ubuntu-latest
 
     env:
