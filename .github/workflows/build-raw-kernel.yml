@@ -125,6 +125,5 @@ jobs:
       - name: Export Artifacts to github
         uses: ./.github/actions/export-artifacts
         with:
-          build-type: raw
           output-files: ${{ inputs.output }}
           oneui-version: ${{ inputs.oneui_version }}
