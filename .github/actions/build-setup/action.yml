@@ -78,4 +78,4 @@ runs:
           
         echo "listado:"
         ls "$TOOLCHAIN_DIR"
-        ls "KERNEL_DIR"
+        ls "$KERNEL_DIR"
