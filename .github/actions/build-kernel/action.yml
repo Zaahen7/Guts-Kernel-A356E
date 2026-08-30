@@ -1,5 +1,3 @@
-#!/bin/bash
-
 name: Build Kernel
 description: Build A356E kernel
 
