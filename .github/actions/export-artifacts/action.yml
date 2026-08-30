@@ -2,8 +2,6 @@ name: Export artifacts
 description: Export kernel artifacts
 
 inputs:
-  build-type:
-    required: true
   output-files:
     required: true
   oneui-version:
