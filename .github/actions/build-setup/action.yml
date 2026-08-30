@@ -77,4 +77,5 @@ runs:
         echo "Done :P"
           
         echo "listado:"
-        ls "$toolchain_dir"
+        ls "$TOOLCHAIN_DIR"
+        ls "KERNEL_DIR"
