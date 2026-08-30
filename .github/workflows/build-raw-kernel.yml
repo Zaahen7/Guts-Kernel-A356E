@@ -27,6 +27,16 @@ on:
           - oneui8.5
           - all
         default: all
+        
+      output:
+        description: "Select the output files"
+        required: true
+        type: choice
+        options:
+          - Image
+          - flashable-zip
+          - both
+        default: both
 
 concurrency:
     group: build-kernels-${{ github.ref }}
