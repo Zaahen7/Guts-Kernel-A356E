@@ -53,8 +53,7 @@ runs:
         echo "Building: ${{ inputs.branch }} kernel"
         echo "========================================"
 
-        git clone \
-          --depth 1 \
+        git clone --depth 1 \
           --single-branch \
           -b "${{ inputs.branch }}" \
           https://github.com/Zaahen7/A356E-KernelSources.git \
@@ -64,8 +63,7 @@ runs:
       shell: bash
       run: |
         echo "Cloning Samsung toolchain..."
-        git clone \
-          --depth 1 \
+        git clone --depth 1 \
           https://github.com/Zaahen7/A356E-toolchain.git \
           "$TOOLCHAIN_DIR"
           
@@ -80,12 +78,11 @@ runs:
         mv "$TOOLCHAIN_DIR/toolchain" "$KERNEL_DIR"
         echo "Done :P"
 
-    - name: Clone anykernel3
+    - name: Clone Anykernel3
       if: inputs.output-files == 'flashable-zip' || inputs.output-files == 'both'
       shell: bash
       run: |
         echo "Cloning anykernel3..."
-        git clone \
-          --depth 1 \
+        git clone --depth 1 \
           https://github.com/Zaahen7/AK3.git \
           "$ANYKERNEL3_DIR"
