@@ -124,14 +124,39 @@ jobs:
         needs.build-oneui8.result == 'success' ||
         needs.build-oneui8.result == 'skipped'
       )
+    runs-on: ubuntu-latest
 
-    uses: ./.github/workflows/build.yml
-    secrets: inherit
+    env:
+      KERNEL_DIR: ${{ github.workspace }}/A356E-Kernel
+      TOOLCHAIN_DIR: ${{ github.workspace }}/A356E-toolchain
 
-    with:
-      branch: oneui8.5
-      ksu_variant: ${{ inputs.ksu_variant }}
-      susfs: ${{ inputs.susfs }}
-      lto: ${{ inputs.lto }}
+    steps:
+      - name: Prepare to build
+        uses: ./.github/actions/build-setup
+        with:
+          repos_token: ${{ secrets.REPOS_TOKEN }}
+          branch: ${{ inputs.oneui_version }}
+  
+  #build-oneui85:
+    #needs: build-oneui8
+    #if: |
+      #always() &&
+      #(
+        #inputs.oneui_version == 'oneui8.5' ||
+        #inputs.oneui_version == 'all'
+      #) &&
+      #(
+        #needs.build-oneui8.result == 'success' ||
+        #needs.build-oneui8.result == 'skipped'
+      #)
+
+    #uses: ./.github/workflows/build.yml
+    #secrets: inherit
+
+    #with:
+      #branch: oneui8.5
+      #ksu_variant: ${{ inputs.ksu_variant }}
+      #susfs: ${{ inputs.susfs }}
+      #lto: ${{ inputs.lto }}
 
       
