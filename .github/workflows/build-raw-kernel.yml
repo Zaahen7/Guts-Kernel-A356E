@@ -1,1 +1,94 @@
 # Run this to get unmodified Image file
+name: Build Raw Kernel
+
+permissions:
+  contents: write
+  actions: write
+  
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: "Select the release type"
+        required: true
+        type: choice
+        options:
+          - actions
+          - prerelease
+          - release
+        default: actions
+
+      oneui_version:
+        description: "Select the One UI target to build"
+        required: true
+        type: choice
+        options:
+          - oneui8
+          - oneui8.5
+          - all
+        default: all
+
+concurrency:
+    group: build-kernels-${{ github.ref }}
+    cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+    
+jobs:
+  # ============================================================
+  # ONE UI 8
+  # ============================================================
+  build-oneui8:
+    if: inputs.oneui_version == 'oneui8' || inputs.oneui_version == 'all'
+    runs-on: ubuntu-latest
+
+    env:
+      KERNEL_DIR: ${{ github.workspace }}/A356E-Kernel
+      TOOLCHAIN_DIR: ${{ github.workspace }}/A356E-toolchain
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Prepare to build
+        uses: ./.github/actions/build-setup
+        with:
+          repos_token: ${{ secrets.REPOS_TOKEN }}
+          branch: oneui8
+
+  # ============================================================
+  # ONE UI 8.5
+  # ============================================================
+  build-oneui85:
+    needs: build-oneui8
+    if: |
+      always() &&
+      (
+        inputs.oneui_version == 'oneui8.5' ||
+        inputs.oneui_version == 'all'
+      ) &&
+      (
+        needs.build-oneui8.result == 'success' ||
+        needs.build-oneui8.result == 'skipped'
+      )
+    runs-on: ubuntu-latest
+
+    env:
+      KERNEL_DIR: ${{ github.workspace }}/A356E-Kernel
+      TOOLCHAIN_DIR: ${{ github.workspace }}/A356E-toolchain
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Prepare to build
+        uses: ./.github/actions/build-setup
+        with:
+          repos_token: ${{ secrets.REPOS_TOKEN }}
+          branch: oneui8.5
+  
+      #lto: ${{ inputs.lto }}
+
+      
