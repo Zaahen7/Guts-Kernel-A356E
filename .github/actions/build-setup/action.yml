@@ -55,9 +55,6 @@ runs:
           -b "${{ inputs.branch }}" \
           https://github.com/Zaahen7/A356E-KernelSources.git \
           "$KERNEL_DIR"
-            
-          echo "listado:"
-          ls "$KERNEL_DIR"
           
     - name: Samsung Toolchain Setup
       shell: bash
@@ -75,8 +72,9 @@ runs:
           rm -f "$archive"
         done
 
-          echo "Moving toolchain to kernel source..."
-          mv "$TOOLCHAIN_DIR/toolchain" "$KERNEL_DIR"
-          echo "Done :P"
-#         echo "listado:"
-#         ls "$toolchain_dir"
+        echo "Moving toolchain to kernel source..."
+        mv "$TOOLCHAIN_DIR/toolchain" "$KERNEL_DIR"
+        echo "Done :P"
+          
+        echo "listado:"
+        ls "$toolchain_dir"
