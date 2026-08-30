@@ -83,14 +83,31 @@ jobs:
   # ============================================================
   build-oneui8:
     if: inputs.oneui_version == 'oneui8' || inputs.oneui_version == 'all'
-    uses: ./.github/workflows/build.yml
-    secrets: inherit
+    runs-on: ubuntu-latest
 
-    with:
-      branch: oneui8
-      ksu_variant: ${{ inputs.ksu_variant }}
-      susfs: ${{ inputs.susfs }}
-      lto: ${{ inputs.lto }}
+    env:
+      KERNEL_DIR: ${{ github.workspace }}/A356E-Kernel
+      TOOLCHAIN_DIR: ${{ github.workspace }}/A356E-toolchain
+
+    steps:
+      - name: Prepare to build
+        uses: ./.github/actions/build-setup
+        with:
+          repos_token: ${{ secrets.REPOS_TOKEN }}
+          branch: ${{ inputs.oneui_version }}
+          #lto: ${{ inputs.lto }}
+          #ksu_variant: ${{ inputs.ksu_variant }}
+          
+      #- name: Build Kernel
+        #uses: ./.github/workflows/build.yml
+        #with:
+          #repos_token: ${{ secrets.REPOS_TOKEN }}
+          #branch: ${{ inputs.oneui_version }}
+          #lto: ${{ inputs.lto }}
+          #ksu_variant: ${{ inputs.ksu_variant }}
+          #susfs: ${{ inputs.susfs }}
+          
+        #secrets: inherit
 
   # ============================================================
   # ONE UI 8.5
