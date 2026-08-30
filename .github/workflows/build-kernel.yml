@@ -90,6 +90,9 @@ jobs:
       TOOLCHAIN_DIR: ${{ github.workspace }}/A356E-toolchain
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
       - name: Prepare to build
         uses: ./.github/actions/build-setup
         with:
@@ -131,6 +134,9 @@ jobs:
       TOOLCHAIN_DIR: ${{ github.workspace }}/A356E-toolchain
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
       - name: Prepare to build
         uses: ./.github/actions/build-setup
         with:
