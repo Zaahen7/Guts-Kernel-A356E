@@ -50,7 +50,7 @@ jobs:
   # ============================================================
   # ONE UI 8
   # ============================================================
-  build-oneui8:
+  build_oneui8:
     if: inputs.oneui_version == 'oneui8' || inputs.oneui_version == 'all'
     runs-on: ubuntu-latest
 
@@ -90,7 +90,7 @@ jobs:
   # ============================================================
   # ONE UI 8.5
   # ============================================================
-  build-oneui85:
+  build_oneui8-5:
     needs: build-oneui8
     if: |
       always() &&
