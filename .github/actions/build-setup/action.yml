@@ -49,10 +49,7 @@ runs:
     - name: Clone kernel source
       shell: bash
       run: |
-        echo "========================================"
-        echo "Building: ${{ inputs.branch }} kernel"
-        echo "========================================"
-
+        echo "Cloning ${{ inputs.branch }} kernel source..."
         git clone --depth 1 \
           --single-branch \
           -b "${{ inputs.branch }}" \
