@@ -33,7 +33,7 @@ on:
         required: true
         type: choice
         options:
-          - Image
+          - image
           - flashable-zip
           - both
         default: both
