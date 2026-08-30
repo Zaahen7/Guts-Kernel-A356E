@@ -142,6 +142,7 @@ jobs:
           
       - name: Build kernel
         run: |
+          cd "$KERNEL_DIR"
           #!/bin/bash
           
           export PATH=$(pwd)/toolchain/clang/host/linux-x86/clang-r450784d/bin:$PATH
