@@ -1,1 +1,31 @@
+name: Prepare to build kernel
+description: Create directories and clone repos that will be used
 
+inputs:
+  repos_token:
+    description: "Repository access token"
+    required: true
+    
+  branch:
+    description: "Branch to clone"
+    required: true
+    
+  #lto:
+    #description: "LTO mode"
+    #required: true
+    
+  #ksu_variant:
+    #description: "KernelSU variant"
+    #required: true
+
+  #susfs:
+    #description: "Enable SUSFS"
+    #required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Configure Git authentication
+      shell: bash
+      run: |
+        git config --global url."https://x-access-token:${{ secrets.REPOS_TOKEN }}@github.com/".insteadOf "https://github.com/"
