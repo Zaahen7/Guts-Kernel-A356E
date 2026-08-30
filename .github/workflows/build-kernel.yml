@@ -97,7 +97,7 @@ jobs:
         uses: ./.github/actions/build-setup
         with:
           repos_token: ${{ secrets.REPOS_TOKEN }}
-          branch: ${{ inputs.oneui_version }}
+          branch: oneui8
           #lto: ${{ inputs.lto }}
           #ksu_variant: ${{ inputs.ksu_variant }}
           
@@ -141,7 +141,7 @@ jobs:
         uses: ./.github/actions/build-setup
         with:
           repos_token: ${{ secrets.REPOS_TOKEN }}
-          branch: ${{ inputs.oneui_version }}
+          branch: oneui8.5
   
   #build-oneui85:
     #needs: build-oneui8
