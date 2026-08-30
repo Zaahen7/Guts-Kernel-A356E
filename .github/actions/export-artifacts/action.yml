@@ -4,11 +4,22 @@ description: Export kernel artifacts
 inputs:
   build-type:
     required: true
+  output-files:
+    required: true
 
 runs:
   using: composite
   steps:
-    - name: Upload Image
+    - name: Raw Kernel Build
+      if: inputs.build-type == 'raw'
+      uses: actions/upload-artifact@v4
+      with:
+        name: Image
+        path: ${{ env.KERNEL_DIR }}/arch/arm64/boot/Image
+
+      
+    - name: Normal Kernel Build
+      if: inputs.build-type == 'normal'
       uses: actions/upload-artifact@v4
       with:
         name: Image-${{ inputs.build-type }}
