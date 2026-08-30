@@ -1,0 +1,43 @@
+name: Build Kernel
+description: Build Samsung Kernel
+
+inputs:
+  repos_token:
+    description: Repository access token
+    required: true
+
+  branch:
+    description: "Kernel source branch"
+    required: true
+    type: string
+
+  ksu_variant:
+    description: "KernelSU variant"
+    required: true
+    type: string
+
+  susfs:
+    description: "Enable SUSFS"
+    required: true
+    type: boolean
+
+  lto:
+    required: true
+    type: string
+
+runs:
+  using: composite
+  steps: 
+    - name: Configure Git authentication
+      run: |
+        git config --global url."https://x-access-token:${{ secrets.REPOS_TOKEN }}@github.com/".insteadOf "https://github.com/"
+        
+    - name: Prepare directories
+      run: |
+        echo "Removing directories..."
+        rm -rf "$kernel_dir" "$toolchain_dir"
+        
+        echo "Creating directories..."
+        mkdir "$kernel_dir" "$toolchain_dir"
+        echo "Directories created :P"
+        
