@@ -67,6 +67,7 @@ jobs:
         with:
           repos_token: ${{ secrets.REPOS_TOKEN }}
           branch: oneui8
+          
       - name: Install build dependencies
         run: |
           sudo apt-get update
@@ -108,6 +109,11 @@ jobs:
         with:
           repos_token: ${{ secrets.REPOS_TOKEN }}
           branch: oneui8.5
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libyaml-dev
           
       - name: Build kernel
         run: |
