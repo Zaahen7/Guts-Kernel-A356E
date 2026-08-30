@@ -125,3 +125,4 @@ jobs:
         with:
           build-type: raw
           output-files: ${{ inputs.output }}
+          zip-name: A356E-${{ inputs.oneui_version }}-RawKernel
