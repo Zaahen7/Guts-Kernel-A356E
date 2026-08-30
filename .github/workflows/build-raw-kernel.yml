@@ -67,7 +67,12 @@ jobs:
         with:
           repos_token: ${{ secrets.REPOS_TOKEN }}
           branch: oneui8
-
+          
+      - name: Build kernel
+        run: |
+          cd "$KERNEL_DIR"
+          ./build-kernel.sh
+          
   # ============================================================
   # ONE UI 8.5
   # ============================================================
@@ -98,7 +103,8 @@ jobs:
         with:
           repos_token: ${{ secrets.REPOS_TOKEN }}
           branch: oneui8.5
-  
-      #lto: ${{ inputs.lto }}
-
-      
+          
+      - name: Build kernel
+        run: |
+          cd "$KERNEL_DIR"
+          ./build-kernel.sh
