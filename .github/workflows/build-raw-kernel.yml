@@ -112,6 +112,7 @@ jobs:
         with:
           repos_token: ${{ secrets.REPOS_TOKEN }}
           branch: oneui8.5
+          output-files: ${{ inputs.output }}
                 
       - name: Install dependencies
         run: |
