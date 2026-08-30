@@ -71,7 +71,7 @@ jobs:
       - name: Build kernel
         run: |
           cd "$KERNEL_DIR"
-          ./build-kernel.sh
+          ./build_kernel.sh
           
   # ============================================================
   # ONE UI 8.5
@@ -107,4 +107,4 @@ jobs:
       - name: Build kernel
         run: |
           cd "$KERNEL_DIR"
-          ./build-kernel.sh
+          ./build_kernel.sh
