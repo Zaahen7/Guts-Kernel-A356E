@@ -67,13 +67,19 @@ jobs:
         with:
           repos_token: ${{ secrets.REPOS_TOKEN }}
           branch: oneui8
-                
+          
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt-get install -y libyaml-dev
+          
       - name: Build kernel
-        continue-on-error: true
         run: |
           cd "$KERNEL_DIR"
           chmod +x build_kernel.sh
           ./build_kernel.sh
+
+
           
       - name: Luego
         run: |
@@ -112,15 +118,13 @@ jobs:
           repos_token: ${{ secrets.REPOS_TOKEN }}
           branch: oneui8.5
                 
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt-get install -y libyaml-dev
+          
       - name: Build kernel
-        continue-on-error: true
         run: |
           cd "$KERNEL_DIR"
           chmod +x build_kernel.sh
           ./build_kernel.sh
-          
-      - name: Luego
-        run: |
-          echo "After:"
-          echo "KERNEL_DIR=$KERNEL_DIR"
-          echo "TOOLCHAIN_DIR=$TOOLCHAIN_DIR"
