@@ -79,6 +79,10 @@ jobs:
           chmod +x build_kernel.sh
           ./build_kernel.sh
           
+          echo "After:"
+          echo "KERNEL_DIR=$KERNEL_DIR"
+          echo "TOOLCHAIN_DIR=$TOOLCHAIN_DIR"
+          
   # ============================================================
   # ONE UI 8.5
   # ============================================================
@@ -137,3 +141,7 @@ jobs:
           cd "$KERNEL_DIR"
           chmod +x build_kernel.sh
           ./build_kernel.sh
+          
+          echo "After:"
+          echo "KERNEL_DIR=$KERNEL_DIR"
+          echo "TOOLCHAIN_DIR=$TOOLCHAIN_DIR"
