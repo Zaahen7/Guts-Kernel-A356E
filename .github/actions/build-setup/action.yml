@@ -31,3 +31,52 @@ runs:
       shell: bash
       run: |
         git config --global url."https://x-access-token:${REPOS_TOKEN}@github.com/".insteadOf "https://github.com/"
+        
+    - name: Prepare directories
+      shell: bash
+      run: |
+        echo "Removing directories..."
+        rm -rf "$kernel_dir" "$toolchain_dir"
+        
+        echo "Creating directories..."
+        mkdir "$kernel_dir" "$toolchain_dir"
+        echo "Directories created :P"
+        
+    - name: Clone kernel source
+      shell: bash
+      run: |
+        echo "========================================"
+        echo "Building: ${{ inputs.branch }} kernel"
+        echo "========================================"
+
+        git clone \
+          --depth 1 \
+          --single-branch \
+          -b "${{ inputs.branch }}" \
+          https://github.com/Zaahen7/A356E-KernelSources.git \
+          "$kernel_dir"
+            
+          echo "listado:"
+          ls "$kernel_dir"
+          
+    - name: Samsung Toolchain Setup
+      shell: bash
+      run: |
+        echo "Cloning Samsung toolchain..."
+        git clone \
+          --depth 1 \
+          https://github.com/Zaahen7/A356E-toolchain.git \
+          "$toolchain_dir"
+          
+        echo "Extracting .tar.xz files"
+        for archive in "$toolchain_dir"/*.tar.xz; do
+          echo "Extracting: $(basename "$archive")"
+          tar -xJf "$archive" -C "$toolchain_dir"
+          rm -f "$archive"
+        done
+
+          echo "Moving toolchain to kernel source..."
+          mv "$toolchain_dir/toolchain" "$kernel_dir"
+          echo "Done :P"
+#         echo "listado:"
+#         ls "$toolchain_dir"
