@@ -17,10 +17,9 @@ runs:
         name: Image
         path: ${{ env.KERNEL_DIR }}/arch/arm64/boot/Image
 
-      
     - name: Export flashable zip
       if: inputs.output-files == 'flashable-zip' || inputs.output-files == 'both'
       uses: actions/upload-artifact@v4
       with:
         name: Image-${{ inputs.build-type }}
-        path: ${{ env.KERNEL_DIR }}/arch/arm64/boot/Image
+        path: ${{ env.ANYKERNEL3_DIR }}/RawKernel-A356E-${{ inputs.oneui-version }}.zip
