@@ -1,1 +1,15 @@
+name: Export artifacts
+description: Export kernel artifacts
 
+inputs:
+  build-type:
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Upload Image
+      uses: actions/upload-artifact@v4
+      with:
+        name: Image-${{ inputs.build-type }}
+        path: ${{ env.KERNEL_DIR }}/arch/arm64/boot/Image
