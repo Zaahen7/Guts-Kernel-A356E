@@ -4,3 +4,36 @@ description: Export kernel files
 inputs:
   release_type:
     required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Publish Release
+      if: inputs.release_type == 'release'
+      uses: softprops/action-gh-release@v2
+      with:
+          tag_name: "build-${{ github.run_number }}"
+          name: "Guts Kernel A356E - Build ${{ github.run_number }}"
+          prerelease: ${{ inputs.release_type == 'prerelease' }}
+          files: |
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "build-${{ github.run_number }}"
+          name: "Guts Kernel A356E - Build ${{ github.run_number }}"
+          prerelease: ${{ inputs.release_type == 'prerelease' }}
+          files: |
+            release-files/**/*.zip
+            release-files/**/Image
+
+
+- name: Publish release
+  if: inputs.release_type == 'release' || inputs.release_type == 'prerelease'
+  uses: softprops/action-gh-release@v2
+  with:
+    tag_name: v1.0.${{ github.run_number }}
+    prerelease: ${{ inputs.release_type == 'prerelease' }}
+    files: |
+      ${{ env.KERNEL_DIR }}/arch/arm64/boot/Image
+      ${{ env.ANYKERNEL3_DIR }}/RawKernel-A356E-${{ inputs.oneui_version }}.zip
