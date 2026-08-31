@@ -140,13 +140,6 @@ jobs:
           cp "$(find image-temp -type f -name 'Image' -print -quit)" \
             "$KERNEL_DIR/arch/arm64/boot/Image"
 
-      - name: Create flashable zip
-        if: inputs.output == 'flashable-zip' || inputs.output == 'both'
-        run: |
-          cp "$KERNEL_DIR/arch/arm64/boot/Image" "ANYKERNEL3_DIR"
-          cd "$ANYKERNEL3_DIR"
-          zip -r9 RawKernel-A356E-${{ inputs.oneui_version }}.zip . -x '.git/*' '.gitignore' 'README.md'
-
       - name: Export Artifacts to github
         uses: ./.github/actions/export-artifacts
         with:
