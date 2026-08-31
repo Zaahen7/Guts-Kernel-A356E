@@ -63,6 +63,7 @@ jobs:
     env:
       KERNEL_DIR: ${{ github.workspace }}/A356E-Kernel
       TOOLCHAIN_DIR: ${{ github.workspace }}/A356E-toolchain
+      ANYKERNEL3_DIR: ${{ github.workspace }}/A356E-Anykernel3
 
     steps:
       - name: Checkout repository
@@ -73,25 +74,34 @@ jobs:
         with:
           repos_token: ${{ secrets.REPOS_TOKEN }}
           branch: oneui8
-          
+          output-files: ${{ inputs.output }}
+                
       - name: Install dependencies
         run: |
           sudo apt update
           sudo apt-get install -y libyaml-dev
           
       - name: Build kernel
+        if: ${{ !inputs.skip-build }}
+        uses: ./.github/actions/build-kernel
+        
+      - name: Download existing Raw Image
+        if: inputs.skip-build
         run: |
-          cd "$KERNEL_DIR"
-          chmod +x build_kernel.sh
-          ./build_kernel.sh
-
-
-          
-      - name: Luego
-        run: |
-          echo "After:"
-          echo "KERNEL_DIR=$KERNEL_DIR"
-          echo "TOOLCHAIN_DIR=$TOOLCHAIN_DIR"
+          mkdir -p "$KERNEL_DIR/arch/arm64/boot"
+          wget -O Image.zip \
+            "https://download1349.mediafire.com/ibx4w4uf68pg8T_R9Aph5K_pME08z-Q-YWtwNcJVOc0V31sSt4KeS-VreGS606RUhpG3cpZt9jURDRJaG-ngEGcicTsccWId30CPazE-OgYosq2e8apd0nMNyYImT60zWNYPV7aceTlsp0F8EW03l40435T_dpHFnzw6T9oz8LXNCA/7z7woq4o9es4huj/Image.zip"
+          unzip -o Image.zip -d image-temp
+          find image-temp -type f -print
+          cp "$(find image-temp -type f -name 'Image' -print -quit)" \
+            "$KERNEL_DIR/arch/arm64/boot/Image"
+            
+      - name: Publish files as ${{ inputs.release_type }}
+        uses: ./.github/actions/PublishFiles
+        with:
+          release_type: ${{ inputs.release_type }}
+          output-files: ${{ inputs.output }}
+          oneui_version: ${{ inputs.oneui_version }}
           
   # ============================================================
   # ONE UI 8.5
@@ -146,9 +156,3 @@ jobs:
           release_type: ${{ inputs.release_type }}
           output-files: ${{ inputs.output }}
           oneui_version: ${{ inputs.oneui_version }}
-          
-      #- name: Export Artifacts to github
-        #uses: ./.github/actions/export-artifacts
-        #with:
-          #output-files: ${{ inputs.output }}
-          #oneui-version: ${{ inputs.oneui_version }}
