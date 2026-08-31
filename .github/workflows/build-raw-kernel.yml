@@ -8,6 +8,12 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
+      skip-build:
+        description: "Skip kernel compilation and use test Image"
+        required: true
+        type: boolean
+        default: false
+  
       release_type:
         description: "Select the release type"
         required: true
@@ -120,7 +126,19 @@ jobs:
           sudo apt-get install -y libyaml-dev
           
       - name: Build kernel
+        if: ${{ !inputs.skip-build }}
         uses: ./.github/actions/build-kernel
+        
+      - name: Download existing Raw Image
+        if: inputs.skip-build
+        run: |
+          mkdir -p "$KERNEL_DIR/arch/arm64/boot"
+          wget -O Image.zip \
+            "https://www.mediafire.com/file/7z7woq4o9es4huj/Image.zip/file"
+          unzip -o Image.zip -d image-temp
+          find image-temp -type f -print
+          cp "$(find image-temp -type f -name 'Image' -print -quit)" \
+            "$KERNEL_DIR/arch/arm64/boot/Image"
 
       - name: Create flashable zip
         if: inputs.output == 'flashable-zip' || inputs.output == 'both'
