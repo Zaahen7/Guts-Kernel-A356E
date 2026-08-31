@@ -140,10 +140,10 @@ jobs:
           cp "$(find image-temp -type f -name 'Image' -print -quit)" \
             "$KERNEL_DIR/arch/arm64/boot/Image"
             
-      - name: Publish files as ${{ inputs.release_type }}
-        uses: ./.github/actions/PublishFiles
-        with:
-          release_type: ${{ inputs.release_type }}
+      #- name: Publish files as ${{ inputs.release_type }}
+        #uses: ./.github/actions/PublishFiles
+        #with:
+          #release_type: ${{ inputs.release_type }}
           
       - name: Export Artifacts to github
         uses: ./.github/actions/export-artifacts
