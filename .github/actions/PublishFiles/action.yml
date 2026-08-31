@@ -18,7 +18,7 @@ runs:
         inputs.release_type == 'actions'
       uses: actions/upload-artifact@v4
       with:
-        name: RawImage
+        name: RawImage-A356E-${{ inputs.oneui_version }}
         path: ${{ env.KERNEL_DIR }}/arch/arm64/boot/Image
         
     - name: Create Release File directory
@@ -49,7 +49,7 @@ runs:
         inputs.release_type == 'actions'
       uses: actions/upload-artifact@v4
       with:
-        name: RawKernel-A356E-${{ inputs.oneui-version }}
+        name: RawKernel-A356E-${{ inputs.oneui_version }}
         path: ${{ env.ANYKERNEL3_DIR }}
         
     - name: Create Flashable Zip
