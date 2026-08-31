@@ -1,1 +1,6 @@
+name: Export files
+description: Export kernel files
 
+inputs:
+  release_type:
+    required: true
