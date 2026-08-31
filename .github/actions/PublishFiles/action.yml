@@ -6,6 +6,8 @@ inputs:
     required: true
   output-files:
     required: true
+  oneui_version:
+    required: true
 
 runs:
   using: composite
