@@ -16,6 +16,12 @@ runs:
       with:
         name: RawImage
         path: ${{ env.KERNEL_DIR }}/arch/arm64/boot/Image
+        
+    - name: Copy Image file to Anykernel3
+      if: inputs.output-files == 'flashable-zip' || inputs.output-files == 'both'
+      shell: bash
+      run: |
+        cp "$KERNEL_DIR/arch/arm64/boot/Image" "$ANYKERNEL3_DIR"
 
     - name: Export flashable zip
       if: inputs.output-files == 'flashable-zip' || inputs.output-files == 'both'
