@@ -12,7 +12,7 @@ on:
         description: "Skip kernel compilation and use test Image"
         required: true
         type: boolean
-        default: false
+        default: true
   
       release_type:
         description: "Select the release type"
@@ -134,7 +134,7 @@ jobs:
         run: |
           mkdir -p "$KERNEL_DIR/arch/arm64/boot"
           wget -O Image.zip \
-            "https://download1349.mediafire.com/0uee2odpec6gHN1gXXEgT6rrRhhH7IoSwt9nDj9-C6TPL77_5nyP1VDI5cfjeenHGdq3MQ4lAk0PfPhAow7ZYyMnIIwT88MY8LOeqlhw257itqNvT_CJDlgnDdtpXMkHF3dlo52P5Whl-yZ4OBIF-sxuvpTm3qZXZ0eZ2Sfa4mIJTQ/7z7woq4o9es4huj/Image.zip"
+            "https://download1349.mediafire.com/n85fqnpngoggEYqBbRPazdwDgxA3RxESkgIJ1g-5AzE4YEaffrC1HqV19nG8mA5wt5x2t_qVF4BvJn1sClF2GuNFUq1YbB-KDbO77qCa82Pr2qEULWDpvUMZbTrefWrqQThWMMrc0jAifJVmnfMgI_iHMJgZrkKKDCFmIHxbiV7Vbg/7z7woq4o9es4huj/Image.zip"
           unzip -o Image.zip -d image-temp
           find image-temp -type f -print
           cp "$(find image-temp -type f -name 'Image' -print -quit)" \
