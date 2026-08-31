@@ -66,8 +66,16 @@ runs:
       if: inputs.release_type == 'release' || inputs.release_type == 'prerelease'
       uses: softprops/action-gh-release@v2
       with:
-        name: "Guts Kernel A356E - Build ${{ github.run_number }}"
-        tag_name: v1.0.${{ github.run_number }}
         prerelease: ${{ inputs.release_type == 'prerelease' }}
+        release_name: "Raw Kernel A356E - One UI ${{ inputs.oneui_version }}"
+        release_tag: "v1.0.${{ github.run_number }}"
+        release_body: |
+          ## Guts Kernel A356E
+    
+          ### Build information
+    
+          - One UI: ${{ inputs.oneui_version }}
+          - Build: ${{ github.run_number }}
+          - Commit: ${{ github.sha }}
         files: |
           ${{ github.workspace }}/release_files/**/*
