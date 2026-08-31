@@ -145,7 +145,7 @@ jobs:
         with:
           release_type: ${{ inputs.release_type }}
           output-files: ${{ inputs.output }}
-          oneui-version: ${{ inputs.oneui_version }}
+          oneui_version: ${{ inputs.oneui_version }}
           
       #- name: Export Artifacts to github
         #uses: ./.github/actions/export-artifacts
