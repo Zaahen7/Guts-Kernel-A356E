@@ -4,36 +4,62 @@ description: Export kernel files
 inputs:
   release_type:
     required: true
+  output-files:
+    required: true
 
 runs:
   using: composite
   steps:
+    - name: Publish Image in Actions
+      if: |
+        (inputs.output-files == 'image' || inputs.output-files == 'both') &&
+        inputs.release_type == 'actions'
+      uses: actions/upload-artifact@v4
+      with:
+        name: RawImage
+        path: ${{ env.KERNEL_DIR }}/arch/arm64/boot/Image
+        
+    - name: Compress Image File
+      if: |
+        (inputs.output-files == 'image' || inputs.output-files == 'both') &&
+        (inputs.release_type == 'release' || inputs.release_type == 'prerelease')
+      shell: bash
+      run: |
+        cd "$KERNEL_DIR/arch/arm64/boot"
+        zip -9 "$GITHUB_WORKSPACE/release_files/RawImage-A356E-${{ inputs.oneui_version }}.zip" Image
+        ls "$GITHUB_WORKSPACE"
+        
+    - name: Copy Image file to Anykernel3
+      if: inputs.output-files == 'flashable-zip' || inputs.output-files == 'both'
+      shell: bash
+      run: |
+        cp "$KERNEL_DIR/arch/arm64/boot/Image" "$ANYKERNEL3_DIR"
+        
+    - name: Publish Kernel in Actions
+      if: |
+        (inputs.output-files == 'flashable-zip' || inputs.output-files == 'both') &&
+        inputs.release_type == 'actions'
+      uses: actions/upload-artifact@v4
+      with:
+        name: RawKernel-A356E-${{ inputs.oneui-version }}
+        path: ${{ env.ANYKERNEL3_DIR }}
+        
+    - name: Create Flashable Zip
+      if: |
+        (inputs.output-files == 'flashable-zip' || inputs.output-files == 'both') &&
+        (inputs.release_type == 'release' || inputs.release_type == 'prerelease')
+      shell: bash
+      run: |
+        cd "$ANYKERNEL3_DIR"
+        zip -r9 "$GITHUB_WORKSPACE/release_files/RawKernel-A356E-${{ inputs.oneui_version }}.zip" . \
+          -x '.git/*' '.gitignore' 'README.md'
+
     - name: Publish Release
-      if: inputs.release_type == 'release'
+      if: inputs.release_type == 'release' || inputs.release_type == 'prerelease'
       uses: softprops/action-gh-release@v2
       with:
-          tag_name: "build-${{ github.run_number }}"
-          name: "Guts Kernel A356E - Build ${{ github.run_number }}"
-          prerelease: ${{ inputs.release_type == 'prerelease' }}
-          files: |
-
-      - name: Create release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: "build-${{ github.run_number }}"
-          name: "Guts Kernel A356E - Build ${{ github.run_number }}"
-          prerelease: ${{ inputs.release_type == 'prerelease' }}
-          files: |
-            release-files/**/*.zip
-            release-files/**/Image
-
-
-- name: Publish release
-  if: inputs.release_type == 'release' || inputs.release_type == 'prerelease'
-  uses: softprops/action-gh-release@v2
-  with:
-    tag_name: v1.0.${{ github.run_number }}
-    prerelease: ${{ inputs.release_type == 'prerelease' }}
-    files: |
-      ${{ env.KERNEL_DIR }}/arch/arm64/boot/Image
-      ${{ env.ANYKERNEL3_DIR }}/RawKernel-A356E-${{ inputs.oneui_version }}.zip
+        name: "Guts Kernel A356E - Build ${{ github.run_number }}"
+        tag_name: v1.0.${{ github.run_number }}
+        prerelease: ${{ inputs.release_type == 'prerelease' }}
+        files: |
+          ${{ github.workspace }}/release_files/**/*
