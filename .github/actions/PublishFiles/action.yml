@@ -21,6 +21,12 @@ runs:
         name: RawImage
         path: ${{ env.KERNEL_DIR }}/arch/arm64/boot/Image
         
+    - name: Create Release File directory
+      if: inputs.release_type == 'release' || inputs.release_type == 'prerelease'
+      shell: bash
+      run: |
+        mkdir "$GITHUB_WORKSPACE/release_files"
+        
     - name: Compress Image File
       if: |
         (inputs.output-files == 'image' || inputs.output-files == 'both') &&
