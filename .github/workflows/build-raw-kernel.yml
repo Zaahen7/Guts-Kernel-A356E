@@ -109,14 +109,11 @@ jobs:
           oneui_version: ${{ inputs.oneui_version }}
 
           # Release Details
-          release_name: "A356E Raw Kernel/Image - One UI ${{ inputs.oneui_version }}"
+          release_name: "A356E Raw Kernel/Image - One UI 8"
           release_tag: "v1.0.${{ github.run_number }}"
           release_body: |
             ## These files are essentially stock, with no modifications.
             
-            ### Changelog:
-            - Initial build
-          
   # ============================================================
   # ONE UI 8.5
   # ============================================================
@@ -177,10 +174,7 @@ jobs:
           oneui_version: ${{ inputs.oneui_version }}
 
           # Release Details
-          release_name: "A356E Raw Kernel/Image - One UI ${{ inputs.oneui_version }}"
+          release_name: "A356E Raw Kernel/Image - One UI 8.5"
           release_tag: "v1.0.${{ github.run_number }}"
           release_body: |
             ## These files are essentially stock, with no modifications.
-            
-            ### Changelog:
-            - Initial build
