@@ -10,7 +10,7 @@ inputs:
     description: "Branch to clone"
     required: true
     
-  output-files:
+  output_files:
     description: "Files to upload in artifacts"
     required: true
     
@@ -76,7 +76,7 @@ runs:
         echo "Done :P"
 
     - name: Clone Anykernel3
-      if: inputs.output-files == 'flashable-zip' || inputs.output-files == 'both'
+      if: inputs.output_files == 'flashable-zip' || inputs.output_files == 'both'
       shell: bash
       run: |
         echo "Cloning anykernel3..."
