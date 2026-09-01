@@ -136,6 +136,10 @@ jobs:
     needs:
       - build_oneui8
       - build_oneui8-5
+    if: |
+      always() &&
+      (needs.build_oneui8.result == 'success' || needs.build_oneui8.result == 'skipped') &&
+      (needs.build_oneui8-5.result == 'success' || needs.build_oneui8-5.result == 'skipped')
       
     env:
       GH_TOKEN: ${{ github.token }}
