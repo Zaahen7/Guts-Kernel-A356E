@@ -5,27 +5,13 @@ inputs:
   repos_token:
     description: "Repository access token"
     required: true
-    
   branch:
-    description: "Branch to clone"
+    description: "Kernel Source Branch to clone"
     required: true
-    
   output_files:
-    description: "Files to upload in artifacts"
+    description: "Files to upload"
     required: true
     
-  #lto:
-    #description: "LTO mode"
-    #required: true
-    
-  #ksu_variant:
-    #description: "KernelSU variant"
-    #required: true
-
-  #susfs:
-    #description: "Enable SUSFS"
-    #required: true
-
 runs:
   using: composite
   steps:
@@ -35,13 +21,17 @@ runs:
       shell: bash
       run: |
         git config --global url."https://x-access-token:${REPOS_TOKEN}@github.com/".insteadOf "https://github.com/"
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        sudo apt update
+        sudo apt-get install -y libyaml-dev
         
     - name: Prepare directories
       shell: bash
       run: |
-        echo "Removing directories..."
         rm -rf "$KERNEL_DIR" "$TOOLCHAIN_DIR" "ANYKERNEL3_DIR"
-        
         echo "Creating directories..."
         mkdir "$KERNEL_DIR" "$TOOLCHAIN_DIR" "ANYKERNEL3_DIR"
         echo "Directories created :P"
