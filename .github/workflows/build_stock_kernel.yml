@@ -89,7 +89,6 @@ jobs:
       - name: Upload files to artifacts
         uses: ./.github/actions/UploadArtifacts
         with:
-          release_type: ${{ inputs.release_type }}
           output_files: ${{ inputs.output_files }}
           oneui_version: "8"
           
@@ -129,7 +128,6 @@ jobs:
       - name: Upload files to artifacts
         uses: ./.github/actions/UploadArtifacts
         with:
-          release_type: ${{ inputs.release_type }}
           output_files: ${{ inputs.output_files }}
           oneui_version: "8-5"
 
