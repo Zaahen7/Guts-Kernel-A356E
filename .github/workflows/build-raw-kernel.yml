@@ -160,15 +160,15 @@ jobs:
       - name: Publish files as release/prerelease
         if: inputs.release_type == 'release' || inputs.release_type == 'prerelease'
         uses: ./.github/actions/PublishRelease
-        with: 
+        with:
+          prerelease: ${{ inputs.release_type == 'prerelease' }}
           output_files: ${{ inputs.output_files }}
           oneui_version: ${{ inputs.oneui_version }}
 
           # Release Details
           release_name: "A356E Raw Kernel/Image - One UI ${{ inputs.oneui_version }}"
           release_tag: "v1.0.${{ github.run_number }}"
-          prerelease: ${{ inputs.release_type == 'prerelease' }}
-          body: |
+          release_body: |
             ## These files are essentially stock, with no modifications.
             
             ### Build information
