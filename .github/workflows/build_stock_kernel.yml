@@ -140,19 +140,28 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
+      - name: Download Artifacts
+        uses: actions/download-artifact@v8
         with:
           path: ${{ github.workspace }}/release_files
-    
-      - name: Publish Release
-        uses: softprops/action-gh-release@v2
+          pattern: 'Stock*'
+          merge-multiple: false
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
         with:
+          prerelease: ${{ inputs.release_type == 'prerelease' }}
           name: "A356E Stock Image/Kernel"
           tag_name: "v1.0.${{ github.run_number }}"
           body: |
             ## These files are essentially stock, with no modifications.
-          files: |
-            ${{ github.workspace }}/release_files/**/*
-    #if: inputs.release_type == 'release' || inputs.release_type == 'prerelease'
-    
+
+      - name: Upload Release Files
+        run: |
+          for dir in "$GITHUB_WORKSPACE"/release_files/Stock*/; do
+              name=$(basename "$dir")
+              cd "$dir"
+              zip -r9 "../$name.zip" .
+              cd - > /dev/null
+              gh release upload "v1.0.${{ github.run_number }}" "$GITHUB_WORKSPACE/release_files/$name.zip"
+          done
