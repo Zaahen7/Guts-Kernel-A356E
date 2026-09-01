@@ -106,7 +106,7 @@ jobs:
         with:
           prerelease: ${{ inputs.release_type == 'prerelease' }}
           output_files: ${{ inputs.output_files }}
-          oneui_version: ${{ inputs.oneui_version }}
+          oneui_version: "8"
 
           # Release Details
           release_name: "A356E Raw Kernel/Image - One UI 8"
@@ -171,7 +171,7 @@ jobs:
         with:
           prerelease: ${{ inputs.release_type == 'prerelease' }}
           output_files: ${{ inputs.output_files }}
-          oneui_version: ${{ inputs.oneui_version }}
+          oneui_version: "8.5"
 
           # Release Details
           release_name: "A356E Raw Kernel/Image - One UI 8.5"
