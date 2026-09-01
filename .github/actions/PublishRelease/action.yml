@@ -33,7 +33,7 @@ runs:
         ls "$GITHUB_WORKSPACE"
         
     - name: Copy Image file to Anykernel3
-      if: inputs.output_files == 'flashable-zip' || inputs.output-files == 'both'
+      if: inputs.output_files == 'flashable-zip' || inputs.output_files == 'both'
       shell: bash
       run: |
         cp "$KERNEL_DIR/arch/arm64/boot/Image" "$ANYKERNEL3_DIR"
