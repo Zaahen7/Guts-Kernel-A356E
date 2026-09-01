@@ -1,0 +1,62 @@
+name: Publish files as Release/Prerelease
+description: Publish files
+
+inputs:
+  prerelease:
+    required: true
+    
+  # Release Details
+  release_name:
+    required: true
+  release_tag:
+    required: true
+  release_body:
+    required: true
+    
+runs:
+  using: composite
+  steps:
+    - name: Download Artifacts
+      shell: bash
+      run: |
+        mkdir -p "$GITHUB_WORKSPACE/release_files"
+        gh api \
+          --paginate \
+          "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
+          --jq '.artifacts[] | select(.name | startswith("Stock")) | .name' |
+          
+        while IFS= read -r artifact; do
+          echo "Downloading: $artifact"
+          mkdir -p "$GITHUB_WORKSPACE/release_files/$artifact"
+          gh run download "${{ github.run_id }}" \
+            --name "$artifact" \
+            --dir "$GITHUB_WORKSPACE/release_files/$artifact"
+        done
+        
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v3
+      with:
+        prerelease: ${{ inputs.prerelease }}
+        name: ${{ inputs.release_name }}
+        tag_name: ${{ inputs.release_tag }}
+        body: ${{ inputs.release_body }}
+          
+    - name: Compress and Upload Release Files
+      shell: bash
+      run: |
+        shopt -s nullglob
+        for dir in "$GITHUB_WORKSPACE"/release_files/Stock*/; do
+          [ -d "$dir" ] || continue
+
+          name=$(basename "$dir")
+          echo "Creating $name.zip..."
+          cd "$dir"
+          zip -r9 "../$name.zip" .
+          cd - > /dev/null
+
+          echo "Uploading $name.zip..."
+          gh release upload \
+            "${{ inputs.release_tag }}" \
+            "$GITHUB_WORKSPACE/release_files/$name.zip" \
+            --repo "${{ github.repository }}"
+        done
