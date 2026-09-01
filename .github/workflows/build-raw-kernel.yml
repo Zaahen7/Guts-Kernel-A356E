@@ -139,16 +139,13 @@ jobs:
         if: ${{ !inputs.skip-build }}
         uses: ./.github/actions/build-kernel
         
-      - name: Download existing Raw Image
+      - name: Create dummy Raw Image
         if: inputs.skip-build
+        shell: bash
         run: |
           mkdir -p "$KERNEL_DIR/arch/arm64/boot"
-          wget -O Image.zip \
-            "https://download1349.mediafire.com/ibx4w4uf68pg8T_R9Aph5K_pME08z-Q-YWtwNcJVOc0V31sSt4KeS-VreGS606RUhpG3cpZt9jURDRJaG-ngEGcicTsccWId30CPazE-OgYosq2e8apd0nMNyYImT60zWNYPV7aceTlsp0F8EW03l40435T_dpHFnzw6T9oz8LXNCA/7z7woq4o9es4huj/Image.zip"
-          unzip -o Image.zip -d image-temp
-          find image-temp -type f -print
-          cp "$(find image-temp -type f -name 'Image' -print -quit)" \
-            "$KERNEL_DIR/arch/arm64/boot/Image"
+          echo "DUMMY KERNEL IMAGE FOR PIPELINE TEST" > "$KERNEL_DIR/arch/arm64/boot/Image"
+          ls -lh "$KERNEL_DIR/arch/arm64/boot/Image"
             
       - name: Publish files as actions
         if: inputs.release_type == 'actions'
