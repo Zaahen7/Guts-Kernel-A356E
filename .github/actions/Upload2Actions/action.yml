@@ -10,11 +10,11 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Publish Image in Actions
+    - name: Upload Image in Actions
       if: inputs.output_files == 'image' || inputs.output_files == 'both'
       uses: actions/upload-artifact@v4
       with:
-        name: RawImage-A356E-oneui${{ inputs.oneui_version }}
+        name: StockImage-A356E-oneui${{ inputs.oneui_version }}
         path: ${{ env.KERNEL_DIR }}/arch/arm64/boot/Image
         
     - name: Copy Image file to Anykernel3
@@ -27,5 +27,5 @@ runs:
       if: inputs.output_files == 'flashable-zip' || inputs.output_files == 'both'
       uses: actions/upload-artifact@v4
       with:
-        name: RawKernel-A356E-oneui${{ inputs.oneui_version }}
+        name: StockFlashableKernel-A356E-oneui${{ inputs.oneui_version }}
         path: ${{ env.ANYKERNEL3_DIR }}
