@@ -34,7 +34,7 @@ on:
           - all
         default: all
         
-      output:
+      output_files:
         description: "Select the output files"
         required: true
         type: choice
@@ -74,7 +74,7 @@ jobs:
         with:
           repos_token: ${{ secrets.REPOS_TOKEN }}
           branch: oneui8
-          output-files: ${{ inputs.output }}
+          output_files: ${{ inputs.output_files }}
                 
       - name: Install dependencies
         run: |
@@ -100,7 +100,7 @@ jobs:
         uses: ./.github/actions/PublishFiles
         with:
           release_type: ${{ inputs.release_type }}
-          output-files: ${{ inputs.output }}
+          output_files: ${{ inputs.output_files }}
           oneui_version: ${{ inputs.oneui_version }}
           
   # ============================================================
@@ -128,7 +128,7 @@ jobs:
         with:
           repos_token: ${{ secrets.REPOS_TOKEN }}
           branch: oneui8.5
-          output-files: ${{ inputs.output }}
+          output_files: ${{ inputs.output_files }}
                 
       - name: Install dependencies
         run: |
@@ -150,9 +150,33 @@ jobs:
           cp "$(find image-temp -type f -name 'Image' -print -quit)" \
             "$KERNEL_DIR/arch/arm64/boot/Image"
             
-      - name: Publish files as ${{ inputs.release_type }}
+      - name: Publish files as actions
+        if: inputs.release_type == 'actions'
         uses: ./.github/actions/PublishFiles
         with:
-          release_type: ${{ inputs.release_type }}
-          output-files: ${{ inputs.output }}
+          output_files: ${{ inputs.output_files }}
           oneui_version: ${{ inputs.oneui_version }}
+
+      - name: Publish files as release/prerelease
+        if: inputs.release_type == 'release' || inputs.release_type == 'prerelease'
+        uses: ./.github/actions/PublishRelease
+        with: 
+          output_files: ${{ inputs.output_files }}
+          oneui_version: ${{ inputs.oneui_version }}
+
+          # Release Details
+          release_name: "A356E Raw Kernel/Image - One UI ${{ inputs.oneui_version }}"
+          release_tag: "v1.0.${{ github.run_number }}"
+          prerelease: ${{ inputs.release_type == 'prerelease' }}
+          body: |
+            ## These files are essentially stock, with no modifications.
+            
+            ### Build information
+            - One UI: ${{ inputs.oneui_version }}
+            - Build: ${{ github.run_number }}
+            - Commit: ${{ github.sha }}
+            
+            ### Changelog
+            - Initial build
+          files: |
+            ${{ github.workspace }}/release_files/**/*
