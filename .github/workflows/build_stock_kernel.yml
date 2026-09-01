@@ -8,12 +8,6 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      skip-build:
-        description: "Skip kernel compilation and use test Image"
-        required: true
-        type: boolean
-        default: true
-  
       release_type:
         description: "Select the release type"
         required: true
@@ -75,11 +69,9 @@ jobs:
           output_files: ${{ inputs.output_files }}
 
       - name: Build kernel
-        if: ${{ !inputs.skip-build }}
         uses: ./.github/actions/build-kernel
         
       - name: Create dummy Image file
-        if: inputs.skip-build
         shell: bash
         run: |
           mkdir -p "$KERNEL_DIR/arch/arm64/boot"
@@ -114,11 +106,9 @@ jobs:
           output_files: ${{ inputs.output_files }}
 
       - name: Build kernel
-        if: ${{ !inputs.skip-build }}
         uses: ./.github/actions/build-kernel
         
       - name: Create dummy Image file
-        if: inputs.skip-build
         shell: bash
         run: |
           mkdir -p "$KERNEL_DIR/arch/arm64/boot"
