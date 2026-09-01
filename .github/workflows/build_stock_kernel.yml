@@ -166,5 +166,7 @@ jobs:
               cd "$dir"
               zip -r9 "../$name.zip" .
               cd - > /dev/null
-              gh release upload "v1.0.${{ github.run_number }}" "$GITHUB_WORKSPACE/release_files/$name.zip"
+              gh release upload "v1.0.${{ github.run_number }}" \
+                "$GITHUB_WORKSPACE/release_files/$name.zip" \
+                --repo "${{ github.repository }}" 
           done
