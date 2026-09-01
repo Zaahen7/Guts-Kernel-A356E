@@ -168,12 +168,5 @@ jobs:
           release_body: |
             ## These files are essentially stock, with no modifications.
             
-            ### Build information
-            - One UI: ${{ inputs.oneui_version }}
-            - Build: ${{ github.run_number }}
-            - Commit: ${{ github.sha }}
-            
-            ### Changelog
+            ### Changelog:
             - Initial build
-          files: |
-            ${{ github.workspace }}/release_files/**/*
