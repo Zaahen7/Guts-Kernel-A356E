@@ -1,0 +1,160 @@
+# Run this to get unmodified Image file
+name: Build Stock Kernel
+
+permissions:
+  contents: write
+  actions: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip-build:
+        description: "Skip kernel compilation and use test Image"
+        required: true
+        type: boolean
+        default: true
+  
+      release_type:
+        description: "Select the release type"
+        required: true
+        type: choice
+        options:
+          - actions
+          - prerelease
+          - release
+        default: actions
+
+      oneui_version:
+        description: "Select the One UI target to build"
+        required: true
+        type: choice
+        options:
+          - oneui8
+          - oneui8.5
+          - all
+        default: all
+        
+      output_files:
+        description: "Select the output files"
+        required: true
+        type: choice
+        options:
+          - image
+          - flashable-zip
+          - both
+        default: both
+
+concurrency:
+    group: build-kernels-${{ github.ref }}
+    cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build_oneui8:
+    name: A356E Stock One UI 8
+    if: inputs.oneui_version == 'oneui8' || inputs.oneui_version == 'all'
+    runs-on: ubuntu-latest
+    
+    env:
+      KERNEL_DIR: ${{ github.workspace }}/A356E-Kernel
+      TOOLCHAIN_DIR: ${{ github.workspace }}/A356E-toolchain
+      ANYKERNEL3_DIR: ${{ github.workspace }}/A356E-Anykernel3
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Prepare to build
+        uses: ./.github/actions/build-setup
+        with:
+          repos_token: ${{ secrets.REPOS_TOKEN }}
+          branch: oneui8
+          output_files: ${{ inputs.output_files }}
+
+      - name: Build kernel
+        if: ${{ !inputs.skip-build }}
+        uses: ./.github/actions/build-kernel
+        
+      - name: Create dummy Image file
+        if: inputs.skip-build
+        shell: bash
+        run: |
+          mkdir -p "$KERNEL_DIR/arch/arm64/boot"
+          echo "DUMMY KERNEL IMAGE FOR PIPELINE TEST" > "$KERNEL_DIR/arch/arm64/boot/Image"
+          ls -lh "$KERNEL_DIR/arch/arm64/boot/Image"
+
+      - name: Upload files to artifacts
+        uses: ./.github/actions/UploadArtifacts
+        with:
+          release_type: ${{ inputs.release_type }}
+          output_files: ${{ inputs.output_files }}
+          oneui_version: "8"
+          
+  build_oneui8-5:
+    name: A356E Stock One UI 8.5
+    if: inputs.oneui_version == 'oneui8.5' || inputs.oneui_version == 'all'
+    runs-on: ubuntu-latest
+    
+    env:
+      KERNEL_DIR: ${{ github.workspace }}/A356E-Kernel
+      TOOLCHAIN_DIR: ${{ github.workspace }}/A356E-toolchain
+      ANYKERNEL3_DIR: ${{ github.workspace }}/A356E-Anykernel3
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare to build
+        uses: ./.github/actions/build-setup
+        with:
+          repos_token: ${{ secrets.REPOS_TOKEN }}
+          branch: oneui8.5
+          output_files: ${{ inputs.output_files }}
+
+      - name: Build kernel
+        if: ${{ !inputs.skip-build }}
+        uses: ./.github/actions/build-kernel
+        
+      - name: Create dummy Image file
+        if: inputs.skip-build
+        shell: bash
+        run: |
+          mkdir -p "$KERNEL_DIR/arch/arm64/boot"
+          echo "DUMMY KERNEL IMAGE FOR PIPELINE TEST" > "$KERNEL_DIR/arch/arm64/boot/Image"
+          ls -lh "$KERNEL_DIR/arch/arm64/boot/Image"
+          
+      - name: Upload files to artifacts
+        uses: ./.github/actions/UploadArtifacts
+        with:
+          release_type: ${{ inputs.release_type }}
+          output_files: ${{ inputs.output_files }}
+          oneui_version: "8-5"
+
+  Upload2Release:
+    name: Upload Artifacs to Release
+    needs:
+      - build_oneui8
+      - build_oneui8-5
+      
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ github.workspace }}/release_files
+    
+      - name: Publish Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "A356E Stock Image/Kernel"
+          tag_name: "v1.0.${{ github.run_number }}"
+          body: |
+            ## These files are essentially stock, with no modifications.
+          files: |
+            ${{ github.workspace }}/release_files/**/*
+    #if: inputs.release_type == 'release' || inputs.release_type == 'prerelease'
+    
