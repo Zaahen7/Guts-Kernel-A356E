@@ -90,7 +90,7 @@ jobs:
         run: |
           mkdir -p "$KERNEL_DIR/arch/arm64/boot"
           wget -O Image.zip \
-            "https://download1349.mediafire.com/9pa3198m0nzgfrLgZY50pc-_qIlgO99gXAFdQz4Q3-3hOh_j5uQpaTpOv061UUahz38ctqIVT2JThZTWlQ84uueobnaHGvQWk1iXANZaU9OrgAKOfrdq3xeLw8CgBN5azJmMjHi4qhXOPFuf-pBJfOk2P_7MqnWcPprvNi_N-2mplQ/7z7woq4o9es4huj/Image.zip"
+            "https://download1349.mediafire.com/a98u1gfrh7igBsT1jtoMn9kt5GR331OCbn3TDrtgW-TbAZNsuGE08Ivl3lfl0iaRhV9fLDtJ6RotOpXZIM3ZI1wPwiQBPUPrsPD5vMLgP4raNxEjXY9LRH_L9PpL5wzTbRl4jvGKUT0q4yM3aesD3MzQ4_9ZHLgg4t8cXkeI3qHIzw/7z7woq4o9es4huj/Image.zip"
           unzip -o Image.zip -d image-temp
           find image-temp -type f -print
           cp "$(find image-temp -type f -name 'Image' -print -quit)" \
