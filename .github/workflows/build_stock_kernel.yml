@@ -140,37 +140,20 @@ jobs:
       always() &&
       (needs.build_oneui8.result == 'success' || needs.build_oneui8.result == 'skipped') &&
       (needs.build_oneui8-5.result == 'success' || needs.build_oneui8-5.result == 'skipped')
-      
+    
     env:
       GH_TOKEN: ${{ github.token }}
       
     runs-on: ubuntu-latest
     
     steps:
-      - name: Download Artifacts
-        uses: actions/download-artifact@v8
-        with:
-          path: ${{ github.workspace }}/release_files
-          pattern: 'Stock*'
-          merge-multiple: false
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v3
+      - name: Publish Artifacts to Release
+        uses: ./.github/actions/Artifacts2release
         with:
           prerelease: ${{ inputs.release_type == 'prerelease' }}
-          name: "A356E Stock Image/Kernel"
-          tag_name: "v1.0.${{ github.run_number }}"
-          body: |
-            ## These files are essentially stock, with no modifications.
 
-      - name: Upload Release Files
-        run: |
-          for dir in "$GITHUB_WORKSPACE"/release_files/Stock*/; do
-              name=$(basename "$dir")
-              cd "$dir"
-              zip -r9 "../$name.zip" .
-              cd - > /dev/null
-              gh release upload "v1.0.${{ github.run_number }}" \
-                "$GITHUB_WORKSPACE/release_files/$name.zip" \
-                --repo "${{ github.repository }}" 
-          done
+          # Release Details
+          release_name: "A356E Stock Image/Kernel"
+          release_tag: "v1.0.${{ github.run_number }}"
+          release_body: |
+            ## These files are essentially stock, with no modifications.
