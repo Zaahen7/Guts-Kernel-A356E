@@ -2,9 +2,7 @@ name: Export files
 description: Export kernel files
 
 inputs:
-  release_type:
-    required: true
-  output-files:
+  output_files:
     required: true
   oneui_version:
     required: true
@@ -13,69 +11,21 @@ runs:
   using: composite
   steps:
     - name: Publish Image in Actions
-      if: |
-        (inputs.output-files == 'image' || inputs.output-files == 'both') &&
-        inputs.release_type == 'actions'
+      if: inputs.output_files == 'image' || inputs.output_files == 'both'
       uses: actions/upload-artifact@v4
       with:
         name: RawImage-A356E-${{ inputs.oneui_version }}
         path: ${{ env.KERNEL_DIR }}/arch/arm64/boot/Image
         
-    - name: Create Release File directory
-      if: inputs.release_type == 'release' || inputs.release_type == 'prerelease'
-      shell: bash
-      run: |
-        mkdir "$GITHUB_WORKSPACE/release_files"
-        
-    - name: Compress Image File
-      if: |
-        (inputs.output-files == 'image' || inputs.output-files == 'both') &&
-        (inputs.release_type == 'release' || inputs.release_type == 'prerelease')
-      shell: bash
-      run: |
-        cd "$KERNEL_DIR/arch/arm64/boot"
-        zip -9 "$GITHUB_WORKSPACE/release_files/RawImage-A356E-${{ inputs.oneui_version }}.zip" Image
-        ls "$GITHUB_WORKSPACE"
-        
     - name: Copy Image file to Anykernel3
-      if: inputs.output-files == 'flashable-zip' || inputs.output-files == 'both'
+      if: inputs.output_files == 'flashable-zip' || inputs.output_files == 'both'
       shell: bash
       run: |
         cp "$KERNEL_DIR/arch/arm64/boot/Image" "$ANYKERNEL3_DIR"
         
     - name: Publish Kernel in Actions
-      if: |
-        (inputs.output-files == 'flashable-zip' || inputs.output-files == 'both') &&
-        inputs.release_type == 'actions'
+      if: inputs.output_files == 'flashable-zip' || inputs.output_files == 'both'
       uses: actions/upload-artifact@v4
       with:
         name: RawKernel-A356E-${{ inputs.oneui_version }}
         path: ${{ env.ANYKERNEL3_DIR }}
-        
-    - name: Create Flashable Zip
-      if: |
-        (inputs.output-files == 'flashable-zip' || inputs.output-files == 'both') &&
-        (inputs.release_type == 'release' || inputs.release_type == 'prerelease')
-      shell: bash
-      run: |
-        cd "$ANYKERNEL3_DIR"
-        zip -r9 "$GITHUB_WORKSPACE/release_files/RawKernel-A356E-${{ inputs.oneui_version }}.zip" . \
-          -x '.git/*' '.gitignore' 'README.md'
-
-    - name: Publish Release
-      if: inputs.release_type == 'release' || inputs.release_type == 'prerelease'
-      uses: softprops/action-gh-release@v2
-      with:
-        prerelease: ${{ inputs.release_type == 'prerelease' }}
-        release_name: "Raw Kernel A356E - One UI ${{ inputs.oneui_version }}"
-        release_tag: "v1.0.${{ github.run_number }}"
-        release_body: |
-          ## Guts Kernel A356E
-    
-          ### Build information
-    
-          - One UI: ${{ inputs.oneui_version }}
-          - Build: ${{ github.run_number }}
-          - Commit: ${{ github.sha }}
-        files: |
-          ${{ github.workspace }}/release_files/**/*
