@@ -6,15 +6,40 @@ inputs:
     required: true
   oneui_version:
     required: true
+  kernel_build:
+    required: true
 
 runs:
   using: composite
   steps:
+    - name: Set stock files name
+      if: inputs.kernel_build == 'stock'
+      shell: bash
+      run: |
+        if [ "${{ inputs.output_files }}" == "image" ] || [ "${{ inputs.output_files }}" == "both" ]; then
+          IMAGE_ZIPNAME="StockImage-A356E-oneui${{ inputs.oneui_version }}"
+          echo "IMAGE_ZIPNAME=$IMAGE_ZIPNAME" >> "$GITHUB_ENV"
+        fi
+        
+        if [ "${{ inputs.output_files }}" == "flashable-zip" ] || [ "${{ inputs.output_files }}" == "both" ]; then
+          KERNEL_ZIPNAME="StockFlashableKernel-A356E-oneui${{ inputs.oneui_version }}"
+          echo "KERNEL_ZIPNAME=$KERNEL_ZIPNAME" >> "$GITHUB_ENV"
+        fi
+
+    - name: Set GutsKernel files name
+      if: inputs.kernel_build == 'guts'
+      shell: bash
+      run: |
+        if [ "${{ inputs.output_files }}" == "flashable-zip" ] || [ "${{ inputs.output_files }}" == "both" ]; then
+          KERNEL_ZIPNAME="GutsKernel-A356E-oneui${{ inputs.oneui_version }}"
+          echo "KERNEL_ZIPNAME=$KERNEL_ZIPNAME" >> "$GITHUB_ENV"
+        fi
+      
     - name: Upload Image in Actions
-      if: inputs.output_files == 'image' || inputs.output_files == 'both'
+      if: inputs.kernel_build == 'stock' && (inputs.output_files == 'image' || inputs.output_files == 'both')
       uses: actions/upload-artifact@v4
       with:
-        name: StockImage-A356E-oneui${{ inputs.oneui_version }}
+        name: ${{ env.IMAGE_ZIPNAME }}
         path: ${{ env.KERNEL_DIR }}/arch/arm64/boot/Image
         compression-level: 9
         
@@ -28,6 +53,6 @@ runs:
       if: inputs.output_files == 'flashable-zip' || inputs.output_files == 'both'
       uses: actions/upload-artifact@v4
       with:
-        name: StockFlashableKernel-A356E-oneui${{ inputs.oneui_version }}
+        name: ${{ env.KERNEL_ZIPNAME }}
         path: ${{ env.ANYKERNEL3_DIR }}
         compression-level: 9
