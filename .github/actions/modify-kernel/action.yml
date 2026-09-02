@@ -1,1 +1,23 @@
+name: Apply Kernel Modifications
+description: Apply selected modifications to kernel
 
+inputs:
+  lto:
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Link Time Optimization
+      if: inputs.lto == 'full'
+      shell: bash
+      run: |
+        echo "Enabling Full LTO..."
+        DEFCONFIG="$KERNEL_DIR/arch/arm64/configs/s5e8835-a35xjvxx_defconfig"
+
+        "$KERNEL_DIR/scripts/config" \
+          --file "$DEFCONFIG" \
+          --enable CONFIG_LTO_CLANG \
+          --disable CONFIG_LTO_NONE \
+          --disable CONFIG_LTO_CLANG_THIN \
+          --enable CONFIG_LTO_CLANG_FULL
