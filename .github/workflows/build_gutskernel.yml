@@ -107,11 +107,17 @@ jobs:
           branch: oneui8.5
           output_files: ${{ inputs.output_files }}
 
+      - name: Setup more Swap Memory
+        if: inputs.lto == 'full'
+        uses: ./.github/actions/SetupSwapMemory
+        with:
+          # Size in GB
+          swap_size: 25
+
       - name: Apply Modifications
         uses: ./.github/actions/modify-kernel
         with:
           lto: ${{ inputs.lto }}
-          
 
       - name: Build kernel
         uses: ./.github/actions/build-kernel   
