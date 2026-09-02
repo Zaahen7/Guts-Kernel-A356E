@@ -1,4 +1,4 @@
-# Run this to get unmodified Image file
+# Kernel made by @Zaahen7
 name: Build GutsKernel
 permissions:
   contents: write
