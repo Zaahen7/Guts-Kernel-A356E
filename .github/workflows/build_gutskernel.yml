@@ -128,6 +128,7 @@ jobs:
       - build_oneui8
       - build_oneui8-5
     if: |
+      inputs.release_type != 'actions' &&
       always() &&
       (needs.build_oneui8.result == 'success' || needs.build_oneui8.result == 'skipped') &&
       (needs.build_oneui8-5.result == 'success' || needs.build_oneui8-5.result == 'skipped')
