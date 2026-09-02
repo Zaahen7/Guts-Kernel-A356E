@@ -16,6 +16,7 @@ runs:
       with:
         name: StockImage-A356E-oneui${{ inputs.oneui_version }}
         path: ${{ env.KERNEL_DIR }}/arch/arm64/boot/Image
+        compression-level: 9
         
     - name: Copy Image file to Anykernel3
       if: inputs.output_files == 'flashable-zip' || inputs.output_files == 'both'
@@ -23,9 +24,10 @@ runs:
       run: |
         cp "$KERNEL_DIR/arch/arm64/boot/Image" "$ANYKERNEL3_DIR"
         
-    - name: Publish Kernel in Actions
+    - name: Upload Kernel in Actions
       if: inputs.output_files == 'flashable-zip' || inputs.output_files == 'both'
       uses: actions/upload-artifact@v4
       with:
         name: StockFlashableKernel-A356E-oneui${{ inputs.oneui_version }}
         path: ${{ env.ANYKERNEL3_DIR }}
+        compression-level: 9
