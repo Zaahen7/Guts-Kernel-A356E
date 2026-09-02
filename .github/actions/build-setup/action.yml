@@ -3,14 +3,17 @@ description: Create directories and clone repos that will be used
 
 inputs:
     repos_token:
-      description: "Repository access token"
-      required: true
+        description: "Repository access token"
+        required: true
+    kernel_build:
+        description: "Kernel type"
+        required: true
     branch:
-      description: "Kernel Source Branch to clone"
-      required: true
+        description: "Kernel Source Branch to clone"
+        required: true
     output_files:
-      description: "Files to upload"
-      required: true
+        description: "Files to upload"
+        required: false
     
 runs:
   using: composite
@@ -83,7 +86,7 @@ runs:
         echo "Done :P"
 
     - name: Clone Anykernel3
-      if: inputs.output_files == 'flashable-zip' || inputs.output_files == 'both'
+      if: inputs.kernel_build == 'guts' || (inputs.kernel_build == 'stock' && (inputs.output_files == 'flashable-zip' || inputs.output_files == 'both'))
       shell: bash
       run: |
         echo "Cloning anykernel3..."
