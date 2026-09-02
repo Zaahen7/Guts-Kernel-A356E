@@ -7,8 +7,12 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-        build_kernel:
-            description: ""
+        skip-build:
+          description: "Skip kernel compilation and use test Image"
+          required: true
+          type: boolean
+          default: true
+          
         release_type:
             description: "Select the release type"
             required: true
@@ -122,13 +126,21 @@ jobs:
           lto: ${{ inputs.lto }}
 
       - name: Build kernel
-        uses: ./.github/actions/build-kernel   
+        if: ${{ !inputs.skip-build }}
+        uses: ./.github/actions/build-kernel
+
+      - name: Create dummy Image file
+        if: inputs.skip-build
+        shell: bash
+        run: |
+          mkdir -p "$KERNEL_DIR/arch/arm64/boot"
           
       - name: Upload files to artifacts
         uses: ./.github/actions/UploadArtifacts
         with:
           output_files: ${{ inputs.output_files }}
           oneui_version: "8-5"
+          kernel_build: "guts"
 
   Upload2Release:
     name: Upload Artifacs to Release
