@@ -31,9 +31,9 @@ runs:
     - name: Prepare directories
       shell: bash
       run: |
-        rm -rf "$KERNEL_DIR" "$TOOLCHAIN_DIR" "ANYKERNEL3_DIR"
+        rm -rf "$KERNEL_DIR" "$TOOLCHAIN_DIR" "$ANYKERNEL3_DIR"
         echo "Creating directories..."
-        mkdir "$KERNEL_DIR" "$TOOLCHAIN_DIR" "ANYKERNEL3_DIR"
+        mkdir "$KERNEL_DIR" "$TOOLCHAIN_DIR" "$ANYKERNEL3_DIR"
         echo "Directories created :P"
         
     - name: Clone kernel source
@@ -45,7 +45,15 @@ runs:
           -b "${{ inputs.branch }}" \
           https://github.com/Zaahen7/A356E-KernelSources.git \
           "$KERNEL_DIR"
-          
+      
+    - name: Extract kernel version
+      shell: bash
+      run: |
+        KERNEL_VERSION=$(make -s -C "$KERNEL_DIR" kernelversion)
+
+        echo "Kernel version: $KERNEL_VERSION"
+        echo "KERNEL_VERSION=$KERNEL_VERSION" >> "$GITHUB_ENV"
+      
     - name: Samsung Toolchain Setup
       shell: bash
       run: |
@@ -73,3 +81,18 @@ runs:
         git clone --depth 1 \
           https://github.com/Zaahen7/AK3.git \
           "$ANYKERNEL3_DIR"
+    
+    - name: Edit update-binary
+      shell: bash
+      run: |
+        UPDATE_BINARY="$ANYKERNEL3_DIR/META-INF/com/google/android/update-binary"
+        ONEUI_VERSION="${BRANCH#oneui}"
+        
+        echo "Editing update-binary..."
+        echo "Kernel version: $KERNEL_VERSION"
+        echo "Kernel branch: ${{ inputs.branch }}"
+    
+        sed -i "s/Zaahen7/$ONEUI_VERSION/g" "$UPDATE_BINARY"
+        sed -i "s/7nehaaZ/$KERNEL_VERSION/g" "$UPDATE_BINARY"
+    
+        echo "update-binary modified successfully."
