@@ -37,6 +37,16 @@ on:
           - both
         default: both
 
+      lto:
+        description: "Choose LTO build"
+        required: true
+        type: choice
+        options:
+          - default
+          - thin
+          - full
+        default: default
+
 concurrency:
     group: build-kernels-${{ github.ref }}
     cancel-in-progress: false
