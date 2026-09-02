@@ -17,12 +17,12 @@ runs:
       shell: bash
       run: |
         if [ "${{ inputs.output_files }}" == "image" ] || [ "${{ inputs.output_files }}" == "both" ]; then
-          IMAGE_ZIPNAME="StockImage-A356E-oneui${{ inputs.oneui_version }}"
+          IMAGE_ZIPNAME="StockImage_A356E_oneui${{ inputs.oneui_version }}"
           echo "IMAGE_ZIPNAME=$IMAGE_ZIPNAME" >> "$GITHUB_ENV"
         fi
         
         if [ "${{ inputs.output_files }}" == "flashable-zip" ] || [ "${{ inputs.output_files }}" == "both" ]; then
-          KERNEL_ZIPNAME="StockFlashableKernel-A356E-oneui${{ inputs.oneui_version }}"
+          KERNEL_ZIPNAME="StockFlashableKernel_A356E_oneui${{ inputs.oneui_version }}"
           echo "KERNEL_ZIPNAME=$KERNEL_ZIPNAME" >> "$GITHUB_ENV"
         fi
 
