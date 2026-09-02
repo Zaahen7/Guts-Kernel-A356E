@@ -110,6 +110,7 @@ jobs:
       - name: Apply Modifications
         uses: ./.github/actions/modify-kernel
         with:
+          lto: ${{ inputs.lto }}
           
 
       - name: Build kernel
