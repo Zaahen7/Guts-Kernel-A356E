@@ -32,16 +32,6 @@ on:
             - oneui8.5
             - all
           default: all
-          
-        output_files:
-          description: "Select the output files"
-          required: true
-          type: choice
-          options:
-            - image
-            - flashable-zip
-            - both
-          default: both
   
     # Kernel Modifications
         lto:
