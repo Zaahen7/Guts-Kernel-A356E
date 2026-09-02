@@ -2,12 +2,12 @@ name: Export files
 description: Export kernel files
 
 inputs:
-  output_files:
-    required: true
-  oneui_version:
-    required: true
-  kernel_build:
-    required: true
+    oneui_version:
+      required: true
+    kernel_build:
+      required: true
+    output_files:
+      required: false
 
 runs:
   using: composite
@@ -30,10 +30,8 @@ runs:
       if: inputs.kernel_build == 'guts'
       shell: bash
       run: |
-        if [ "${{ inputs.output_files }}" == "flashable-zip" ] || [ "${{ inputs.output_files }}" == "both" ]; then
-          KERNEL_ZIPNAME="GutsKernel-A356E-oneui${{ inputs.oneui_version }}"
-          echo "KERNEL_ZIPNAME=$KERNEL_ZIPNAME" >> "$GITHUB_ENV"
-        fi
+        KERNEL_ZIPNAME="GutsKernel_A356E_oneui${{ inputs.oneui_version }}"
+        echo "KERNEL_ZIPNAME=$KERNEL_ZIPNAME" >> "$GITHUB_ENV"
       
     - name: Upload Image in Actions
       if: inputs.kernel_build == 'stock' && (inputs.output_files == 'image' || inputs.output_files == 'both')
@@ -44,13 +42,13 @@ runs:
         compression-level: 9
         
     - name: Copy Image file to Anykernel3
-      if: inputs.output_files == 'flashable-zip' || inputs.output_files == 'both'
+      if: inputs.kernel_build == 'guts' || (inputs.kernel_build == 'stock' && (inputs.output_files == 'flashable-zip' || inputs.output_files == 'both'))
       shell: bash
       run: |
         cp "$KERNEL_DIR/arch/arm64/boot/Image" "$ANYKERNEL3_DIR"
         
     - name: Upload Kernel in Actions
-      if: inputs.output_files == 'flashable-zip' || inputs.output_files == 'both'
+      if: inputs.kernel_build == 'guts' || (inputs.kernel_build == 'stock' && (inputs.output_files == 'flashable-zip' || inputs.output_files == 'both'))
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.KERNEL_ZIPNAME }}
