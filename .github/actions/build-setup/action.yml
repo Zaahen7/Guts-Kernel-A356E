@@ -2,15 +2,15 @@ name: Prepare to build kernel
 description: Create directories and clone repos that will be used
 
 inputs:
-  repos_token:
-    description: "Repository access token"
-    required: true
-  branch:
-    description: "Kernel Source Branch to clone"
-    required: true
-  output_files:
-    description: "Files to upload"
-    required: true
+    repos_token:
+      description: "Repository access token"
+      required: true
+    branch:
+      description: "Kernel Source Branch to clone"
+      required: true
+    output_files:
+      description: "Files to upload"
+      required: true
     
 runs:
   using: composite
@@ -27,6 +27,15 @@ runs:
       run: |
         sudo apt update
         sudo apt-get install -y libyaml-dev
+
+    - name: Free disk space
+      uses: endersonmenezes/free-disk-space@v3
+      with:
+          remove_android: true
+          remove_dotnet: true
+          remove_haskell: true
+          remove_tool_cache: true
+          remove_swap: true
         
     - name: Prepare directories
       shell: bash
