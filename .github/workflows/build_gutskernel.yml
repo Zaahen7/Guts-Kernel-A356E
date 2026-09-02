@@ -94,6 +94,8 @@ jobs:
         shell: bash
         run: |
           mkdir -p "$KERNEL_DIR/arch/arm64/boot"
+          echo "DUMMY KERNEL IMAGE FOR PIPELINE TEST" > "$KERNEL_DIR/arch/arm64/boot/Image"
+          ls -lh "$KERNEL_DIR/arch/arm64/boot/Image"
 
       - name: Upload files to artifacts
         uses: ./.github/actions/UploadArtifacts
@@ -137,12 +139,14 @@ jobs:
       - name: Build kernel
         if: ${{ !inputs.skip-build }}
         uses: ./.github/actions/build-kernel
-
+        
       - name: Create dummy Image file
         if: inputs.skip-build
         shell: bash
         run: |
           mkdir -p "$KERNEL_DIR/arch/arm64/boot"
+          echo "DUMMY KERNEL IMAGE FOR PIPELINE TEST" > "$KERNEL_DIR/arch/arm64/boot/Image"
+          ls -lh "$KERNEL_DIR/arch/arm64/boot/Image"
           
       - name: Upload files to artifacts
         uses: ./.github/actions/UploadArtifacts
