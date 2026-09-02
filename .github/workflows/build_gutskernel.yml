@@ -63,7 +63,7 @@ defaults:
 
 jobs:
   build_oneui8:
-    name: A356E Stock One UI 8
+    name: GutsKernel for A356E Oneui 8
     if: inputs.oneui_version == 'oneui8' || inputs.oneui_version == 'all'
     runs-on: ubuntu-latest
     
@@ -81,19 +81,38 @@ jobs:
         with:
           repos_token: ${{ secrets.REPOS_TOKEN }}
           branch: oneui8
-          output_files: ${{ inputs.output_files }}
+          kernel_build: "guts"
+
+      - name: Setup more Swap Memory
+        if: inputs.lto == 'full'
+        uses: ./.github/actions/SetupSwapMemory
+        with:
+          # Size in GB
+          swap_size: 25
+
+      - name: Apply Modifications
+        uses: ./.github/actions/modify-kernel
+        with:
+          lto: ${{ inputs.lto }}
 
       - name: Build kernel
+        if: ${{ !inputs.skip-build }}
         uses: ./.github/actions/build-kernel
+
+      - name: Create dummy Image file
+        if: inputs.skip-build
+        shell: bash
+        run: |
+          mkdir -p "$KERNEL_DIR/arch/arm64/boot"
 
       - name: Upload files to artifacts
         uses: ./.github/actions/UploadArtifacts
         with:
-          output_files: ${{ inputs.output_files }}
           oneui_version: "8"
+          kernel_build: "guts"
           
   build_oneui8-5:
-    name: A356E Stock One UI 8.5
+    name: GutsKernel for A356E Oneui 8.5
     if: inputs.oneui_version == 'oneui8.5' || inputs.oneui_version == 'all'
     runs-on: ubuntu-latest
     
@@ -167,7 +186,7 @@ jobs:
           prerelease: ${{ inputs.release_type == 'prerelease' }}
 
           # Release Details
-          release_name: "A356E Stock Image/Kernel"
+          release_name: "GutsKernel for A356E"
           release_tag: "v1.0.${{ github.run_number }}"
           release_body: |
             ## These files are essentially stock, with no modifications.
