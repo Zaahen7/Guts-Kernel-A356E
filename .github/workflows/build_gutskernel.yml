@@ -73,7 +73,7 @@ jobs:
           branch: oneui8
           kernel_build: "guts"
 
-      - name: Setup more Swap Memory
+      - name: Setup Swap Memory
         if: inputs.lto == 'full'
         uses: ./.github/actions/SetupSwapMemory
         with:
@@ -125,7 +125,7 @@ jobs:
           branch: oneui8.5
           kernel_build: "guts"
 
-      - name: Setup more Swap Memory
+      - name: Setup Swap Memory
         if: inputs.lto == 'full'
         uses: ./.github/actions/SetupSwapMemory
         with:
