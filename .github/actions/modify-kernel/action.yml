@@ -1,25 +1,47 @@
 name: Link Time Optimization
-description: Apply Full LTO
+description: Apply LTO Mode
 
 inputs:
-  lto:
+  LinkTO:
     required: true
 
 runs:
   using: composite
   steps:
-    - name: Applying Full LTO
-      if: inputs.lto == 'full'
+    - name: Set LTO Mode
       shell: bash
       run: |
-        echo "Enabling Full LTO..."
         DEFCONFIG="$KERNEL_DIR/arch/arm64/configs/s5e8835-a35xjvxx_defconfig"
+        
+        echo "===== LTO CONFIGURATION ====="
+        echo "LTO mode: ${{ inputs.LinkTO }}"
+        echo "Defconfig: $DEFCONFIG"
+        
+        if [[ "${{ inputs.LinkTO }}" == "full" ]]; then
+          echo "Enabling Full LTO..."
+        
+          "$KERNEL_DIR/scripts/config" \
+            --file "$DEFCONFIG" \
+            --enable CONFIG_LTO_CLANG \
+            --disable CONFIG_LTO_NONE \
+            --disable CONFIG_LTO_CLANG_THIN \
+            --enable CONFIG_LTO_CLANG_FULL
+        
+        elif [[ "${{ inputs.LinkTO }}" == "thin" ]]; then
+          echo "Enabling Thin LTO..."
+        
+          "$KERNEL_DIR/scripts/config" \
+            --file "$DEFCONFIG" \
+            --enable CONFIG_LTO_CLANG \
+            --disable CONFIG_LTO_NONE \
+            --disable CONFIG_LTO_CLANG_FULL \
+            --enable CONFIG_LTO_CLANG_THIN
+        
+        else
+          echo "LTO is default, no changes to defconfig"
+        fi
+        
+        echo "===== LTO CONFIG RESULT ====="
+        grep -E 'CONFIG_(LTO|LTO_CLANG)' "$DEFCONFIG" || true
+        echo "============================="
 
-        "$KERNEL_DIR/scripts/config" \
-          --file "$DEFCONFIG" \
-          --enable CONFIG_LTO_CLANG \
-          --disable CONFIG_LTO_NONE \
-          --disable CONFIG_LTO_CLANG_THIN \
-          --enable CONFIG_LTO_CLANG_FULL
-
-        echo "Enabled :O"
