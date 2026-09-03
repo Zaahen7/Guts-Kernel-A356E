@@ -96,6 +96,7 @@ jobs:
         uses: ./.github/actions/build-kernel
         with:
           LinkTO: ${{ matrix.lto }}
+          branch: ${{ matrix.branch }}
 
       - name: Upload files to artifacts
         uses: ./.github/actions/UploadArtifacts
