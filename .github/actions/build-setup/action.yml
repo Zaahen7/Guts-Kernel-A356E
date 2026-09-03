@@ -62,7 +62,7 @@ runs:
         ONEUI_VERSION="${ONEUI_VERSION#oneui}"
 
         echo "One Ui Version: $ONEUI_VERSION"
-        echo "ONEUI_VERSION=$ONEUI_VERSION" >> "GITHUB_ENV"
+        echo "ONEUI_VERSION=$ONEUI_VERSION" >> "$GITHUB_ENV"
 
         echo "Cloning One UI $ONEUI_VERSION kernel source..."
         git clone --depth 1 \
