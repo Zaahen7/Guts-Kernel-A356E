@@ -2,7 +2,7 @@ name: Setup Swap Memory
 description: Setup Swap Memory
 
 inputs:
-  lto:
+  LinkTO:
     description: "LTO mode"
     required: true
 
@@ -14,7 +14,7 @@ runs:
       run: |
         SWAPFILE="/swapfile"
 
-        case "${{ inputs.lto }}" in
+        case "${{ inputs.LinkTO }}" in
           full)
             SWAP_SIZE="25G"
             ;;
@@ -25,7 +25,7 @@ runs:
             SWAP_SIZE="8G"
             ;;
           *)
-            echo "Error: Unknown LTO mode: ${{ inputs.lto }}"
+            echo "Error: Unknown LTO mode: ${{ inputs.LinkTO }}"
             exit 1
             ;;
         esac
