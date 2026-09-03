@@ -16,8 +16,8 @@ runs:
       run: |
         echo "Starting Kernel Build..."
         echo "===== KERNEL INFO ====="
-        echo "Kernel Version: $KERNEL_VERSION"
-        echo "One UI: $ONEUI_VERSION"
+        echo "Kernel Version: ${{ env.KERNEL_VERSION }}"
+        echo "One UI: ${{ env.ONEUI_VERSION }}"
         echo "Branch: ${{ inputs.branch }}"
         echo "LTO: ${{ inputs.LinkTO }}"
 
