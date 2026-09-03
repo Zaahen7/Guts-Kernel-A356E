@@ -45,29 +45,28 @@ concurrency:
 defaults:
   run:
     shell: bash
-
+    
 jobs:
   build:
     name: |
-      A356E Stock One UI 
-      ${{ 
+      A356E Stock One UI
+      ${{
         matrix.branch == 'oneui8' && '8' ||
         matrix.branch == 'oneui8.5' && '8.5'
       }}
-    
+
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        branch:
-          - oneui8
-          - oneui8.5
+        branch: ${{ fromJSON(inputs.oneui_version == 'all' && '["oneui8","oneui8.5"]' || format('["{0}"]', inputs.oneui_version)) }}
 
     env:
       KERNEL_DIR: ${{ github.workspace }}/A356E-Kernel
       TOOLCHAIN_DIR: ${{ github.workspace }}/A356E-toolchain
       ANYKERNEL3_DIR: ${{ github.workspace }}/A356E-Anykernel3
+
 
     steps:
       - name: Checkout repository
