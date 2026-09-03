@@ -1,5 +1,5 @@
 # Workflow made by @Zaahen7
-name: Build GutsKernel
+name: Build GutsKernel for A356E
 permissions:
   contents: write
   actions: write
@@ -53,7 +53,7 @@ defaults:
 
 jobs:
   build_oneui8:
-    name: GutsKernel for A356E Oneui 8
+    name: GutsKernel Oneui 8
     if: inputs.oneui_version == 'oneui8' || inputs.oneui_version == 'all'
     runs-on: ubuntu-latest
     
@@ -105,7 +105,7 @@ jobs:
           lto: ${{ inputs.lto }}
           
   build_oneui8-5:
-    name: GutsKernel for A356E Oneui 8.5
+    name: GutsKernel Oneui 8.5
     if: inputs.oneui_version == 'oneui8.5' || inputs.oneui_version == 'all'
     runs-on: ubuntu-latest
     
