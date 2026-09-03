@@ -17,6 +17,8 @@ inputs:
     free_diskspace:
         description: "Enable to free disk space"
         required: true
+
+
 runs:
   using: composite
   steps:
