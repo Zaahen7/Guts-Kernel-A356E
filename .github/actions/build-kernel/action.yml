@@ -29,4 +29,4 @@ runs:
         grep -E 'CONFIG_(LTO|LTO_CLANG)' .config
         echo "======================"
         
-        make -j$(nproc) Image
+    #make -j$(nproc) Image
