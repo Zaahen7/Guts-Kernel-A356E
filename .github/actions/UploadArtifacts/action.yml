@@ -36,7 +36,12 @@ runs:
       if: inputs.kernel_build == 'guts'
       shell: bash
       run: |
-        KERNEL_ZIPNAME="GutsKernel_A356E_Oneui${{ inputs.oneui_version }}_${{ inputs.oneui_version }}LTO"
+        KERNEL_ZIPNAME="GutsKernel_A356E_Oneui${{ inputs.oneui_version }}
+        
+        if [ -n "${{ inputs.lto }}" ]; then
+          KERNEL_ZIPNAME="${KERNEL_ZIPNAME}_${{ inputs.lto }}LTO"
+        fi
+        
         echo "KERNEL_ZIPNAME=$KERNEL_ZIPNAME" >> "$GITHUB_ENV"
       
     - name: Upload Image in Actions
