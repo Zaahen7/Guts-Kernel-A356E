@@ -29,7 +29,7 @@ on:
         
     # Kernel Modifications
       LinkTO:
-        description: "Choose LTO build"
+        description: "Choose LTO Mode"
         required: true
         type: choice
         options:
@@ -81,11 +81,22 @@ jobs:
           kernel_build: "stock"
           free_diskspace: true
 
+      - name: Setup Swap Memory
+        if: inputs.LinkTO == 'full'
+        uses: ./.github/actions/SetupSwapMemory
+        with:
+          LinkTO: ${{ inputs.LinkTO }}
+
+      - name: Apply LTO Configs
+        uses: ./.github/actions/modify-kernel
+        with:
+          LinkTO: ${{ inputs.LinkTO }}
+          
       - name: Build kernel
         uses: ./.github/actions/build-kernel
         with:
           LinkTO: ${{ inputs.LinkTO }}
-          
+        
 
       - name: Upload files to artifacts
         uses: ./.github/actions/UploadArtifacts
