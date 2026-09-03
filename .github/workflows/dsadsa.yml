@@ -82,7 +82,6 @@ jobs:
           free_diskspace: true
 
       - name: Setup Swap Memory
-        if: inputs.LinkTO == 'full'
         uses: ./.github/actions/SetupSwapMemory
         with:
           LinkTO: ${{ inputs.LinkTO }}
@@ -97,19 +96,20 @@ jobs:
         with:
           LinkTO: ${{ inputs.LinkTO }}
         
-
       - name: Upload files to artifacts
         uses: ./.github/actions/UploadArtifacts
         with:
-          output_files: flashable-zip
-          oneui_version: ${{ matrix.branch == 'oneui8' && '8' || '8-5' }}
-          kernel_build: stock
+          oneui_version: ${{ env.ONEUI_VERSION }}
+          kernel_build: "stock"
+
+          #Modifications
+          LinkTO: ${{ inputs.LinkTO }}
 
   Upload2Release:
     name: Upload Artifacts to Release
     needs: build
     if: |
-      always() &&
+      inputs.release_type != 'actions' &&
       needs.build.result == 'success'
 
     env:
