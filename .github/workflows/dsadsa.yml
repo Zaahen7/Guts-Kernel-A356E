@@ -1,0 +1,121 @@
+name: Build Stock Kernel
+
+permissions:
+  contents: write
+  actions: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: "Select the release type"
+        required: true
+        type: choice
+        options:
+          - actions
+          - prerelease
+          - release
+        default: actions
+
+      oneui_version:
+        description: "Select the One UI target to build"
+        required: true
+        type: choice
+        options:
+          - oneui8
+          - oneui8.5
+          - all
+        default: all
+        
+    # Kernel Modifications
+      LinkTO:
+        description: "Choose LTO build"
+        required: true
+        type: choice
+        options:
+          - default
+          - thin
+          - full
+        default: default
+          
+concurrency:
+  group: build-kernels-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    name: |
+      A356E Stock One UI 
+      ${{ 
+        matrix.branch == 'oneui8' && '8' ||
+        matrix.branch == 'oneui8.5' && '8.5'
+      }}
+    
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        branch:
+          - oneui8
+          - oneui8.5
+
+    env:
+      KERNEL_DIR: ${{ github.workspace }}/A356E-Kernel
+      TOOLCHAIN_DIR: ${{ github.workspace }}/A356E-toolchain
+      ANYKERNEL3_DIR: ${{ github.workspace }}/A356E-Anykernel3
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare to build
+        uses: ./.github/actions/build-setup
+        with:
+          repos_token: ${{ secrets.REPOS_TOKEN }}
+          branch: ${{ matrix.branch }}
+          kernel_build: "stock"
+          free_diskspace: true
+
+      - name: Build kernel
+        uses: ./.github/actions/build-kernel
+        with:
+          LinkTO: ${{ inputs.LinkTO }}
+          
+
+      - name: Upload files to artifacts
+        uses: ./.github/actions/UploadArtifacts
+        with:
+          output_files: flashable-zip
+          oneui_version: ${{ matrix.branch == 'oneui8' && '8' || '8-5' }}
+          kernel_build: stock
+
+  Upload2Release:
+    name: Upload Artifacts to Release
+    needs: build
+    if: |
+      always() &&
+      needs.build.result == 'success'
+
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Publish Artifacts to Release
+        uses: ./.github/actions/Artifacts2release
+        with:
+          prerelease: ${{ inputs.release_type == 'prerelease' }}
+
+          release_name: "A356E Stock Image/Kernel"
+          release_tag: "v1.0.${{ github.run_number }}"
+          release_body: |
+            ## These files are essentially stock, with no modifications.
