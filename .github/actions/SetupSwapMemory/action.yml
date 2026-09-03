@@ -2,9 +2,9 @@ name: Setup Swap Memory
 description: Setup Swap Memory
 
 inputs:
-    swap_size:
-      description: "Swap size in GB"
-      required: true
+  lto:
+    description: "LTO mode"
+    required: true
 
 runs:
   using: composite
@@ -13,14 +13,29 @@ runs:
       shell: bash
       run: |
         SWAPFILE="/swapfile"
-        SWAP_SIZE="${{ inputs.swap_size }}G"
+
+        case "${{ inputs.lto }}" in
+          full)
+            SWAP_SIZE="25G"
+            ;;
+          thin)
+            SWAP_SIZE="12G"
+            ;;
+          default)
+            SWAP_SIZE="8G"
+            ;;
+          *)
+            echo "Error: Unknown LTO mode: ${{ inputs.lto }}"
+            exit 1
+            ;;
+        esac
 
         echo "Memory and swap before:"
         free -h
 
         echo "Setting up $SWAP_SIZE swap..."
 
-        if swapon --show=NAME | grep -q "$SWAPFILE"; then
+        if swapon --show=NAME | grep -q "^${SWAPFILE}$"; then
           echo "Swap already enabled."
         else
           sudo fallocate -l "$SWAP_SIZE" "$SWAPFILE"
@@ -31,4 +46,3 @@ runs:
 
         echo "Memory and swap after:"
         free -h
-
