@@ -97,8 +97,9 @@ runs:
     - name: Edit update-binary
       shell: bash
       run: |
-        UPDATE_BINARY="$ANYKERNEL3_DIR/META-INF/com/google/android/update-binary"
+        BRANCH="${{ inputs.branch }}"
         ONEUI_VERSION="${BRANCH#oneui}"
+        UPDATE_BINARY="$ANYKERNEL3_DIR/META-INF/com/google/android/update-binary"
         
         echo "Editing update-binary..."
         echo "Kernel version: $KERNEL_VERSION"
