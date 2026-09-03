@@ -1,4 +1,4 @@
-name: Build Stock Kernel
+name: Build Stock Kernel NEW
 
 permissions:
   contents: write
