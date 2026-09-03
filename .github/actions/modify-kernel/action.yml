@@ -21,3 +21,5 @@ runs:
           --disable CONFIG_LTO_NONE \
           --disable CONFIG_LTO_CLANG_THIN \
           --enable CONFIG_LTO_CLANG_FULL
+
+        echo "Enabled :O"
