@@ -5,16 +5,18 @@ inputs:
     repos_token:
         description: "Repository access token"
         required: true
-    kernel_build:
-        description: "Kernel type"
-        required: true
+        
     branch:
         description: "Kernel Source Branch to clone"
         required: true
-    output_files:
-        description: "Files to upload"
-        required: false
-    
+        
+    kernel_build:
+        description: "Kernel type"
+        required: true
+        
+    free_diskspace:
+        description: "Enable to free disk space"
+        required: true
 runs:
   using: composite
   steps:
@@ -28,10 +30,13 @@ runs:
     - name: Install dependencies
       shell: bash
       run: |
+        echo Installing dependencies...
         sudo apt update
         sudo apt-get install -y libyaml-dev
+        echo Done :V
 
     - name: Free disk space
+      if: ${{ inputs.free_diskspace }}
       uses: endersonmenezes/free-disk-space@v3
       with:
           remove_android: true
@@ -44,14 +49,19 @@ runs:
       shell: bash
       run: |
         rm -rf "$KERNEL_DIR" "$TOOLCHAIN_DIR" "$ANYKERNEL3_DIR"
-        echo "Creating directories..."
+        echo Creating directories...
         mkdir "$KERNEL_DIR" "$TOOLCHAIN_DIR" "$ANYKERNEL3_DIR"
-        echo "Directories created :P"
+        echo Directories created :P
         
     - name: Clone kernel source
       shell: bash
       run: |
-        echo "Cloning ${{ inputs.branch }} kernel source..."
+        ONEUI_VERSION="${BRANCH#oneui}"
+
+        echo "One Ui Version: $ONEUI_VERSION"
+        echo "ONEUI_VERSION=$ONEUI_VERSION" >> "GITHUB_ENV"
+
+        echo "Cloning One UI $ONEUI_VERSION kernel source..."
         git clone --depth 1 \
           --single-branch \
           -b "${{ inputs.branch }}" \
@@ -86,26 +96,21 @@ runs:
         echo "Done :P"
 
     - name: Clone Anykernel3
-      if: inputs.kernel_build == 'guts' || (inputs.kernel_build == 'stock' && (inputs.output_files == 'flashable-zip' || inputs.output_files == 'both'))
       shell: bash
       run: |
-        echo "Cloning anykernel3..."
+        echo Cloning anykernel3...
         git clone --depth 1 \
           https://github.com/Zaahen7/AK3.git \
           "$ANYKERNEL3_DIR"
+        echo Done :P
     
     - name: Edit update-binary
       shell: bash
       run: |
-        BRANCH="${{ inputs.branch }}"
-        ONEUI_VERSION="${BRANCH#oneui}"
         UPDATE_BINARY="$ANYKERNEL3_DIR/META-INF/com/google/android/update-binary"
         
         echo "Editing update-binary..."
-        echo "Kernel version: $KERNEL_VERSION"
-        echo "Kernel branch: ${{ inputs.branch }}"
-    
         sed -i "s/Zaahen7/$ONEUI_VERSION/g" "$UPDATE_BINARY"
         sed -i "s/7nehaaZ/$KERNEL_VERSION/g" "$UPDATE_BINARY"
-    
+        
         echo "update-binary modified successfully."
