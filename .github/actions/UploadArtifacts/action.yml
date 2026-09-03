@@ -2,64 +2,48 @@ name: Export files
 description: Export kernel files
 
 inputs:
-    oneui_version:
-        required: true
-    kernel_build:
+      oneui_version:
         required: true
 
-    #Stock
-    output_files:
-        required: false
+      kernel_build:
+        required: true
 
-    #Guts Kernel
-    lto:
+  # Kernel Modifications
+      LinkTO:
         required: false
 
 runs:
   using: composite
   steps:
-    - name: Set stock files name
-      if: inputs.kernel_build == 'stock'
+    - name: Set files name
       shell: bash
       run: |
-        if [ "${{ inputs.output_files }}" == "image" ] || [ "${{ inputs.output_files }}" == "both" ]; then
-          IMAGE_ZIPNAME="StockImage_A356E_Oneui${{ inputs.oneui_version }}"
-          echo "IMAGE_ZIPNAME=$IMAGE_ZIPNAME" >> "$GITHUB_ENV"
-        fi
-        
-        if [ "${{ inputs.output_files }}" == "flashable-zip" ] || [ "${{ inputs.output_files }}" == "both" ]; then
+        if [[ "${{ inputs.kernel_build }}" == "stock" ]]; then
           KERNEL_ZIPNAME="StockFlashableKernel_A356E_Oneui${{ inputs.oneui_version }}"
-          echo "KERNEL_ZIPNAME=$KERNEL_ZIPNAME" >> "$GITHUB_ENV"
+        elif [[ "${{ inputs.kernel_build }}" == "guts" ]]; then
+          KERNEL_ZIPNAME="GutsKernel_A356E_Oneui${{ inputs.oneui_version }}"
+        else
+          echo "ERROR: Unknown kernel build: ${{ inputs.kernel_build }}"
+          exit 1
         fi
 
-    - name: Set GutsKernel files name
-      if: inputs.kernel_build == 'guts'
+        echo "KERNEL_ZIPNAME=$KERNEL_ZIPNAME" >> "$GITHUB_ENV"
+
+    - name: Append modifications to kernel zipname
       shell: bash
       run: |
-        KERNEL_ZIPNAME="GutsKernel_A356E_Oneui${{ inputs.oneui_version }}"
-        
-        if [ -n "${{ inputs.lto }}" ]; then
-          KERNEL_ZIPNAME="${KERNEL_ZIPNAME}_${{ inputs.lto }}LTO"
+        if [[ -n "${{ inputs.LinkTO }}" ]]; then
+            KERNEL_ZIPNAME="${KERNEL_ZIPNAME}_${{ inputs.LinkTO }}LTO"
         fi
         
         echo "KERNEL_ZIPNAME=$KERNEL_ZIPNAME" >> "$GITHUB_ENV"
-      
-    - name: Upload Image in Actions
-      if: inputs.kernel_build == 'stock' && (inputs.output_files == 'image' || inputs.output_files == 'both')
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ env.IMAGE_ZIPNAME }}
-        path: ${{ env.KERNEL_DIR }}/arch/arm64/boot/Image
-        compression-level: 9
-        
-    - name: Copy Image file to Anykernel3
-      if: inputs.kernel_build == 'guts' || (inputs.kernel_build == 'stock' && (inputs.output_files == 'flashable-zip' || inputs.output_files == 'both'))
+
+    - name: Copy Image file to AnyKernel3
       shell: bash
       run: |
         cp "$KERNEL_DIR/arch/arm64/boot/Image" "$ANYKERNEL3_DIR"
-        
+
     - name: Upload Kernel in Actions
-      if: inputs.kernel_build == 'guts' || (inputs.kernel_build == 'stock' && (inputs.output_files == 'flashable-zip' || inputs.output_files == 'both'))
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.KERNEL_ZIPNAME }}
