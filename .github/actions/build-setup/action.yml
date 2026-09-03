@@ -58,7 +58,8 @@ runs:
     - name: Clone kernel source
       shell: bash
       run: |
-        ONEUI_VERSION="${BRANCH#oneui}"
+        ONEUI_VERSION="${{ inputs.branch }}"
+        ONEUI_VERSION="${ONEUI_VERSION#oneui}"
 
         echo "One Ui Version: $ONEUI_VERSION"
         echo "ONEUI_VERSION=$ONEUI_VERSION" >> "GITHUB_ENV"
