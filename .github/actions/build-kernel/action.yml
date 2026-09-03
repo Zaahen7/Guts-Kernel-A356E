@@ -2,8 +2,11 @@ name: Build Kernel
 description: Build kernel
 
 inputs:
-    LinkTO:
-        required: true
+  LinkTO:
+    required: true
+
+  branch:
+    required: true
 
 runs:
   using: composite
@@ -11,18 +14,51 @@ runs:
     - name: Build kernel
       shell: bash
       run: |
-        echo Starting Kernel Build...
+        echo "Starting Kernel Build..."
         echo "===== KERNEL INFO ====="
-        echo Kernel Version: $KERNEL_VERSION
-        echo One UI $ONEUI_VERSION
-        
-        cd "$KERNEL_DIR"
-        chmod +x build_kernel.sh
-        
-        if [[ "${{ inputs.lto }}" == "default" ]]; then
-          ./build_kernel.sh
-        else
-          LTO="${{ inputs.lto }}" ./build_kernel.sh
-        fi
-        
+        echo "Kernel Version: $KERNEL_VERSION"
+        echo "One UI: $ONEUI_VERSION"
+        echo "Branch: ${{ inputs.branch }}"
+        echo "LTO: ${{ inputs.LinkTO }}"
 
+        cd "$KERNEL_DIR"
+
+        export PATH=$(pwd)/toolchain/clang/host/linux-x86/clang-r450784d/bin:$PATH
+        export PATH=$(pwd)/toolchain/build/kernel/build-tools/path/linux-x86/:$PATH
+
+        export HOSTCFLAGS="-I$(pwd)/toolchain/prebuilts/kernel-build-tools/linux-x86/include -isystem /usr/include"
+
+        export HOSTLDFLAGS="-L $(pwd)/toolchain/prebuilts/kernel-build-tools/linux-x86/lib64 \
+            -Wl,-rpath,$(pwd)/toolchain/prebuilts/kernel-build-tools/linux-x86/lib64 \
+            -fuse-ld=lld --rtlib=compiler-rt"
+
+        export DTC_FLAGS="-@"
+        export PLATFORM_VERSION=13
+        export ANDROID_MAJOR_VERSION=t
+        export LLVM=1
+        export DEPMOD=depmod
+        export ARCH=arm64
+        export TARGET_SOC=s5e8835
+
+        if [[ "${{ inputs.branch }}" == "oneui8.5" ]]; then
+          export BUILD_NUMBER=A356EXXU9DZE8
+        elif [[ "${{ inputs.branch }}" == "oneui8" ]]; then
+          export BUILD_NUMBER=A356EXXS5CYJ1
+        else
+          echo "Error: Unknown branch: ${{ inputs.branch }}"
+          exit 1
+        fi
+
+        echo "BUILD_NUMBER=$BUILD_NUMBER"
+
+        if [[ "${{ inputs.LinkTO }}" == "default" ]]; then
+          make s5e8835-a35xjvxx_defconfig
+          make -j$(nproc) Image
+        else
+          LTO="${{ inputs.LinkTO }}" make s5e8835-a35xjvxx_defconfig
+          LTO="${{ inputs.LinkTO }}" make -j$(nproc) Image
+        fi
+
+        echo "===== LTO CONFIG ====="
+        grep -E 'CONFIG_(LTO|LTO_CLANG)' .config || true
+        echo "======================"
