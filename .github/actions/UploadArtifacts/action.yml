@@ -3,11 +3,17 @@ description: Export kernel files
 
 inputs:
     oneui_version:
-      required: true
+        required: true
     kernel_build:
-      required: true
+        required: true
+
+    #Stock
     output_files:
-      required: false
+        required: false
+
+    #Guts Kernel
+    lto:
+        required: false
 
 runs:
   using: composite
@@ -30,7 +36,7 @@ runs:
       if: inputs.kernel_build == 'guts'
       shell: bash
       run: |
-        KERNEL_ZIPNAME="GutsKernel_A356E_Oneui${{ inputs.oneui_version }}"
+        KERNEL_ZIPNAME="GutsKernel_A356E_Oneui${{ inputs.oneui_version }}_${{ inputs.oneui_version }}LTO"
         echo "KERNEL_ZIPNAME=$KERNEL_ZIPNAME" >> "$GITHUB_ENV"
       
     - name: Upload Image in Actions
