@@ -1,5 +1,5 @@
-name: Apply Link Time Optimization
-description: Apply selected modifications to kernel
+name: Link Time Optimization
+description: Apply Full LTO
 
 inputs:
   lto:
