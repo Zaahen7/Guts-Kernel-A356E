@@ -102,6 +102,7 @@ jobs:
         with:
           oneui_version: "8"
           kernel_build: "guts"
+          lto: ${{ inputs.lto }}
           
   build_oneui8-5:
     name: GutsKernel for A356E Oneui 8.5
@@ -153,6 +154,7 @@ jobs:
         with:
           oneui_version: "8-5"
           kernel_build: "guts"
+          lto: ${{ inputs.lto }}
 
   Upload2Release:
     name: Upload Artifacs to Release
