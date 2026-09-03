@@ -1,4 +1,4 @@
-name: Apply Kernel Modifications
+name: Apply Link Time Optimization
 description: Apply selected modifications to kernel
 
 inputs:
@@ -8,7 +8,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Link Time Optimization
+    - name: Applying Full LTO
       if: inputs.lto == 'full'
       shell: bash
       run: |
