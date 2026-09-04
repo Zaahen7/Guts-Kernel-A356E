@@ -11,6 +11,8 @@ inputs:
   # Kernel Modifications
       LinkTO:
         required: false
+      ksun_branch:
+        required: false
 
 runs:
   using: composite
@@ -34,6 +36,9 @@ runs:
       run: |
         if [[ -n "${{ inputs.LinkTO }}" ]]; then
             KERNEL_ZIPNAME="${KERNEL_ZIPNAME}_${{ inputs.LinkTO }}LTO"
+        fi
+        if [[ -n "${{ inputs.ksun_branch }}" ]]; then
+            KERNEL_ZIPNAME="${KERNEL_ZIPNAME}_KSUN-${{ inputs.ksun_branch }}"
         fi
         
         echo "KERNEL_ZIPNAME=$KERNEL_ZIPNAME" >> "$GITHUB_ENV"
