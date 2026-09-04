@@ -34,12 +34,13 @@ on:
           default: all
   
     # Kernel Modifications
-        lto:
-          description: "Choose LTO build"
+        LinkTO:
+          description: "Choose LTO Mode"
           required: true
           type: choice
           options:
             - default
+            - thin
             - full
           default: full
 
@@ -52,6 +53,62 @@ defaults:
     shell: bash
 
 jobs:
+  build:
+    name: |
+      GutsKernel One UI
+      ${{
+        matrix.branch == 'oneui8' && '8' ||
+        matrix.branch == 'oneui8.5' && '8.5'
+      }}
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      matrix:
+        branch: >-
+          ${{ fromJSON(inputs.oneui_version == 'all' &&
+          '["oneui8","oneui8.5"]' || format('["{0}"]', inputs.oneui_version)) }}
+    env:
+      KERNEL_DIR: ${{ github.workspace }}/A356E-Kernel
+      TOOLCHAIN_DIR: ${{ github.workspace }}/A356E-toolchain
+      ANYKERNEL3_DIR: ${{ github.workspace }}/A356E-Anykernel3
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare to build
+        uses: ./.github/actions/build-setup
+        with:
+          repos_token: ${{ secrets.REPOS_TOKEN }}
+          branch: ${{ matrix.branch }}
+          free_diskspace: true
+
+      - name: Setup Swap Memory
+        uses: ./.github/actions/SetupSwapMemory
+        with:
+          LinkTO: ${{ inputs.LinkTO }}
+
+      - name: Apply Kernel Modifications
+        uses: ./.github/actions/modify-kernel
+        with:
+          LinkTO: ${{ inputs.LinkTO }}
+
+      - name: Build Kernel
+        uses: ./.github/actions/build-kernel
+        with:
+          LinkTO: ${{ inputs.LinkTO }}
+
+      - name: Upload files to artifacts
+        uses: ./.github/actions/UploadArtifacts
+        with:
+          oneui_version: ${{ env.ONEUI_VERSION }}
+          kernel_build: "stock"
+
+          #Modifications
+          LinkTO: ${{ inputs.LinkTO }}
+      
   build_oneui8:
     name: GutsKernel Oneui 8
     if: inputs.oneui_version == 'oneui8' || inputs.oneui_version == 'all'
