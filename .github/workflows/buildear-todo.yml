@@ -129,8 +129,8 @@ jobs:
 
           #Kernel Modifications
           LinkTO: ${{ matrix.lto }}
-          ksu_variant: ${{ inputs.ksu_variant }}
           ksun_branch: ${{ inputs.ksun_branch }}
+          
   Upload2Release:
     name: Upload Artifacts to Release
     needs: build
