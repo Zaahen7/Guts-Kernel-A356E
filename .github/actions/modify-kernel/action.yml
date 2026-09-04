@@ -1,11 +1,13 @@
-name: Link Time Optimization
-description: Apply LTO Mode
-
+name: Apply kernel Modifications
+description: Apply kernel mods
 inputs:
   LinkTO:
     required: true
   ksu_variant:
     required: true
+  ksun_branch:
+    required: false
+    default: stable
 
 runs:
   using: composite
@@ -50,4 +52,8 @@ runs:
       shell: bash
       run: |
         cd "$KERNEL_DIR"
-        curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s dev
+        if [[ "${{ inputs.ksun_branch }}" == "dev" ]]; then
+          curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s dev
+        else
+          curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s stable
+        fi
