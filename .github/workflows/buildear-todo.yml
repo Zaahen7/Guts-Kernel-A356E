@@ -79,7 +79,6 @@ jobs:
         with:
           repos_token: ${{ secrets.REPOS_TOKEN }}
           branch: ${{ matrix.branch }}
-          kernel_build: "stock"
           free_diskspace: true
 
       - name: Setup Swap Memory
