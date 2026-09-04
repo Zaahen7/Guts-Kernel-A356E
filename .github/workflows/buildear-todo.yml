@@ -74,6 +74,7 @@ jobs:
         matrix.branch == 'oneui8.5' && '8.5'
       }}
       - ${{ matrix.lto }} LTO
+      - KSUN: ${{ matrix.ksun_branch }}
 
     runs-on: ubuntu-latest
 
