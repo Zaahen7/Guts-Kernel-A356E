@@ -18,7 +18,6 @@ runs:
         echo "===== KERNEL INFO ====="
         echo "Kernel Version: ${{ env.KERNEL_VERSION }}"
         echo "One UI: ${{ env.ONEUI_VERSION }}"
-        echo "Branch: ${{ inputs.branch }}"
         echo "LTO: ${{ inputs.LinkTO }}"
 
         cd "$KERNEL_DIR"
