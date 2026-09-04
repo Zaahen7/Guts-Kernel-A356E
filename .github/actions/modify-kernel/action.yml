@@ -46,14 +46,59 @@ runs:
         echo "===== LTO CONFIG RESULT ====="
         grep -E 'CONFIG_(LTO|LTO_CLANG)' "$A35_DEFCONFIG" || true
         echo "============================="
-
+        
     - name: Add Kernel SU Next
       if: inputs.ksu_variant == 'ksu-next'
       shell: bash
       run: |
+        set -euo pipefail
+
+        echo "===== KERNELSU-NEXT CONFIGURATION ====="
+        echo "Kernel directory: $KERNEL_DIR"
+        echo "Kernel version: ${KERNEL_VERSION:-unknown}"
+        echo "Defconfig: $A35_DEFCONFIG"
+        echo "KernelSU-Next branch: ${{ inputs.ksun_branch }}"
+
         cd "$KERNEL_DIR"
+
+        # Install KernelSU-Next
         if [[ "${{ inputs.ksun_branch }}" == "dev" ]]; then
-          curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s dev
+          curl -LSs \
+            "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" \
+            | bash -s dev
         else
-          curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s stable
+          curl -LSs \
+            "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" \
+            | bash -s "${{ inputs.ksun_branch }}"
         fi
+
+        echo "===== KERNELSU-NEXT INSTALLED ====="
+
+        # Enable KernelSU in A356E defconfig
+        "$KERNEL_DIR/scripts/config" \
+          --file "$A35_DEFCONFIG" \
+          --enable CONFIG_KSU
+
+        # KPROBES hook disabled for Samsung 5.15
+        "$KERNEL_DIR/scripts/config" \
+          --file "$A35_DEFCONFIG" \
+          --disable CONFIG_KSU_KPROBES_HOOK
+
+        echo "===== KERNELSU CONFIGURATION ====="
+        grep -E '^CONFIG_KSU' "$A35_DEFCONFIG" || true
+
+        # Verify installation
+        if [[ ! -d "$KERNEL_DIR/KernelSU-Next" ]]; then
+          echo "ERROR: KernelSU-Next was not installed"
+          exit 1
+        fi
+
+        if [[ ! -L "$KERNEL_DIR/drivers/kernelsu" ]]; then
+          echo "ERROR: drivers/kernelsu symlink was not created"
+          exit 1
+        fi
+
+        echo "KernelSU-Next installed successfully."
+        echo "KSU path: $KERNEL_DIR/KernelSU-Next"
+        echo "KSU link: $(readlink "$KERNEL_DIR/drivers/kernelsu")"
+        echo "====================================="
