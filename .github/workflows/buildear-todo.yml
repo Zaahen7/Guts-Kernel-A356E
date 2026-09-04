@@ -87,6 +87,9 @@ jobs:
         with:
           LinkTO: ${{ matrix.lto }}
 
+      - name: Prepare kernel to modifications
+        uses: ./.github/actions/desactivate-securities
+        
       - name: Apply LTO Configs
         uses: ./.github/actions/modify-kernel
         with:
