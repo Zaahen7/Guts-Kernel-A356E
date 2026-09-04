@@ -13,13 +13,13 @@ runs:
       run: |
         echo "===== LTO CONFIGURATION ====="
         echo "LTO mode: ${{ inputs.LinkTO }}"
-        echo "Defconfig: $DEFCONFIG"
+        echo "Defconfig: $A35_DEFCONFIG"
         
         if [[ "${{ inputs.LinkTO }}" == "full" ]]; then
           echo "Enabling Full LTO..."
         
           "$KERNEL_DIR/scripts/config" \
-            --file "$DEFCONFIG" \
+            --file "$A35_DEFCONFIG" \
             --enable CONFIG_LTO_CLANG \
             --disable CONFIG_LTO_NONE \
             --disable CONFIG_LTO_CLANG_THIN \
@@ -29,7 +29,7 @@ runs:
           echo "Enabling Thin LTO..."
         
           "$KERNEL_DIR/scripts/config" \
-            --file "$DEFCONFIG" \
+            --file "$A35_DEFCONFIG" \
             --enable CONFIG_LTO_CLANG \
             --disable CONFIG_LTO_NONE \
             --disable CONFIG_LTO_CLANG_FULL \
@@ -40,5 +40,5 @@ runs:
         fi
         
         echo "===== LTO CONFIG RESULT ====="
-        grep -E 'CONFIG_(LTO|LTO_CLANG)' "$DEFCONFIG" || true
+        grep -E 'CONFIG_(LTO|LTO_CLANG)' "$A35_DEFCONFIG" || true
         echo "============================="
