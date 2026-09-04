@@ -71,13 +71,15 @@ runs:
           https://github.com/Zaahen7/A356E-KernelSources.git \
           "$KERNEL_DIR"
       
-    - name: Extract kernel version
+    - name: Extract kernel version & define DEFCONFIG
       shell: bash
       run: |
         KERNEL_VERSION=$(make -s -C "$KERNEL_DIR" kernelversion)
 
         echo "Kernel version: $KERNEL_VERSION"
         echo "KERNEL_VERSION=$KERNEL_VERSION" >> "$GITHUB_ENV"
+
+        echo "A35_DEFCONFIG=$KERNEL_DIR/arch/arm64/configs/s5e8835-a35xjvxx_defconfig" >> "$GITHUB_ENV"
       
     - name: Samsung Toolchain Setup
       shell: bash
