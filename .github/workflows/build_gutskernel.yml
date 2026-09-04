@@ -90,6 +90,9 @@ jobs:
         with:
           LinkTO: ${{ inputs.LinkTO }}
 
+      - name: Prepare kernel for modifications
+        uses: ./.github/actions/desactivate-securities
+
       - name: Apply Kernel Modifications
         uses: ./.github/actions/modify-kernel
         with:
