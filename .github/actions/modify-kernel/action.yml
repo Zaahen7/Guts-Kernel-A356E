@@ -4,6 +4,8 @@ description: Apply LTO Mode
 inputs:
   LinkTO:
     required: true
+  ksu_variant:
+    required: true
 
 runs:
   using: composite
@@ -42,3 +44,10 @@ runs:
         echo "===== LTO CONFIG RESULT ====="
         grep -E 'CONFIG_(LTO|LTO_CLANG)' "$A35_DEFCONFIG" || true
         echo "============================="
+
+    - name: Add Kernel SU Next
+      if: inputs.ksu_variant == 'ksu-next'
+      shell: bash
+      run: |
+        cd "$KERNEL_DIR"
+        curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s dev
