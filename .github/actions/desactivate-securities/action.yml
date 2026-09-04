@@ -46,3 +46,9 @@ runs:
         echo "===== SAMSUNG SECURITY CONFIGURATION ====="
         grep -E 'CONFIG_(UH|RKP|SECURITY_DEFEX|PROCA|FIVE|KDP)' "$A35_DEFCONFIG" || true
         echo "==========================================="
+        
+    - name: Remove check_defconfig
+      shell: bash
+      run: |
+       cd "$KERNEL_DIR"
+       sed -i 's/check_defconfig//' ./build.config.gki
