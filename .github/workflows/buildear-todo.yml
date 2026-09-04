@@ -63,7 +63,7 @@ jobs:
       fail-fast: false
       matrix:
         branch: ${{ fromJSON(inputs.oneui_version == 'all' && '["oneui8","oneui8.5"]' || format('["{0}"]', inputs.oneui_version)) }}
-        lto: ${{ fromJSON(inputs.LinkTO == 'all' && '["default","thin","full"]' || format('["{0}"]', inputs.LinkTO)) }}
+        lto: ${{ fromJSON(inputs.LinkTO == 'all' && '["thin","full"]' || format('["{0}"]', inputs.LinkTO)) }}
 
     env:
       KERNEL_DIR: ${{ github.workspace }}/A356E-Kernel
