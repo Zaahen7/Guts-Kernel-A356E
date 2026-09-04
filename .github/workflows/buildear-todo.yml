@@ -111,9 +111,9 @@ jobs:
       - name: Apply Kernel Modifications
         uses: ./.github/actions/modify-kernel
         with:
-          LinkTO: ${{ inputs.LinkTO }}
+          LinkTO: ${{ matrix.lto }}
           ksu_variant: ${{ inputs.ksu_variant }}
-          ksun_branch: ${{ inputs.ksun_branch }}
+          ksun_branch: ${{ matrix.ksun_branch }}
 
       - name: Build kernel
         uses: ./.github/actions/build-kernel
