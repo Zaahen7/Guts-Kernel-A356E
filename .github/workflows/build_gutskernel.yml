@@ -29,7 +29,7 @@ on:
           type: choice
           options:
             - 8.5
-          default: 8.5
+          default: "8.5"
   
     # Kernel Modifications
         LinkTO:
@@ -63,40 +63,29 @@ defaults:
     shell: bash
 
 jobs:
-  build:
-    name: |
-      GutsKernel One UI
-      ${{
-        matrix.branch == 'oneui8' && '8' ||
-        matrix.branch == 'oneui8.5' && '8.5'
-      }}
-
+  build-kernel:
+    name: GutsKernel One UI ${{ inputs.oneui_version }}
     runs-on: ubuntu-latest
 
-    strategy:
-      fail-fast: true
-      matrix:
-        branch: >-
-          ${{ fromJSON(inputs.oneui_version == 'all' &&
-          '["oneui8","oneui8.5"]' || format('["{0}"]', inputs.oneui_version)) }}
     env:
-      KERNEL_DIR: ${{ github.workspace }}/A356E-Kernel
-      TOOLCHAIN_DIR: ${{ github.workspace }}/A356E-toolchain
-      ANYKERNEL3_DIR: ${{ github.workspace }}/A356E-Anykernel3
+      KERNEL_DIR: ${{ github.workspace }}/GutsKernel
+      TOOLCHAIN_DIR: ${{ github.workspace }}/Toolchain
+      ANYKERNEL3_DIR: ${{ github.workspace }}/Anykernel3
+      ONEUI_VERSION: ${{ inputs.oneui_version }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Prepare to build
-        uses: ./.github/actions/build-setup
+        uses: ./.github/actions/1-build-setup
         with:
           repos_token: ${{ secrets.REPOS_TOKEN }}
-          branch: ${{ matrix.branch }}
+          branch: oneui$ONEUI_VERSION
           free_diskspace: true
 
       - name: Setup Swap Memory
-        uses: ./.github/actions/SetupSwapMemory
+        uses: ./.github/actions/2-SetupSwapMemory
         with:
           LinkTO: ${{ inputs.LinkTO }}
 
