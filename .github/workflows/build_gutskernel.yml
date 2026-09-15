@@ -24,12 +24,12 @@ on:
             default: Actions
       
         oneui_version:
-          description: "One UI version"
+          description: "One UI version to build"
           required: true
           type: choice
           options:
-            - One UI 8.5
-          default: One UI 8.5
+            - 8.5
+          default: 8.5
   
     # Kernel Modifications
         LinkTO:
@@ -43,7 +43,7 @@ on:
           default: Full
 
         kernel_variant:
-          description: "Choose Root Variant"
+          description: "Choose Kernel Variant"
           required: true
           type: choice
           options:
