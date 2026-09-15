@@ -47,10 +47,10 @@ on:
           required: true
           type: choice
           options:
-            - Puck
-            - Zodd
-            - Femto
-            - Griff
+            - Puck (Clean)
+            - Zodd (Ksu+Susfs)
+            - Femto (Ksu-next+Susfs)
+            - Griff (Resukisu+Susfs
             - All
           default: All
 
