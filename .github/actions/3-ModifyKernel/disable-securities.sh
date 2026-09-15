@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 echo "===== DISABLING SAMSUNG SECURITY FEATURES ====="
 "$KERNEL_DIR/scripts/config" \
