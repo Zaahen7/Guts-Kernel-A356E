@@ -89,11 +89,8 @@ jobs:
         with:
           LinkTO: ${{ inputs.LinkTO }}
 
-      - name: Prepare kernel for modifications
-        uses: ./.github/actions/desactivate-securities
-
       - name: Apply Kernel Modifications
-        uses: ./.github/actions/modify-kernel
+        uses: ./.github/actions/3-ModifyKernel
         with:
           LinkTO: ${{ inputs.LinkTO }}
           ksu_variant: ${{ inputs.ksu_variant }}
