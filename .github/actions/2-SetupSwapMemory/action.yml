@@ -15,13 +15,13 @@ runs:
         SWAPFILE="/swapfile"
 
         case "${{ inputs.LinkTO }}" in
-          full)
+          Full)
             SWAP_SIZE="25G"
             ;;
-          thin)
+          Thin)
             SWAP_SIZE="12G"
             ;;
-          default)
+          Default)
             SWAP_SIZE="8G"
             ;;
           *)
