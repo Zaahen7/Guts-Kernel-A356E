@@ -58,11 +58,7 @@ runs:
     - name: Clone kernel source
       shell: bash
       run: |
-        ONEUI_VERSION="${{ inputs.branch }}"
-        ONEUI_VERSION="${ONEUI_VERSION#oneui}"
-
         echo "One Ui Version: $ONEUI_VERSION"
-        echo "ONEUI_VERSION=$ONEUI_VERSION" >> "$GITHUB_ENV"
 
         echo "Cloning One UI $ONEUI_VERSION kernel source..."
         git clone --depth 1 \
@@ -75,13 +71,12 @@ runs:
       shell: bash
       run: |
         KERNEL_VERSION=$(make -s -C "$KERNEL_DIR" kernelversion)
-
         echo "Kernel version: $KERNEL_VERSION"
         echo "KERNEL_VERSION=$KERNEL_VERSION" >> "$GITHUB_ENV"
 
         echo "A35_DEFCONFIG=$KERNEL_DIR/arch/arm64/configs/s5e8835-a35xjvxx_defconfig" >> "$GITHUB_ENV"
       
-    - name: Samsung Toolchain Setup
+    - name: Setup Samsung Toolchain
       shell: bash
       run: |
         echo "Cloning Samsung toolchain..."
