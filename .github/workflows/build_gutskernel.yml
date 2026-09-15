@@ -14,43 +14,45 @@ on:
           default: true
           
         release_type:
-            description: "Select the release type"
+            description: "Release type"
             required: true
             type: choice
             options:
-              - actions
-              - prerelease
-              - release
-            default: actions
+              - Actions
+              - Prerelease
+              - Release
+            default: Actions
       
         oneui_version:
-          description: "Select the One UI target to build"
+          description: "One UI version"
           required: true
           type: choice
           options:
-            - oneui8
-            - oneui8.5
-            - all
-          default: all
+            - One UI 8.5
+          default: One UI 8.5
   
     # Kernel Modifications
         LinkTO:
-          description: "Choose LTO Mode"
+          description: "Link Time Optimization(LTO) Mode"
           required: true
           type: choice
           options:
-            - default
-            - thin
-            - full
-          default: full
+            - Default
+            - Thin
+            - Full
+          default: Full
 
-        ksu_variant:
+        kernel_variant:
           description: "Choose Root Variant"
           required: true
           type: choice
           options:
-            - ksu-next
-          default: ksu-next
+            - Puck
+            - Zodd
+            - Femto
+            - Griff
+            - All
+          default: All
 
 concurrency:
     group: build-kernels-${{ github.ref }}
