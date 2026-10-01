@@ -49,9 +49,9 @@ on:
           type: choice
           options:
             - Puck / Clean
-            - Zodd
-            - Femto
-            - Griff
+            - Zodd / KSU
+            - Femto / KSU-Next
+            - Zoro / Resuki-SU
             - All
           default: All
 
