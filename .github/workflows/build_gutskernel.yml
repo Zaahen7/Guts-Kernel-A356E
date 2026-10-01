@@ -7,30 +7,6 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-        skip-build:
-          description: "Skip kernel compilation and use test Image"
-          type: boolean
-          default: true
-          
-        release-type:
-            description: "Release type"
-            required: true
-            type: choice
-            options:
-              - Actions
-              - Prerelease
-              - Release
-            default: Actions
-      
-        oneui-version:
-          description: "One UI Version"
-          required: true
-          type: choice
-          options:
-            - 8.5
-            - 8
-          default: "8.5"
-
         puck-variant:
           description: "Kernel Variants to build"
           required: true
@@ -53,6 +29,20 @@ on:
           description: "Zoro / Resuki-SU"
           type: boolean
           default: true
+
+          
+
+      
+        oneui-version:
+          description: "One UI Version"
+          required: true
+          type: choice
+          options:
+            - 8.5
+            - 8
+          default: "8.5"
+
+
           
 
     # Kernel Modifications
@@ -90,7 +80,21 @@ on:
           description: "Enable Battery Tweaks"
           type: boolean
           default: true
-
+          
+        release-type:
+            description: "Release type"
+            required: true
+            type: choice
+            options:
+              - Actions
+              - Prerelease
+              - Release
+            default: Actions
+            
+        skip-build:
+          description: "Use test Image to test workflow"
+          type: boolean
+          default: true
 concurrency:
     group: build-kernels-${{ github.ref }}
     cancel-in-progress: false
