@@ -4,7 +4,7 @@ description: Modify Kernel
 inputs:
   kernel-patches:
     description: "Apply optimization patches"
-  enable-susfs:
+  susfs:
     description: "Enable SUSFS"
   enable-bbg:
     description: "Enable Baseband Guard"
@@ -19,23 +19,85 @@ runs:
     - name: Disable Samsung security features
       shell: bash
       run: |
-        echo "===== DISABLING SAMSUNG SECURITY FEATURES ====="
+        echo "Disabling Samsung security features..."
         "$KERNEL_DIR/scripts/config" \
-          --file "$A35_DEFCONFIG" \
-          --disable CONFIG_UH \  #Samsung Unified Hypervisor
-          --disable CONFIG_RKP \  #Real-time Kernel Protection 
-          --disable CONFIG_KDP \  #Samsung Kernel Data Protection
-          --disable CONFIG_SECURITY_DEFEX \ #Samsung exploit and privilege-escalation protection
-          --disable CONFIG_FIVE \ #Samsung process and file integrity protection
-          --disable CONFIG_PROCA  #Samsung process and file integrity protection
+          --file "$DEFCONFIG" \
+          --disable CONFIG_UH \
+          --disable CONFIG_RKP \
+          --disable CONFIG_KDP \
+          --disable CONFIG_SECURITY_DEFEX \
+          --disable CONFIG_FIVE \
+          --disable CONFIG_PROCA
+        echo "Done :v"
+        echo "Disabling check defconfig..."
+        sed -i 's/check_defconfig//' ./build.config.gki
+        echo "Done :v"
 
-        echo ""
-        echo "===== SAMSUNG SECURITY CONFIGURATION ====="
-        grep -E 'CONFIG_(UH|RKP|SECURITY_DEFEX|PROCA|FIVE|KDP)' "$A35_DEFCONFIG" || true
-        echo "==========================================="
-        
-    - name: Remove check_defconfig
+    - name: Install KernelSU variant
       shell: bash
       run: |
-       cd "$KERNEL_DIR"
-       sed -i 's/check_defconfig//' ./build.config.gki
+        
+        
+    - name: Enable SUSFS
+      shell: bash
+      env:
+        SUSFS_DIR: ${{ github.workspace }}/susfs4ksu
+        SUSFS_REPO: "https://gitlab.com/simonpunk/susfs4ksu.git"
+        STABLECOMMIT: "23d85d2278f3e481644f809053868b6153715583"
+      run: |
+        if 
+        echo "Installing SUSFS..."
+        rm -rf "$SUSFS_DIR"
+        mkdir "$SUSFS_DIR"
+        cd "$SUSFS_DIR"
+
+        case "${{ inputs.susfs }}" in
+          Disabled)
+            echo "SUSFS disabled"
+            exit 0
+            ;;
+        
+          Stable)
+            echo "Using stable SUSFS"
+            git init
+            git remote add origin "$SUSFS_REPO"
+            git fetch --depth=1 origin "$SUSFS_STABLECOMMIT"
+            git checkout FETCH_HEAD
+            ;;
+        
+          Latest)
+            echo "Using latest SUSFS"
+            git clone --depth=1 -b "gki-android13-5.15" "$SUSFS_REPO" "$SUSFS_DIR"
+            ;;
+        
+          *)
+            echo "Error: Unknown SUSFS option: ${{ inputs.susfs }}"
+            exit 1
+            ;;
+        esac
+        
+        cp -v "$SUSFS_DIR/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch" "$KERNEL_DIR/KernelSU/"
+        cp -v "$SUSFS_DIR/kernel_patches/50_add_susfs_in_gki-android13-5.15.patch" "$KERNEL_DIR"
+        cp -v "$SUSFS_DIR/kernel_patches/fs/"*.c "$KERNEL_DIR/fs/"
+        cp -v "$SUSFS_DIR/kernel_patches/include/linux/"*.h "$KERNEL_DIR/include/linux/"
+
+        cd "$KERNEL_DIR/KernelSU"
+        patch -p1 < "10_enable_susfs_for_ksu.patch"
+
+        cd "$KERNEL_DIR"
+        patch -p1 < "$KOpts/susfs_prepare_a35_1ui85.patch"
+
+        echo "Adjusting namespace.c context on SUSFS patch"
+        sed -i '/^ \tnew = copy_tree(old, old->mnt\.mnt_root, copy_flags);$/{
+            N
+            N
+            /^ \tnew = copy_tree(old, old->mnt\.mnt_root, copy_flags);\n \tif (IS_ERR(new)) {\n \t\tnamespace_unlock();$/c\
+         #ifdef CONFIG_KDP_NS\
+         \tnew = copy_tree(old, ((struct kdp_mount *)old)->mnt->mnt_root, copy_flags);\
+         #else
+        }' "$KERNEL_DIR/50_add_susfs_in_gki-android13-5.15.patch"
+        echo "Success editing SUSFS patch"
+
+        patch -p1 < "50_add_susfs_in_gki-android13-5.15.patch"
+        "$KERNEL_DIR/scripts/config" --file "$A35_DEFCONFIG" --enable CONFIG_KSU_SUSFS
+        echo "SUSFS Installed."
