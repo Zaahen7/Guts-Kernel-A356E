@@ -1,9 +1,9 @@
 # Workflow made by @Zaahen7
-name: Build GutsKernel for A356E
+name: Build GutsKernel
 permissions:
   contents: write
   actions: write
-
+  
 on:
   workflow_dispatch:
     inputs:
@@ -14,7 +14,7 @@ on:
           options:
             - Puck / Clean (Needed)
           default: Puck / Clean (Needed)
-
+          
         zodd-variant:
           description: "Zodd / KernelSU from tiann"
           type: boolean
@@ -24,12 +24,12 @@ on:
           description: "Femto / KernelSU-Next"
           type: boolean
           default: true
-
+          
         zoro-variant:
           description: "Zoro / Resuki-SU"
           type: boolean
           default: true
-
+          
         oneui-version:
           description: "One UI Version"
           required: true
@@ -38,7 +38,7 @@ on:
             - 8.5
             - 8
           default: "8.5"
-          
+
     # Kernel Modifications
         lto-mode:
           description: "Link Time Optimization(LTO) Mode"
@@ -58,22 +58,22 @@ on:
             - None
             - All
           default: All
-
+          
         enable-susfs:
           description: "Enable SUSFS"
           type: boolean
           default: true
-
+          
         enable-bbg:
           description: "Enable Baseband Guard"
           type: boolean
           default: true
-
+          
         enable-netsch:
           description: "Enable more NET schedulers"
           type: boolean
           default: true
-
+          
         enable-bbrv3:
           description: "Add BBR & BBRv3"
           type: boolean
@@ -93,9 +93,9 @@ on:
           description: "Use test Image to test workflow"
           type: boolean
           default: true
-          
+
 concurrency:
-    group: build-kernels-${{ github.ref }}
+    group: gutskernels-${{ github.ref }}
     cancel-in-progress: false
 
 defaults:
@@ -104,14 +104,14 @@ defaults:
 
 jobs:
   build-kernel:
-    name: GutsKernel One UI ${{ inputs.oneui_version }}
+    name: GutsKernel One UI ${{ inputs.oneui-version }}
     runs-on: ubuntu-latest
-
+    
     env:
       KERNEL_DIR: ${{ github.workspace }}/GutsKernel
       TOOLCHAIN_DIR: ${{ github.workspace }}/Toolchain
       ANYKERNEL3_DIR: ${{ github.workspace }}/Anykernel3
-      ONEUI_VERSION: ${{ inputs.oneui_version }}
+      ONEUI_VERSION: ${{ inputs.oneui-version }}
 
     steps:
       - name: Checkout repository
@@ -121,7 +121,6 @@ jobs:
         uses: ./.github/actions/1-build-setup
         with:
           repos_token: ${{ secrets.REPOS_TOKEN }}
-          branch: oneui$ONEUI_VERSION
           free_diskspace: true
 
       - name: Setup Swap Memory
