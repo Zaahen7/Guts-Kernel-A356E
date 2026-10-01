@@ -99,5 +99,5 @@ runs:
         echo "Success editing SUSFS patch"
 
         patch -p1 < "50_add_susfs_in_gki-android13-5.15.patch"
-        "$KERNEL_DIR/scripts/config" --file "$A35_DEFCONFIG" --enable CONFIG_KSU_SUSFS
+        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_KSU_SUSFS
         echo "SUSFS Installed."
