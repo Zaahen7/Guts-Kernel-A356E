@@ -9,11 +9,10 @@ on:
     inputs:
         skip-build:
           description: "Skip kernel compilation and use test Image"
-          required: true
           type: boolean
           default: true
           
-        release_type:
+        release-type:
             description: "Release type"
             required: true
             type: choice
@@ -23,7 +22,7 @@ on:
               - Release
             default: Actions
       
-        oneui_version:
+        oneui-version:
           description: "One UI Version"
           required: true
           type: choice
@@ -32,7 +31,7 @@ on:
             - 8
           default: "8.5"
 
-        puck_variant:
+        puck-variant:
           description: "Kernel Variants to build"
           required: true
           type: choice
@@ -40,29 +39,26 @@ on:
             - Puck / Clean (Needed)
           default: Puck / Clean (Needed)
 
-        zodd_variant:
+        zodd-variant:
           description: "Zodd / KernelSU from tiann"
-          required: false
           type: boolean
           default: true
           
-        femto_variant:
+        femto-variant:
           description: "Femto / KernelSU-Next"
-          required: false
           type: boolean
           default: true
 
-        zoro_variant:
+        zoro-variant:
           description: "Zoro / Resuki-SU"
-          required: false
           type: boolean
           default: true
           
 
     # Kernel Modifications
-        LinkTO:
+        lto-mode:
           description: "Link Time Optimization(LTO) Mode"
-          required: false
+          required: true
           type: choice
           options:
             - Default
@@ -70,9 +66,18 @@ on:
             - Full - Recommended
           default: Full - Recommended
 
-        SUSFS:
+        enable-susfs:
           description: "Enable SUSFS"
-          required: true
+          type: boolean
+          default: true
+
+        enable-bbg:
+          description: "Enable Baseband Guard"
+          type: boolean
+          default: true
+        
+        battery-tweaks:
+          description: "Enable Battery Tweaks"
           type: boolean
           default: true
 
