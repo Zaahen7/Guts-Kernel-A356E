@@ -52,7 +52,7 @@ on:
           options:
             - Default
             - Thin
-            - Full
+            - Full - Recommended
           default: Full
 
         SUSFS:
