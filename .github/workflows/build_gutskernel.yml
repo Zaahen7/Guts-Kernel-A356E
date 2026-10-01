@@ -53,7 +53,7 @@ on:
             - Default
             - Thin
             - Full - Recommended
-          default: Full
+          default: Full - Recommended
 
         SUSFS:
           description: "Enable SUSFS"
