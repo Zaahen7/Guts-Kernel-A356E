@@ -31,17 +31,6 @@ on:
             - 8.5
             - 8
           default: "8.5"
-  
-    # Kernel Modifications
-        LinkTO:
-          description: "Link Time Optimization(LTO) Mode"
-          required: true
-          type: choice
-          options:
-            - Default
-            - Thin
-            - Full
-          default: Full
 
         kernel_variant:
           description: "Choose Kernel Variant"
@@ -54,6 +43,23 @@ on:
             - Zoro / Resuki-SU
             - All
           default: All
+
+    # Kernel Modifications
+        LinkTO:
+          description: "Link Time Optimization(LTO) Mode"
+          required: false
+          type: choice
+          options:
+            - Default
+            - Thin
+            - Full
+          default: Full
+
+        SUSFS:
+          description: "Enable SUSFS"
+          required: true
+          type: boolean
+          default: true
 
 concurrency:
     group: build-kernels-${{ github.ref }}
