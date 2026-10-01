@@ -67,17 +67,27 @@ on:
           default: Full - Recommended
 
         enable-susfs:
-          description: "SUSFS"
+          description: "Enable SUSFS"
           type: boolean
           default: true
 
         enable-bbg:
-          description: "Baseband Guard"
+          description: "Enable Baseband Guard"
+          type: boolean
+          default: true
+
+        enable-netsch:
+          description: "Enable more net schedulers"
+          type: boolean
+          default: true
+
+        enable-bbrv3:
+          description: "Add BBR & BBRv3"
           type: boolean
           default: true
         
         battery-tweaks:
-          description: "Battery Tweaks"
+          description: "Enable Battery Tweaks"
           type: boolean
           default: true
 
