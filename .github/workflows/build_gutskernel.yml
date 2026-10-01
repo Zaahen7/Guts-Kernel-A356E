@@ -67,17 +67,17 @@ on:
           default: Full - Recommended
 
         enable-susfs:
-          description: "Enable SUSFS"
+          description: "SUSFS"
           type: boolean
           default: true
 
         enable-bbg:
-          description: "Enable Baseband Guard"
+          description: "Baseband Guard"
           type: boolean
           default: true
         
         battery-tweaks:
-          description: "Enable Battery Tweaks"
+          description: "Battery Tweaks"
           type: boolean
           default: true
 
