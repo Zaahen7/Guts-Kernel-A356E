@@ -32,17 +32,25 @@ on:
             - 8
           default: "8.5"
 
-        kernel_variant:
-          description: "Choose Kernel Variant"
+        puck_variant:
+          description: "Clean Variant (Needed to build other variants)"
           required: true
           type: choice
           options:
+            - Always Build
             - Puck / Clean
             - Zodd / KSU
             - Femto / KSU-Next
             - Zoro / Resuki-SU
             - All
-          default: All
+          default: Always Build
+
+        zodd_variant:
+          description: KernelSU from tiann
+          required: false
+          type: boolean
+          default: true
+          
 
     # Kernel Modifications
         LinkTO:
