@@ -116,19 +116,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+        
       - name: Prepare to build
         uses: ./.github/actions/1-build-setup
         with:
           repos-token: ${{ secrets.REPOS_TOKEN }}
           free-diskspace: true
           lto-mode: ${{ inputs.lto-mode }}
-
-      - name: Setup Swap Memory
-        uses: ./.github/actions/2-SetupSwapMemory
-        with:
-          LinkTO: ${{ inputs.lto-mode }}
-
+          
       - name: Apply Kernel Modifications
         uses: ./.github/actions/3-ModifyKernel
         with:
