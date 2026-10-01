@@ -37,8 +37,8 @@ on:
           required: true
           type: choice
           options:
-            - Always Build (Needed)
-          default: Always Build (Needed)
+            - Puck / Clean (Needed)
+          default: Puck / Clean (Needed)
 
         zodd_variant:
           description: "KernelSU from tiann"
