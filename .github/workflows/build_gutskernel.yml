@@ -60,7 +60,7 @@ on:
             - All
           default: All
           
-        enable-susfs:
+        susfs:
           description: "Enable SUSFS"
           required: true
           type: choice
@@ -134,7 +134,7 @@ jobs:
         uses: ./.github/actions/modify-kernel
         with:
           kernel-patches: ${{ inputs.kernel-patches }}
-          enable-susfs: ${{ inputs.enable-susfs }}
+          susfs: ${{ inputs.susfs }}
           enable-bbg: ${{ inputs.enable-bbg }}
           enable-netsch: ${{ inputs.enable-netsch }}
           enable-bbrv3: ${{ inputs.enable-bbrv3 }}
