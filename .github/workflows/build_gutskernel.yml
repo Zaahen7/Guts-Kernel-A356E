@@ -24,12 +24,12 @@ on:
             default: Actions
       
         oneui_version:
-          description: "Build kernel for"
+          description: "One UI Version"
           required: true
           type: choice
           options:
-            - One ui 8.5
-            - One ui 8
+            - 8.5
+            - 8
           default: "8.5"
   
     # Kernel Modifications
