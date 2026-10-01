@@ -30,9 +30,6 @@ on:
           type: boolean
           default: true
 
-          
-
-      
         oneui-version:
           description: "One UI Version"
           required: true
@@ -41,10 +38,7 @@ on:
             - 8.5
             - 8
           default: "8.5"
-
-
           
-
     # Kernel Modifications
         lto-mode:
           description: "Link Time Optimization(LTO) Mode"
@@ -55,6 +49,15 @@ on:
             - Thin
             - Full - Recommended
           default: Full - Recommended
+          
+        kernel-patches:
+          description: "Apply kernel patches"
+          required: true
+          type: choice
+          options:
+            - None
+            - All
+          default: All
 
         enable-susfs:
           description: "Enable SUSFS"
@@ -95,6 +98,7 @@ on:
           description: "Use test Image to test workflow"
           type: boolean
           default: true
+          
 concurrency:
     group: build-kernels-${{ github.ref }}
     cancel-in-progress: false
