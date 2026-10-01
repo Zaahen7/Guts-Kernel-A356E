@@ -77,7 +77,7 @@ on:
           default: true
 
         enable-netsch:
-          description: "Enable more net schedulers"
+          description: "Enable more NET schedulers"
           type: boolean
           default: true
 
