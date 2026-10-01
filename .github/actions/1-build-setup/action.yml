@@ -29,14 +29,6 @@ runs:
       run: |
         git config --global url."https://x-access-token:${REPOS_TOKEN}@github.com/".insteadOf "https://github.com/"
 
-    - name: Install dependencies
-      shell: bash
-      run: |
-        echo Installing dependencies...
-        sudo apt update
-        sudo apt-get install -y libyaml-dev
-        echo Done :V
-
     - name: Free disk space
       if: ${{ inputs.free_diskspace }}
       uses: endersonmenezes/free-disk-space@v3
@@ -46,71 +38,94 @@ runs:
           remove_haskell: true
           remove_tool_cache: true
           remove_swap: true
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        echo "Installing dependencies..."
+        sudo apt update
+        sudo apt-get install -y libyaml-dev
+        echo "Done :v"
         
     - name: Prepare directories
       shell: bash
       run: |
+        echo "Preparing directories..."
         rm -rf "$KERNEL_DIR" "$TOOLCHAIN_DIR" "$ANYKERNEL3_DIR"
-        echo Creating directories...
         mkdir "$KERNEL_DIR" "$TOOLCHAIN_DIR" "$ANYKERNEL3_DIR"
-        echo Directories created :P
+        echo "Done :v"
         
     - name: Clone kernel source
       shell: bash
+      env:
+        SOURCE: "https://github.com/Zaahen7/A356E-KernelSources.git"
+        BRANCH: "oneui8.5"
+        DIRECTORY: "$KERNEL_DIR"
       run: |
-        echo "One Ui Version: $ONEUI_VERSION"
+        echo "Cloning Kernel Source..."
+        git clone \
+            --depth 1 \
+            --single-branch \
+            --branch "$BRANCH" \
+            "$SOURCE" \
+            "$DIRECTORY"
+        echo "Done :v"
+        
+    - name: Clone Toolchain
+      shell: bash
+      env:
+        SOURCE: "https://github.com/Zaahen7/A356E-toolchain.git"
+        BRANCH: "main"
+        DIRECTORY: "$TOOLCHAIN_DIR"
+      run: |
+        echo "Cloning Toolchain..."
+        git clone \
+            --depth 1 \
+            --single-branch \
+            --branch "$BRANCH" \
+            "$SOURCE" \
+            "$DIRECTORY"
+        echo "Done :v"
 
-        echo "Cloning One UI $ONEUI_VERSION kernel source..."
-        git clone --depth 1 \
-          --single-branch \
-          -b "${{ inputs.branch }}" \
-          https://github.com/Zaahen7/A356E-KernelSources.git \
-          "$KERNEL_DIR"
-      
-    - name: Extract kernel version & define DEFCONFIG
+    - name: Setup Toolchain
       shell: bash
       run: |
-        KERNEL_VERSION=$(make -s -C "$KERNEL_DIR" kernelversion)
-        echo "Kernel version: $KERNEL_VERSION"
-        echo "KERNEL_VERSION=$KERNEL_VERSION" >> "$GITHUB_ENV"
-
-        echo "A35_DEFCONFIG=$KERNEL_DIR/arch/arm64/configs/s5e8835-a35xjvxx_defconfig" >> "$GITHUB_ENV"
-      
-    - name: Setup Samsung Toolchain
-      shell: bash
-      run: |
-        echo "Cloning Samsung toolchain..."
-        git clone --depth 1 \
-          https://github.com/Zaahen7/A356E-toolchain.git \
-          "$TOOLCHAIN_DIR"
-          
-        echo "Extracting .tar.xz files"
+        echo "Toolchain Setup..."
         for archive in "$TOOLCHAIN_DIR"/*.tar.xz; do
           echo "Extracting: $(basename "$archive")"
           tar -xJf "$archive" -C "$TOOLCHAIN_DIR"
           rm -f "$archive"
         done
-
-        echo "Moving toolchain to kernel source..."
         mv "$TOOLCHAIN_DIR/toolchain" "$KERNEL_DIR"
-        echo "Done :P"
+        echo "Done :v"
 
     - name: Clone Anykernel3
       shell: bash
+      env:
+        SOURCE: "https://github.com/Zaahen7/AK3.git"
+        BRANCH: "main"
+        DIRECTORY: "$ANYKERNEL3_DIR"
       run: |
-        echo Cloning anykernel3...
-        git clone --depth 1 \
-          https://github.com/Zaahen7/AK3.git \
-          "$ANYKERNEL3_DIR"
-        echo Done :P
-    
-    - name: Edit update-binary
+        echo "Cloning Anykernel3..."
+        git clone \
+            --depth 1 \
+            --single-branch \
+            --branch "$BRANCH" \
+            "$SOURCE" \
+            "$DIRECTORY"
+        echo "Done :v"
+      
+    - name: Extract kernel version from MAKEFILE
       shell: bash
       run: |
-        UPDATE_BINARY="$ANYKERNEL3_DIR/META-INF/com/google/android/update-binary"
-        
+        KERNEL_VERSION=$(make -s -C "$KERNEL_DIR" kernelversion)
+        echo "Kernel version: $KERNEL_VERSION"
+        echo "KERNEL_VERSION=$KERNEL_VERSION" >> "$GITHUB_ENV"
+    
+    - name: Edit update-binary from Anykernel3
+      shell: bash
+      run: |
         echo "Editing update-binary..."
-        sed -i "s/Zaahen7/$ONEUI_VERSION/g" "$UPDATE_BINARY"
-        sed -i "s/7nehaaZ/$KERNEL_VERSION/g" "$UPDATE_BINARY"
-        
-        echo "update-binary modified successfully."
+        sed -i "s/Zaahen7/$ONEUI_VERSION/g" "$ANYKERNEL3_DIR/META-INF/com/google/android/update-binary"
+        sed -i "s/7nehaaZ/$KERNEL_VERSION/g" "$ANYKERNEL3_DIR/META-INF/com/google/android/update-binary"
+        echo "Done :v"
