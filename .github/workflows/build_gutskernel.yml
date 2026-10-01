@@ -51,7 +51,7 @@ on:
           default: Full - Recommended
           
         kernel-patches:
-          description: "Apply kernel patches"
+          description: "Kernel patches"
           required: true
           type: choice
           options:
