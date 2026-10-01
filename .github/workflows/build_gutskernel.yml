@@ -51,7 +51,7 @@ on:
           default: Full
           
         kernel-patches:
-          description: "Kernel patches"
+          description: "Kernel optimization patches"
           required: true
           type: choice
           options:
