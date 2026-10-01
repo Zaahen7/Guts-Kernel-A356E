@@ -6,18 +6,9 @@ inputs:
         description: "Repository access token"
         required: true
         
-    branch:
-        description: "Kernel Source Branch to clone"
-        required: true
-        
-    kernel_build:
-        description: "Kernel type"
-        required: true
-        
     free_diskspace:
         description: "Enable to free disk space"
         required: true
-
 
 runs:
   using: composite
