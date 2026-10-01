@@ -61,7 +61,7 @@ on:
           default: All
           
         susfs:
-          description: "Enable SUSFS"
+          description: "SUSFS 5.15"
           required: true
           type: choice
           options:
