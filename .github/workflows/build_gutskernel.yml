@@ -47,8 +47,8 @@ on:
           options:
             - Default
             - Thin
-            - Full - Recommended
-          default: Full - Recommended
+            - Full
+          default: Full
           
         kernel-patches:
           description: "Kernel patches"
@@ -95,7 +95,7 @@ on:
           default: true
 
 concurrency:
-    group: gutskernels-${{ github.ref }}
+    group: GutsKernels-${{ github.ref }}
     cancel-in-progress: false
 
 defaults:
@@ -120,18 +120,19 @@ jobs:
       - name: Prepare to build
         uses: ./.github/actions/1-build-setup
         with:
-          repos_token: ${{ secrets.REPOS_TOKEN }}
-          free_diskspace: true
+          repos-token: ${{ secrets.REPOS_TOKEN }}
+          free-diskspace: true
+          lto-mode: ${{ inputs.lto-mode }}
 
       - name: Setup Swap Memory
         uses: ./.github/actions/2-SetupSwapMemory
         with:
-          LinkTO: ${{ inputs.LinkTO }}
+          LinkTO: ${{ inputs.lto-mode }}
 
       - name: Apply Kernel Modifications
         uses: ./.github/actions/3-ModifyKernel
         with:
-          LinkTO: ${{ inputs.LinkTO }}
+          LinkTO: ${{ inputs.lto-mode }}
           ksu_variant: ${{ inputs.ksu_variant }}
 
       - name: Build Kernel
@@ -150,7 +151,7 @@ jobs:
 
   Upload2Release:
     name: Upload Artifacs to Release
-    needs: build
+    needs: build-kernel
     if: |
       inputs.release_type != 'actions' &&
       needs.build.result == 'success'
