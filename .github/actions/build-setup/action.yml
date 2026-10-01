@@ -10,10 +10,6 @@ inputs:
         description: "Enable to free disk space"
         required: true
         
-    lto-mode:
-        description: "LTO mode selected"
-        required: true
-
 runs:
   using: composite
   steps:
@@ -47,7 +43,7 @@ runs:
       run: |
         SWAPFILE="/swapfile"
 
-        case "${{ inputs.lto-mode }}" in
+        case "$LTO_MODE" in
           Full)
             SWAP_SIZE="25G"
             ;;
@@ -58,7 +54,7 @@ runs:
             SWAP_SIZE="8G"
             ;;
           *)
-            echo "Error: Unknown LTO mode: ${{ inputs.lto-mode }}"
+            echo "Error: Unknown LTO mode: $LTO_MODE"
             exit 1
             ;;
         esac
