@@ -41,19 +41,19 @@ on:
           default: Puck / Clean (Needed)
 
         zodd_variant:
-          description: "KernelSU from tiann"
+          description: "Zodd / KernelSU from tiann"
           required: false
           type: boolean
           default: true
           
         femto_variant:
-          description: "KernelSU-Next"
+          description: "Femto / KernelSU-Next"
           required: false
           type: boolean
           default: true
 
         zoro_variant:
-          description: "Resuki-SU"
+          description: "Zoro / Resuki-SU"
           required: false
           type: boolean
           default: true
