@@ -1,5 +1,17 @@
-name: Apply Modifications to kernel
-description: apply mods to kernel
+name: Modify Kernel
+description: Modify Kernel
+
+inputs:
+  kernel-patches:
+    description: "Apply optimization patches"
+  enable-susfs:
+    description: "Enable SUSFS"
+  enable-bbg:
+    description: "Enable Baseband Guard"
+  enable-netsch:
+    description: "Enable more NET schedulers"
+  enable-bbrv3:
+    description: "Enable BBR & BBRv3"
 
 runs:
   using: composite
