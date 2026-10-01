@@ -78,11 +78,6 @@ on:
           description: "Add BBR & BBRv3"
           type: boolean
           default: true
-        
-        battery-tweaks:
-          description: "Enable Battery Tweaks"
-          type: boolean
-          default: true
           
         release-type:
             description: "Release type"
