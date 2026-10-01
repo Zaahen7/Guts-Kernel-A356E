@@ -61,7 +61,7 @@ on:
           default: All
           
         susfs:
-          description: "SUSFS for kernel 5.15"
+          description: "SUSFS"
           required: true
           type: choice
           options:
