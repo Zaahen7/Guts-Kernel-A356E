@@ -38,8 +38,7 @@ on:
             - 8.5
             - 8
           default: "8.5"
-
-    # Kernel Modifications
+        
         lto-mode:
           description: "Link Time Optimization(LTO) Mode"
           required: true
@@ -49,7 +48,9 @@ on:
             - Thin
             - Full
           default: Full
-          
+                  
+# Kernel Modifications
+        
         kernel-patches:
           description: "Kernel optimization patches"
           required: true
@@ -111,6 +112,7 @@ jobs:
       KERNEL_DIR: ${{ github.workspace }}/GutsKernel
       TOOLCHAIN_DIR: ${{ github.workspace }}/Toolchain
       ANYKERNEL3_DIR: ${{ github.workspace }}/Anykernel3
+      LTO_MODE: ${{ inputs.lto-mode }}
       ONEUI_VERSION: ${{ inputs.oneui-version }}
 
     steps:
@@ -125,10 +127,13 @@ jobs:
           lto-mode: ${{ inputs.lto-mode }}
           
       - name: Apply Kernel Modifications
-        uses: ./.github/actions/3-ModifyKernel
+        uses: ./.github/actions/modify-kernel
         with:
-          LinkTO: ${{ inputs.lto-mode }}
-          ksu_variant: ${{ inputs.ksu_variant }}
+          kernel-patches: ${{ inputs.kernel-patches }}
+          enable-susfs: ${{ inputs.enable-susfs }}
+          enable-bbg: ${{ inputs.enable-bbg }}
+          enable-netsch: ${{ inputs.enable-netsch }}
+          enable-bbrv3: ${{ inputs.enable-bbrv3 }}
 
       - name: Build Kernel
         uses: ./.github/actions/build-kernel
