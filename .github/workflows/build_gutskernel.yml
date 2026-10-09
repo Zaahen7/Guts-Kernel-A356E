@@ -122,7 +122,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         
       - name: Prepare to build
         uses: ./.github/actions/build-setup
@@ -142,7 +142,7 @@ jobs:
       - name: Build Kernel
         uses: ./.github/actions/build-kernel
         with:
-          LinkTO: ${{ inputs.LinkTO }}
+          lto-mode: ${{ inputs.lto-mode }}
 
       - name: Upload files to artifacts
         uses: ./.github/actions/UploadArtifacts
@@ -151,14 +151,14 @@ jobs:
           kernel_build: "stock"
 
           #Modifications
-          LinkTO: ${{ inputs.LinkTO }}
+          lto-mode: ${{ inputs.lto-mode }}
 
   Upload2Release:
     name: Upload Artifacs to Release
     needs: build-kernel
     if: |
-      inputs.release_type != 'actions' &&
-      needs.build.result == 'success'
+      inputs.release-type != 'actions' &&
+      needs.build-kernel.result == 'success'
     
     env:
       GH_TOKEN: ${{ github.token }}
@@ -172,7 +172,7 @@ jobs:
       - name: Publish Artifacts to Release
         uses: ./.github/actions/Artifacts2release
         with:
-          prerelease: ${{ inputs.release_type == 'prerelease' }}
+          prerelease: ${{ inputs.release-type == 'prerelease' }}
 
           # Release Details
           release_name: "GutsKernel for A356E"
