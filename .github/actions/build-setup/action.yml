@@ -15,13 +15,13 @@ runs:
   steps:
     - name: Configure Git authentication
       env:
-        REPOS_TOKEN: ${{ inputs.repos_token }}
+        REPOS_TOKEN: ${{ inputs.repos-token }}
       shell: bash
       run: |
         git config --global url."https://x-access-token:${REPOS_TOKEN}@github.com/".insteadOf "https://github.com/"
 
     - name: Free disk space
-      if: ${{ inputs.free_diskspace }}
+      if: ${{ inputs.free-diskspace }}
       uses: endersonmenezes/free-disk-space@v3
       with:
           remove_android: true
