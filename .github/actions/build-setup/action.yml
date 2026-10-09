@@ -2,11 +2,11 @@ name: Prepare to build kernel
 description: Create directories and clone repos that will be used
 
 inputs:
-    repos_token:
+    repos-token:
         description: "Repository access token"
         required: true
         
-    free_diskspace:
+    free-diskspace:
         description: "Enable to free disk space"
         required: true
         
