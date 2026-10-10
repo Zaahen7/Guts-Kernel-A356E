@@ -215,6 +215,8 @@ runs:
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_BBG
         sed -i '/^CONFIG_LSM=/ s/"$/,baseband_guard"/' "$DEFCONFIG"
         sed -i '/^config LSM$/,/^help$/{ /^[[:space:]]*default/ { /baseband_guard/! s/selinux/selinux,baseband_guard/ } }' security/Kconfig
+        echo "CONFIG_LSM after enabling BBG:"
+        grep '^CONFIG_LSM=' "$DEFCONFIG"
     
     - name: Enable more NET schedulers & wireguard
       if: ${{ inputs.enable-netsch }}
@@ -229,7 +231,9 @@ runs:
         
         #WIREGUARD
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_WIREGUARD
-        echo "Done :v"
+        echo "Enabled network scheduler and WireGuard configs:"
+        
+        grep -E '^CONFIG_(NET_SCH_(FQ|FQ_CODEL|PIE|FQ_PIE|CAKE)|WIREGUARD)=' "$DEFCONFIG"
 
     - name: Enable BBR & BBRv3
       if: ${{ inputs.enable-bbrv3 }}
