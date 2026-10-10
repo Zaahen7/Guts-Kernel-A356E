@@ -8,12 +8,12 @@ on:
   workflow_dispatch:
     inputs:
         welcome:
-          description: "Select Kernel variant below:"
+          description: "Workflow Made by @Zaahen7"
           type: choice
           options:
-            - Workflow Made by @Zaahen7
-          default: "Workflow Made by @Zaahen7"
-          required: false
+            - "Select Kernel variant below:"
+          default: "Select Kernel variant below:"
+          required: true
 
         puck-variant:
           description: "Puck / Clean"
@@ -89,7 +89,7 @@ on:
         battery-tweak:
           description: "EXPERIMENTAL battery tweak"
           type: boolean
-          default: true
+          default: false
           
         release-type:
             description: "Release type"
@@ -100,11 +100,6 @@ on:
               - Prerelease
               - Release
             default: Actions
-            
-        skip-build:
-          description: "Use test Image to test workflow"
-          type: boolean
-          default: true
 
 concurrency:
     group: GutsKernels-${{ github.ref }}

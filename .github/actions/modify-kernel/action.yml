@@ -159,7 +159,8 @@ runs:
           # Skip SUSFS patches.
           case "$(basename "$patch")" in
             susfs_prepare_a35_1ui85.patch | \
-            susfs_prepare_a35_1ui8.patch)
+            susfs_prepare_a35_1ui8.patch | \
+            net-tcp-backport-BBRv3-to-android13-5.15.patch)
               continue
               ;;
           esac
@@ -197,6 +198,7 @@ runs:
       if: ${{ inputs.enable-bbrv3 }}
       shell: bash
       run: |
+        patch -p1 < "$KPATCHES_DIR/net-tcp-backport-BBRv3-to-android13-5.15.patch"
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_TCP_CONG_ADVANCED
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_TCP_CONG_BBR
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_TCP_CONG_BBR3
