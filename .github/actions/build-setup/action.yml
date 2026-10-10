@@ -1,11 +1,7 @@
 name: Prepare to build kernel
 description: Create directories and clone repos that will be used
 
-inputs:
-    repos-token:
-        description: "Repository access token"
-        required: true
-        
+inputs:   
     free-diskspace:
         description: "Enable to free disk space"
         required: true
@@ -13,13 +9,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Configure Git authentication
-      env:
-        REPOS_TOKEN: ${{ inputs.repos-token }}
-      shell: bash
-      run: |
-        git config --global url."https://x-access-token:${REPOS_TOKEN}@github.com/".insteadOf "https://github.com/"
-
     - name: Free disk space
       if: ${{ inputs.free-diskspace }}
       uses: endersonmenezes/free-disk-space@v3
@@ -87,7 +76,7 @@ runs:
     - name: Clone kernel source
       shell: bash
       env:
-        SOURCE: "https://github.com/Zaahen7/A356E-KernelSources.git"
+        SOURCE: "https://github.com/Zaahen7/KernelSource-A356E.git"
       run: |
         BRANCH="oneui${ONEUI_VERSION}"
 
@@ -103,7 +92,7 @@ runs:
     - name: Clone Toolchain
       shell: bash
       env:
-        SOURCE: "https://github.com/Zaahen7/A356E-toolchain.git"
+        SOURCE: "https://github.com/Zaahen7/Toolchain-A356E.git"
         BRANCH: "main"
       run: |
         echo "Cloning Toolchain..."

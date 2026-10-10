@@ -144,7 +144,6 @@ jobs:
       - name: Prepare to build
         uses: ./.github/actions/build-setup
         with:
-          repos-token: ${{ secrets.REPOS_TOKEN }}
           free-diskspace: true
      
       - name: Apply Kernel Modifications
