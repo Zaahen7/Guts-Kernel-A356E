@@ -248,8 +248,9 @@ runs:
       if: ${{ inputs.vfs-support }}
       shell: bash
       run: |
+        cd "$KERNEL_DIR"
         echo "Adding VFS support for Hybrid Mount MetaModule..."
-        curl -LSs "https://raw.githubusercontent.com/Hybrid-Mount/meta-hybrid_mount/dev/module/vfs/setup.sh" | bash
+        curl -fLSs "https://raw.githubusercontent.com/Hybrid-Mount/meta-hybrid_mount/dev/module/vfs/setup.sh" | bash
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_HYBRIDMOUNT
         echo "Done :v"
     
