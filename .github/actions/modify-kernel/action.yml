@@ -234,7 +234,10 @@ runs:
     - name: Enable BBR & BBRv3
       if: ${{ inputs.enable-bbrv3 }}
       shell: bash
+      env:
+        KPATCHES_DIR: ${{ github.workspace }}/patches
       run: |
+        cd "$KERNEL_DIR"
         patch -p1 < "$KPATCHES_DIR/net-tcp-backport-BBRv3-to-android13-5.15.patch"
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_TCP_CONG_ADVANCED
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_TCP_CONG_BBR
