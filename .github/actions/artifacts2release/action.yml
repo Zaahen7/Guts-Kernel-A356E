@@ -10,12 +10,45 @@ inputs:
     required: true
   release_tag:
     required: true
-  release_body:
-    required: true
 
 runs:
   using: composite
   steps:
+    - name: Prepare release notes from changelog
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        changelog="$GITHUB_WORKSPACE/CHANGELOG.md"
+        release_notes="$GITHUB_WORKSPACE/release-notes.md"
+
+        if [[ ! -f "$changelog" ]]; then
+          echo "ERROR: Changelog file not found: $changelog"
+          exit 1
+        fi
+
+        awk '
+          /^## v[0-9]/ {
+            sections++
+            if (sections > 5) {
+              exit
+            }
+          }
+          sections > 0 {
+            print
+          }
+          END {
+            if (sections == 0) {
+              exit 1
+            }
+          }
+        ' "$changelog" > "$release_notes" || {
+          echo "ERROR: No versioned release sections found in CHANGELOG.md."
+          exit 1
+        }
+
+        echo "Selected the five most recent version sections from CHANGELOG.md."
+
     - name: Download Artifacts
       shell: bash
       run: |
@@ -58,7 +91,7 @@ runs:
         prerelease: ${{ inputs.prerelease }}
         name: ${{ inputs.release_name }}
         tag_name: ${{ inputs.release_tag }}
-        body: ${{ inputs.release_body }}
+        body_path: ${{ github.workspace }}/release-notes.md
     
     - name: Upload Release Files
       shell: bash

@@ -2,23 +2,31 @@ name: Modify Kernel
 description: Modify Kernel
 
 inputs:
-  kernel-patches:
-    description: "Apply optimization patches"
-  susfs:
+  kernel-variant:
+    description: "Kernel variant"
+  enable-susfs:
     description: "Enable SUSFS"
+  apply-kpatches:
+    description: "Apply optimization patches"
   enable-bbg:
     description: "Enable Baseband Guard"
   enable-netsch:
     description: "Enable more NET schedulers"
   enable-bbrv3:
     description: "Enable BBR & BBRv3"
-
+  vfs-support:
+    description: "Add VFS support for Hybrid Mount MetaModule"
+  battery-tweak:
+    description: "EXPERIMENTAL battery tweak"
 runs:
   using: composite
   steps:
     - name: Disable Samsung security features
       shell: bash
       run: |
+        cd "$KERNEL_DIR"
+        DEFCONFIG="$KERNEL_DIR/arch/arm64/configs/s5e8835-a35xjvxx_defconfig"
+
         echo "Disabling Samsung security features..."
         "$KERNEL_DIR/scripts/config" \
           --file "$DEFCONFIG" \
@@ -29,52 +37,83 @@ runs:
           --disable CONFIG_FIVE \
           --disable CONFIG_PROCA
         echo "Done :v"
+
         echo "Disabling check defconfig..."
-        sed -i 's/check_defconfig//' ./build.config.gki
+        sed -i 's/check_defconfig//' "$KERNEL_DIR/build.config.gki"
         echo "Done :v"
 
     - name: Install KernelSU variant
+      if: ${{ inputs['kernel-variant'] != 'Puck' }}
       shell: bash
-      run: |
-        
+      run: |    
+        case "${{ inputs['kernel-variant'] }}" in
+          Zodd)
+            echo "Zodd variant selected. Installing Stable KernelSU from tiann"
+            cd "$KERNEL_DIR"
+            curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+            ;;
+          Femto)
+            echo "Femto variant selected. Installing Latest KernelSU-Next"
+            cd "$KERNEL_DIR"
+            ;;
+          Zoro)
+            echo "Zoro variant selected. Installing Latest Resuki-SU"
+            cd "$KERNEL_DIR"
+            ;;
+          *)
+            echo "No KernelSU variant selected or unknown variant."
+            ;;
+        esac
         
     - name: Enable SUSFS
+      if: ${{ inputs.enable-susfs }}
       shell: bash
       env:
         SUSFS_DIR: ${{ github.workspace }}/susfs4ksu
         SUSFS_REPO: "https://gitlab.com/simonpunk/susfs4ksu.git"
+        SUSFS_BRANCH: "gki-android13-5.15"
         STABLECOMMIT: "23d85d2278f3e481644f809053868b6153715583"
+        KPATCHES_DIR: ${{ github.workspace }}/patches
+        KERNEL_VARIANT: ${{ inputs['kernel-variant'] }}
       run: |
-        if 
-        echo "Installing SUSFS..."
+        case "${{ inputs['kernel-variant'] }}" in
+          Puck)
+            echo "Puck variant selected. SUSFS is not supported for Puck."
+            exit 0
+            ;;
+          Zodd|Femto|Zoro)
+            echo "Installing SUSFS..."
+            ;;
+          *)
+            echo "Unknown kernel variant: ${{ inputs['kernel-variant'] }}. SUSFS installation skipped."
+            exit 1
+            ;;
+        esac
+
+        if [[ "$ONEUI_VERSION" == "8" && ! -f "$KPATCHES_DIR/susfs_prepare_a35_1ui8.patch" ]]; then
+            echo "ERROR: SUSFS for One UI 8 requires patches/susfs_prepare_a35_1ui8.patch, which is not present."
+            echo "Disable SUSFS or add the One UI 8 compatibility patch before building."
+            exit 1
+        fi
+
+        # Prepare SUSFS directory
         rm -rf "$SUSFS_DIR"
         mkdir "$SUSFS_DIR"
         cd "$SUSFS_DIR"
 
-        case "${{ inputs.susfs }}" in
-          Disabled)
-            echo "SUSFS disabled"
-            exit 0
-            ;;
-        
-          Stable)
-            echo "Using stable SUSFS"
+        if [ "$KERNEL_VARIANT" = "Zodd" ]; then
+            echo "Zodd variant detected. Using stable SUSFS."
             git init
             git remote add origin "$SUSFS_REPO"
-            git fetch --depth=1 origin "$SUSFS_STABLECOMMIT"
+            git fetch --depth=1 origin "$STABLECOMMIT"
             git checkout FETCH_HEAD
-            ;;
-        
-          Latest)
-            echo "Using latest SUSFS"
-            git clone --depth=1 -b "gki-android13-5.15" "$SUSFS_REPO" "$SUSFS_DIR"
-            ;;
-        
-          *)
-            echo "Error: Unknown SUSFS option: ${{ inputs.susfs }}"
-            exit 1
-            ;;
-        esac
+        else
+            echo "${{ inputs['kernel-variant'] }} variant detected. Using latest SUSFS."
+            git init
+            git remote add origin "$SUSFS_REPO"
+            git fetch --depth=1 origin "$SUSFS_BRANCH"
+            git checkout FETCH_HEAD
+        fi
         
         cp -v "$SUSFS_DIR/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch" "$KERNEL_DIR/KernelSU/"
         cp -v "$SUSFS_DIR/kernel_patches/50_add_susfs_in_gki-android13-5.15.patch" "$KERNEL_DIR"
@@ -85,19 +124,97 @@ runs:
         patch -p1 < "10_enable_susfs_for_ksu.patch"
 
         cd "$KERNEL_DIR"
-        patch -p1 < "$KOpts/susfs_prepare_a35_1ui85.patch"
-
-        echo "Adjusting namespace.c context on SUSFS patch"
-        sed -i '/^ \tnew = copy_tree(old, old->mnt\.mnt_root, copy_flags);$/{
-            N
-            N
-            /^ \tnew = copy_tree(old, old->mnt\.mnt_root, copy_flags);\n \tif (IS_ERR(new)) {\n \t\tnamespace_unlock();$/c\
-         #ifdef CONFIG_KDP_NS\
-         \tnew = copy_tree(old, ((struct kdp_mount *)old)->mnt->mnt_root, copy_flags);\
-         #else
-        }' "$KERNEL_DIR/50_add_susfs_in_gki-android13-5.15.patch"
-        echo "Success editing SUSFS patch"
+        if [ "$ONEUI_VERSION" = "8.5" ]; then
+            patch -p1 < "$KPATCHES_DIR/susfs_prepare_a35_1ui85.patch"
+            echo "Adjusting namespace.c context on SUSFS patch"
+            sed -i '/^ \tnew = copy_tree(old, old->mnt\.mnt_root, copy_flags);$/{
+                N
+                N
+                /^ \tnew = copy_tree(old, old->mnt\.mnt_root, copy_flags);\n \tif (IS_ERR(new)) {\n \t\tnamespace_unlock();$/c\
+            #ifdef CONFIG_KDP_NS\
+            \tnew = copy_tree(old, ((struct kdp_mount *)old)->mnt->mnt_root, copy_flags);\
+            #else
+            }' "$KERNEL_DIR/50_add_susfs_in_gki-android13-5.15.patch"
+            echo "Success editing SUSFS patch"
+        elif [ "$ONEUI_VERSION" = "8" ]; then
+            patch -p1 < "$KPATCHES_DIR/susfs_prepare_a35_1ui8.patch"
+        else
+            echo "Unknown One UI version: $ONEUI_VERSION. SUSFS installation skipped."
+            exit 1
+        fi
 
         patch -p1 < "50_add_susfs_in_gki-android13-5.15.patch"
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_KSU_SUSFS
         echo "SUSFS Installed."
+    
+    - name: Apply Kernel Optimization Patches
+      if: ${{ inputs.apply-kpatches }}
+      shell: bash
+      env:
+        KPATCHES_DIR: ${{ github.workspace }}/patches
+      run: |
+        echo "Applying kernel optimization patches..."
+        cd "$KERNEL_DIR"
+        for patch in "$KPATCHES_DIR"/*.patch; do
+          # Skip SUSFS patches.
+          case "$(basename "$patch")" in
+            susfs_prepare_a35_1ui85.patch | \
+            susfs_prepare_a35_1ui8.patch)
+              continue
+              ;;
+          esac
+          echo "Applying patch: $patch"
+          patch -p1 < "$patch"
+        done
+        echo "Done :v"
+
+    - name: Enable Baseband Guard
+      if: ${{ inputs.enable-bbg }}
+      shell: bash
+      run: |
+        curl -LSs https://github.com/vc-teahouse/Baseband-guard/raw/main/setup.sh | bash
+        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_BBG
+        sed -i '/^CONFIG_LSM=/ s/"$/,baseband_guard"/' "$DEFCONFIG"
+        cd "$KERNEL_DIR"
+        sed -i '/^config LSM$/,/^help$/{ /^[[:space:]]*default/ { /baseband_guard/! s/selinux/selinux,baseband_guard/ } }' security/Kconfig
+    
+    - name: Enable more NET schedulers & wireguard
+      if: ${{ inputs.enable-netsch }}
+      shell: bash
+      run: |
+        # NET SCHEDULERS
+        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_NET_SCH_FQ
+        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_NET_SCH_FQ_CODEL
+        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_NET_SCH_PIE
+        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_NET_SCH_FQ_PIE
+        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_NET_SCH_CAKE
+        
+        #WIREGUARD
+        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_WIREGUARD
+        echo "Done :v"
+
+    - name: Enable BBR & BBRv3
+      if: ${{ inputs.enable-bbrv3 }}
+      shell: bash
+      run: |
+        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_TCP_CONG_ADVANCED
+        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_TCP_CONG_BBR
+        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_TCP_CONG_BBR3
+        echo "Done :v"
+
+    - name: Add VFS support for Hybrid Mount MetaModule
+      if: ${{ inputs.vfs-support }}
+      shell: bash
+      run: |
+        echo "Adding VFS support for Hybrid Mount MetaModule..."
+        curl -LSs "https://raw.githubusercontent.com/Hybrid-Mount/meta-hybrid_mount/dev/module/vfs/setup.sh" | bash
+        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_HYBRIDMOUNT
+        echo "Done :v"
+    
+    - name: Apply EXPERIMENTAL battery tweak
+      if: ${{ inputs.battery-tweak }}
+      shell: bash
+      run: |
+        echo "Enabling CONFIG_WQ_POWER_EFFICIENT_DEFAULT" 
+        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_WQ_POWER_EFFICIENT_DEFAULT
+        echo "Done :v"

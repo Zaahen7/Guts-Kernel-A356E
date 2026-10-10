@@ -1,0 +1,24 @@
+name: Export files
+description: Export kernel files
+
+inputs:
+  variant:
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Copy Image file to AnyKernel3
+      shell: bash
+      run: cp "$KERNEL_DIR/arch/arm64/boot/Image" "$ANYKERNEL3_DIR"
+
+    - name: Get build date
+      shell: bash
+      run: echo "BUILD_DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+
+    - name: Upload Kernel in Actions
+      uses: actions/upload-artifact@v4
+      with:
+        name: GutsKernel${{ inputs.variant }}-A356E-Oneui${{ env.ONEUI_VERSION }}-${{ env.BUILD_DATE }}
+        path: ${{ env.ANYKERNEL3_DIR }}
+        compression-level: 9

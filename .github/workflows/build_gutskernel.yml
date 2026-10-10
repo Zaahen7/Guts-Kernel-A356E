@@ -7,13 +7,18 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-        puck-variant:
-          description: "Kernel Variants to build"
-          required: true
+        welcome:
+          description: "Select Kernel variant below:"
           type: choice
           options:
-            - Puck / Clean (Needed)
-          default: Puck / Clean (Needed)
+            - Workflow Made by @Zaahen7
+          default: "Workflow Made by @Zaahen7"
+          required: false
+
+        puck-variant:
+          description: "Puck / Clean"
+          type: boolean
+          default: true
           
         zodd-variant:
           description: "Zodd / KernelSU from tiann"
@@ -52,36 +57,37 @@ on:
 # Kernel Modifications
         
         kernel-patches:
-          description: "Kernel optimization patches"
-          required: true
-          type: choice
-          options:
-            - None
-            - All
-          default: All
+          description: "Apply kernel optimization patches"
+          type: boolean
+          default: true
           
         susfs:
-          description: "SUSFS"
-          required: true
-          type: choice
-          options:
-            - Disabled
-            - Stable
-            - Latest
-          default: Stable
+          description: "Enable SUSFS"
+          type: boolean
+          default: true
           
-        enable-bbg:
+        bbg:
           description: "Enable Baseband Guard"
           type: boolean
           default: true
           
-        enable-netsch:
-          description: "Enable more NET schedulers"
+        netsch:
+          description: "Enable more NET schedulers & Wireguard support"
           type: boolean
           default: true
           
-        enable-bbrv3:
+        bbrv3:
           description: "Add BBR & BBRv3"
+          type: boolean
+          default: true
+        
+        vfs-support:
+          description: "Add VFS support for Hybrid Mount MetaModule"
+          type: boolean
+          default: true
+
+        battery-tweak:
+          description: "EXPERIMENTAL battery tweak"
           type: boolean
           default: true
           
@@ -102,7 +108,7 @@ on:
 
 concurrency:
     group: GutsKernels-${{ github.ref }}
-    cancel-in-progress: false
+    cancel-in-progress: true
 
 defaults:
   run:
@@ -110,8 +116,23 @@ defaults:
 
 jobs:
   build-kernel:
-    name: GutsKernel One UI ${{ inputs.oneui-version }}
+    name: GutsKernel One UI ${{ inputs.oneui-version }} - ${{ matrix.variant }}
+    if: ${{ inputs.puck-variant || inputs.zodd-variant || inputs.femto-variant || inputs.zoro-variant }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: >-
+          ${{ fromJSON(format(
+            '[{0}{1}{2}{3}]',
+            inputs.puck-variant && '"Puck"' ||
+              inputs.zodd-variant && '"Zodd"' ||
+              inputs.femto-variant && '"Femto"' ||
+              inputs.zoro-variant && '"Zoro"' || '"Puck"',
+            inputs.zodd-variant && inputs.puck-variant && ',"Zodd"' || '',
+            inputs.femto-variant && (inputs.puck-variant || inputs.zodd-variant) && ',"Femto"' || '',
+            inputs.zoro-variant && (inputs.puck-variant || inputs.zodd-variant || inputs.femto-variant) && ',"Zoro"' || ''
+          )) }}
     
     env:
       KERNEL_DIR: ${{ github.workspace }}/GutsKernel
@@ -119,63 +140,59 @@ jobs:
       ANYKERNEL3_DIR: ${{ github.workspace }}/Anykernel3
       LTO_MODE: ${{ inputs.lto-mode }}
       ONEUI_VERSION: ${{ inputs.oneui-version }}
+      DEFCONFIG: ${{ github.workspace }}/GutsKernel/arch/arm64/configs/s5e8835-a35xjvxx_defconfig
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
         
       - name: Prepare to build
         uses: ./.github/actions/build-setup
         with:
           repos-token: ${{ secrets.REPOS_TOKEN }}
           free-diskspace: true
-          
+     
       - name: Apply Kernel Modifications
         uses: ./.github/actions/modify-kernel
         with:
-          kernel-patches: ${{ inputs.kernel-patches }}
-          susfs: ${{ inputs.susfs }}
-          enable-bbg: ${{ inputs.enable-bbg }}
-          enable-netsch: ${{ inputs.enable-netsch }}
-          enable-bbrv3: ${{ inputs.enable-bbrv3 }}
+          apply-kpatches: ${{ inputs.kernel-patches }}
+          kernel-variant: ${{ matrix.variant }}
+          enable-susfs: ${{ inputs.susfs }}
+          enable-bbg: ${{ inputs.bbg }}
+          enable-netsch: ${{ inputs.netsch }}
+          enable-bbrv3: ${{ inputs.bbrv3 }}
+          vfs-support: ${{ inputs.vfs-support }}
+          battery-tweak: ${{ inputs.battery-tweak }}
 
       - name: Build Kernel
         uses: ./.github/actions/build-kernel
         with:
           lto-mode: ${{ inputs.lto-mode }}
+          variant: ${{ matrix.variant }}
 
       - name: Upload files to artifacts
-        uses: ./.github/actions/UploadArtifacts
+        uses: ./.github/actions/upload-artifacts
         with:
-          oneui_version: ${{ env.ONEUI_VERSION }}
-          kernel_build: "stock"
+          variant: ${{ matrix.variant }}
 
-          #Modifications
-          lto-mode: ${{ inputs.lto-mode }}
-
-  Upload2Release:
-    name: Upload Artifacs to Release
+  Artifacts2Release:
+    name: Upload Artifacts to Release
     needs: build-kernel
     if: |
-      inputs.release-type != 'actions' &&
+      inputs.release-type != 'Actions' &&
       needs.build-kernel.result == 'success'
-    
+    runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
-      
-    runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         
       - name: Publish Artifacts to Release
-        uses: ./.github/actions/Artifacts2release
+        uses: ./.github/actions/artifacts2release
         with:
-          prerelease: ${{ inputs.release-type == 'prerelease' }}
+          prerelease: ${{ inputs.release-type == 'Prerelease' }}
 
           # Release Details
           release_name: "GutsKernel for A356E"
           release_tag: "v1.0.${{ github.run_number }}"
-          release_body: |
-            ## These files are essentially stock, with no modifications.

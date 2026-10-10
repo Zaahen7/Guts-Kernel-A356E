@@ -1,5 +1,5 @@
 diff --git a/arch/arm64/lib/memcmp.S b/arch/arm64/lib/memcmp.S
-index 7d9563842..c61a08600 100644
+index 7d9563842..336b4ed10 100644
 --- a/arch/arm64/lib/memcmp.S
 +++ b/arch/arm64/lib/memcmp.S
 @@ -3,7 +3,7 @@
@@ -11,7 +11,7 @@ index 7d9563842..c61a08600 100644
   */
  
  #include <linux/linkage.h>
-@@ -16,90 +16,70 @@
+@@ -16,90 +16,67 @@
  
  #define L(label) .L ## label
  
@@ -43,7 +43,6 @@ index 7d9563842..c61a08600 100644
 +#define data3w	w5
 +#define data4	x6
 +#define data4w	w6
-+#define tmp	x6
 +#define src1end	x7
 +#define src2end	x8
  
@@ -84,8 +83,6 @@ index 7d9563842..c61a08600 100644
 +	add	src2end, src2, limit
 +	cmp	limit, 32
  	b.ls	L(last_bytes)
-+	cmp	limit, 160
-+	b.hs	L(loop_align)
 +	sub	limit, limit, 32
  
 -	/* We overlap loads between 0-32 bytes at either side of SRC1 when we
@@ -154,7 +151,7 @@ index 7d9563842..c61a08600 100644
  
  	/* Compare data bytes and set return value to 0, -1 or 1.  */
  L(return):
-@@ -108,31 +88,104 @@ L(return):
+@@ -108,31 +85,43 @@ L(return):
  	rev	data2, data2
  #endif
  	cmp	data1, data2
@@ -211,67 +208,6 @@ index 7d9563842..c61a08600 100644
 +	ldrb	data2w, [src2end, -1]
  	sub	result, data1w, data2w
 +L(return_zero):
-+	ret
-+
-+L(loop_align):
-+	ldp	data1, data3, [src1, 16]
-+	ldp	data2, data4, [src2, 16]
-+	cmp	data1, data2
-+	ccmp	data3, data4, 0, eq
-+	b.ne	L(return2)
-+
-+	/* Align src2 and adjust src1, src2 and limit.  */
-+	and	tmp, src2, 15
-+	sub	tmp, tmp, 16
-+	sub	src2, src2, tmp
-+	add	limit, limit, tmp
-+	sub	src1, src1, tmp
-+	sub	limit, limit, 64 + 16
-+
-+	.p2align 4
-+L(loop64):
-+	ldr	q0, [src1, 16]
-+	ldr	q1, [src2, 16]
-+	subs	limit, limit, 64
-+	ldr	q2, [src1, 32]
-+	ldr	q3, [src2, 32]
-+	eor	v0.16b, v0.16b, v1.16b
-+	eor	v1.16b, v2.16b, v3.16b
-+	ldr	q2, [src1, 48]
-+	ldr	q3, [src2, 48]
-+	umaxp	v0.16b, v0.16b, v1.16b
-+	ldr	q4, [src1, 64]!
-+	ldr	q5, [src2, 64]!
-+	eor	v1.16b, v2.16b, v3.16b
-+	eor	v2.16b, v4.16b, v5.16b
-+	umaxp	v1.16b, v1.16b, v2.16b
-+	umaxp	v0.16b, v0.16b, v1.16b
-+	umaxp	v0.16b, v0.16b, v0.16b
-+	fmov	tmp, d0
-+	ccmp	tmp, 0, 0, hi
-+	b.eq	L(loop64)
-+
-+	/* If equal, process last 1-64 bytes using scalar loop.  */
-+	add	limit, limit, 64 + 16
-+	cbz	tmp, L(last64)
-+
-+	/* Determine the 8-byte aligned offset of the first difference.  */
-+#ifdef __AARCH64EB__
-+	rev16	tmp, tmp
-+#endif
-+	rev	tmp, tmp
-+	clz	tmp, tmp
-+	bic	tmp, tmp, 7
-+	sub	tmp, tmp, 48
-+	ldr	data1, [src1, tmp]
-+	ldr	data2, [src2, tmp]
-+#ifndef __AARCH64EB__
-+	rev	data1, data1
-+	rev	data2, data2
-+#endif
-+	mov	result, 1
-+	cmp	data1, data2
-+	cneg	result, result, lo
  	ret
  
  SYM_FUNC_END_PI(memcmp)
