@@ -126,16 +126,53 @@ runs:
         cd "$KERNEL_DIR"
         if [ "$ONEUI_VERSION" = "8.5" ]; then
             patch -p1 < "$KPATCHES_DIR/susfs_prepare_a35_1ui85.patch"
-            echo "Adjusting namespace.c context on SUSFS patch"
-            sed -i '/^ \tnew = copy_tree(old, old->mnt\.mnt_root, copy_flags);$/{
-                N
-                N
-                /^ \tnew = copy_tree(old, old->mnt\.mnt_root, copy_flags);\n \tif (IS_ERR(new)) {\n \t\tnamespace_unlock();$/c\
-            #ifdef CONFIG_KDP_NS\
-            \tnew = copy_tree(old, ((struct kdp_mount *)old)->mnt->mnt_root, copy_flags);\
-            #else
-            }' "$KERNEL_DIR/50_add_susfs_in_gki-android13-5.15.patch"
-            echo "Success editing SUSFS patch"
+            echo "Adjusting namespace.c context in the SUSFS patch..."
+            python3 - "$KERNEL_DIR/50_add_susfs_in_gki-android13-5.15.patch" <<'PY'
+        from pathlib import Path
+        import sys
+
+        patch_file = Path(sys.argv[1])
+        lines = patch_file.read_text().splitlines(keepends=True)
+        target = (
+            "new = copy_tree(old, old->mnt.mnt_root, copy_flags);",
+            "if (IS_ERR(new)) {",
+            "namespace_unlock();",
+        )
+        matches = []
+        in_namespace_file = False
+
+        for index, line in enumerate(lines):
+            if line.startswith("diff --git "):
+                in_namespace_file = line.startswith("diff --git a/fs/namespace.c ")
+            if not in_namespace_file:
+                continue
+            if index + len(target) > len(lines):
+                continue
+
+            context = lines[index:index + len(target)]
+            if all(line.startswith(" ") for line in context):
+                normalized = tuple(" ".join(line[1:].split()) for line in context)
+                if normalized == target:
+                    matches.append(index)
+
+        if len(matches) != 1:
+            print(
+                "ERROR: Expected exactly one namespace.c SUSFS context to adapt, "
+                f"found {len(matches)} in {patch_file}.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+        index = matches[0]
+        replacement = (
+            " #ifdef CONFIG_KDP_NS\n",
+            " \tnew = copy_tree(old, ((struct kdp_mount *)old)->mnt->mnt_root, copy_flags);\n",
+            " #else\n",
+        )
+        lines[index:index + len(target)] = replacement
+        patch_file.write_text("".join(lines))
+        print("Adapted exactly one namespace.c SUSFS patch context for CONFIG_KDP_NS.")
+        PY
         elif [ "$ONEUI_VERSION" = "8" ]; then
             patch -p1 < "$KPATCHES_DIR/susfs_prepare_a35_1ui8.patch"
         else
