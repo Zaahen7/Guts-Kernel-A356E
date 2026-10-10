@@ -11,8 +11,8 @@ on:
           description: "Workflow Made by @Zaahen7"
           type: choice
           options:
-            - "Select Kernel variant below:"
-          default: "Select Kernel variant below:"
+            - "Check the kernel variant below"
+          default: "Check the kernel variant below"
           required: true
 
         puck-variant:
