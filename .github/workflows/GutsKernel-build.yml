@@ -25,13 +25,13 @@ on:
           type: boolean
           default: true
           
-        femto-variant:
-          description: "Femto / KernelSU-Next"
-          type: boolean
-          default: true
+        #femto-variant:
+          #description: "Femto / KernelSU-Next"
+          #type: boolean
+          #default: true
           
         zoro-variant:
-          description: "Zoro / Resuki-SU"
+          description: "Zoro / Baka-SU"
           type: boolean
           default: true
           
