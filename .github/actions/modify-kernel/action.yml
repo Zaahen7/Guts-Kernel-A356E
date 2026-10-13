@@ -46,19 +46,25 @@ runs:
       if: ${{ inputs['kernel-variant'] != 'Puck' }}
       shell: bash
       run: |    
+        cd "$KERNEL_DIR"
         case "${{ inputs['kernel-variant'] }}" in
           Zodd)
-            echo "Zodd variant selected. Installing Stable KernelSU from tiann"
-            cd "$KERNEL_DIR"
-            curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+            echo "Zodd variant selected. Installing KernelSU from tiann"
+            curl -fLSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
             ;;
           Femto)
-            echo "Femto variant selected. Installing Latest KernelSU-Next"
-            cd "$KERNEL_DIR"
+            echo "Femto variant selected. Installing KernelSU-Next"
+            if [[ "${{ inputs.enable-susfs }}" == "true" ]]; then
+              echo "Using pershoot repo"
+              curl -fLSs "https://raw.githubusercontent.com/pershoot/KernelSU-Next/refs/heads/dev-susfs/kernel/setup.sh" | bash -
+              echo "SUSFS enabled"
+            fi
+            echo "Using official repo"
+            curl -fLSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -
             ;;
           Zoro)
-            echo "Zoro variant selected. Installing Latest Resuki-SU"
-            cd "$KERNEL_DIR"
+            echo "Zoro variant selected. Installing Baka-SU"
+            curl -fLSs "https://raw.githubusercontent.com/Baka-SU/BakaSU/main/kernel/setup.sh" | bash
             ;;
           *)
             echo "No KernelSU variant selected or unknown variant."
@@ -89,24 +95,22 @@ runs:
             exit 1
             ;;
         esac
-
-        if [[ "$ONEUI_VERSION" == "8" && ! -f "$KPATCHES_DIR/susfs_prepare_a35_1ui8.patch" ]]; then
-            echo "ERROR: SUSFS for One UI 8 requires patches/susfs_prepare_a35_1ui8.patch, which is not present."
-            echo "Disable SUSFS or add the One UI 8 compatibility patch before building."
-            exit 1
-        fi
-
+        
         # Prepare SUSFS directory
         rm -rf "$SUSFS_DIR"
         mkdir "$SUSFS_DIR"
         cd "$SUSFS_DIR"
-
+        
         if [ "$KERNEL_VARIANT" = "Zodd" ]; then
             echo "Zodd variant detected. Using stable SUSFS."
             git init
             git remote add origin "$SUSFS_REPO"
             git fetch --depth=1 origin "$STABLECOMMIT"
             git checkout FETCH_HEAD
+            
+            cp -v "$SUSFS_DIR/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch" "$KERNEL_DIR/KernelSU/"
+            cd "$KERNEL_DIR/KernelSU"
+            patch -p1 < "10_enable_susfs_for_ksu.patch"
         else
             echo "${{ inputs['kernel-variant'] }} variant detected. Using latest SUSFS."
             git init
@@ -115,68 +119,17 @@ runs:
             git checkout FETCH_HEAD
         fi
         
-        cp -v "$SUSFS_DIR/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch" "$KERNEL_DIR/KernelSU/"
-        cp -v "$SUSFS_DIR/kernel_patches/50_add_susfs_in_gki-android13-5.15.patch" "$KERNEL_DIR"
         cp -v "$SUSFS_DIR/kernel_patches/fs/"*.c "$KERNEL_DIR/fs/"
         cp -v "$SUSFS_DIR/kernel_patches/include/linux/"*.h "$KERNEL_DIR/include/linux/"
-
-        cd "$KERNEL_DIR/KernelSU"
-        patch -p1 < "10_enable_susfs_for_ksu.patch"
-
+        cp -v "$SUSFS_DIR/kernel_patches/50_add_susfs_in_gki-android13-5.15.patch" "$KERNEL_DIR"
+        
         cd "$KERNEL_DIR"
         if [ "$ONEUI_VERSION" = "8.5" ]; then
-            patch -p1 < "$KPATCHES_DIR/susfs_prepare_a35_1ui85.patch"
-            echo "Adjusting namespace.c context in the SUSFS patch..."
-            python3 - "$KERNEL_DIR/50_add_susfs_in_gki-android13-5.15.patch" <<'PY'
-        from pathlib import Path
-        import sys
-
-        patch_file = Path(sys.argv[1])
-        lines = patch_file.read_text().splitlines(keepends=True)
-        target = (
-            "new = copy_tree(old, old->mnt.mnt_root, copy_flags);",
-            "if (IS_ERR(new)) {",
-            "namespace_unlock();",
-        )
-        matches = []
-        in_namespace_file = False
-
-        for index, line in enumerate(lines):
-            if line.startswith("diff --git "):
-                in_namespace_file = line.startswith("diff --git a/fs/namespace.c ")
-            if not in_namespace_file:
-                continue
-            if index + len(target) > len(lines):
-                continue
-
-            context = lines[index:index + len(target)]
-            if all(line.startswith(" ") for line in context):
-                normalized = tuple(" ".join(line[1:].split()) for line in context)
-                if normalized == target:
-                    matches.append(index)
-
-        if len(matches) != 1:
-            print(
-                "ERROR: Expected exactly one namespace.c SUSFS context to adapt, "
-                f"found {len(matches)} in {patch_file}.",
-                file=sys.stderr,
-            )
-            sys.exit(1)
-
-        index = matches[0]
-        replacement = (
-            " #ifdef CONFIG_KDP_NS\n",
-            " \tnew = copy_tree(old, ((struct kdp_mount *)old)->mnt->mnt_root, copy_flags);\n",
-            " #else\n",
-        )
-        lines[index:index + len(target)] = replacement
-        patch_file.write_text("".join(lines))
-        print("Adapted exactly one namespace.c SUSFS patch context for CONFIG_KDP_NS.")
-        PY
-        elif [ "$ONEUI_VERSION" = "8" ]; then
-            patch -p1 < "$KPATCHES_DIR/susfs_prepare_a35_1ui8.patch"
+          patch -p1 < "$KPATCHES_DIR/susfs_prepare_a35_1ui85.patch"
+          echo "Adjusting SUSFS patch context..."
+          python3 "$GITHUB_WORKSPACE/.github/actions/modify-kernel/adjust_susfs_patch_a35.py" "$KERNEL_DIR/50_add_susfs_in_gki-android13-5.15.patch" || exit 1
         else
-            echo "Unknown One UI version: $ONEUI_VERSION. SUSFS installation skipped."
+            echo "Unsupported One UI version: $ONEUI_VERSION. SUSFS installation skipped."
             exit 1
         fi
 
