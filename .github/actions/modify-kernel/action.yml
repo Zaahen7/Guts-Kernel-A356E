@@ -79,7 +79,6 @@ runs:
         SUSFS_REPO: "https://gitlab.com/simonpunk/susfs4ksu.git"
         SUSFS_BRANCH: "gki-android13-5.15"
         STABLECOMMIT: "23d85d2278f3e481644f809053868b6153715583"
-        KPATCHES_DIR: ${{ github.workspace }}/patches
         KERNEL_VARIANT: ${{ inputs['kernel-variant'] }}
       run: |
         case "${{ inputs['kernel-variant'] }}" in
@@ -125,9 +124,9 @@ runs:
         cp -v "$SUSFS_DIR/kernel_patches/50_add_susfs_in_gki-android13-5.15.patch" "$KERNEL_DIR"
         
         if [ "$ONEUI_VERSION" = "8.5" ]; then
-          patch -p1 < "$KPATCHES_DIR/susfs_prepare_a35_1ui85.patch"
+          patch -p1 < "$GITHUB_ACTION_PATH/susfs_prepare_a35_1ui85.patch"
           echo "Adjusting SUSFS patch context..."
-          python3 "$GITHUB_WORKSPACE/.github/actions/modify-kernel/adjust_susfs_patch_a35.py" "$KERNEL_DIR/50_add_susfs_in_gki-android13-5.15.patch" || exit 1
+          python3 "$GITHUB_ACTION_PATH/adjust_susfs_patch_a35.py" "$KERNEL_DIR/50_add_susfs_in_gki-android13-5.15.patch" || exit 1
         else
             echo "Unsupported One UI version: $ONEUI_VERSION. SUSFS installation skipped."
             exit 1
@@ -191,11 +190,9 @@ runs:
     - name: Enable BBR & BBRv3
       if: ${{ inputs.enable-bbrv3 }}
       shell: bash
-      env:
-        KPATCHES_DIR: ${{ github.workspace }}/patches
       run: |
         cd "$KERNEL_DIR"
-        patch -p1 < "$KPATCHES_DIR/net-tcp-backport-BBRv3-to-android13-5.15.patch"
+        patch -p1 < "$GITHUB_ACTION_PATH/net-tcp-backport-BBRv3-to-android13-5.15.patch"
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_TCP_CONG_ADVANCED
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_TCP_CONG_BBR
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_TCP_CONG_BBR3
