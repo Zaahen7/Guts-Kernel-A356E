@@ -119,11 +119,11 @@ runs:
             git checkout FETCH_HEAD
         fi
         
+        cd "$KERNEL_DIR"
         cp -v "$SUSFS_DIR/kernel_patches/fs/"*.c "$KERNEL_DIR/fs/"
         cp -v "$SUSFS_DIR/kernel_patches/include/linux/"*.h "$KERNEL_DIR/include/linux/"
         cp -v "$SUSFS_DIR/kernel_patches/50_add_susfs_in_gki-android13-5.15.patch" "$KERNEL_DIR"
         
-        cd "$KERNEL_DIR"
         if [ "$ONEUI_VERSION" = "8.5" ]; then
           patch -p1 < "$KPATCHES_DIR/susfs_prepare_a35_1ui85.patch"
           echo "Adjusting SUSFS patch context..."
