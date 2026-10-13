@@ -1,62 +1,37 @@
-# GutsKernel — A356E (Galaxy A35 5G, Exynos 1380)
+<div align="center">
 
-Custom kernel based on Samsung's One UI 8.5 kernel source (5.15.189),
-built for the Galaxy A35 5G (SM-A356E). Focused primarily on battery
-efficiency, with KernelSU + SUSFS root support and a runtime tuning
-module for values that live outside the kernel image.
+## GutsKernel — A356E (Galaxy A35 5G, Exynos 1380)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/Zaahen7/Guts-Kernel-A356E/GutsKernel-build.yml?label=Build%20Status&style=for-the-badge&logo=github)](https://github.com/Zaahen7/Guts-Kernel-A356E/actions)
+[![GitHub Release](https://img.shields.io/github/v/release/Zaahen7/Guts-Kernel-A356E?label=release&style=for-the-badge&color=blue)](https://github.com/Zaahen7/Guts-Kernel-A356E/releases/latest)
+</div>
 
-## Base
-- Kernel: 5.15.189, Samsung One UI 8.5 source
-- Device: Samsung Galaxy A35 5G (SM-A356E), Exynos 1380 (s5e8835)
+## Prebuilted Kernel Variants
+<br>
+
+|  Variant | Root Solution | ✨Features |
+|:---|:---|:---|
+| 🌸 **Puck / Clean** | No root | BBG|
+| 💢 **Zodd / KSU** | KernelSU+SUSFS | BBG |
+| 🔐 **KernelSU-Next** | Next-generation kernel-level root solution |
+| 🛡️ **SUSFS v2.2.0+** | Advanced root hiding with Magic Mount support (Auto-synced) |
+| 🔋 **Battery Optimization** | Modular suite: Wakelock hard-caps, Schedutil tuning, MGLRU, and Log Silencing |
+| 🛠️ **Manual Hooks** | `scope_min_manual_hooks_v1.4` for better app compatibility |
+| 🖧 **BBRv3** | Next-gen TCP congestion control |
+| 🛡️ **BBG** | LSM-based Baseband Guard security |
+| 🌐 **TTL Target Support** | Network packet manipulation |
+| 🧱 **IP Set Support** | Advanced firewall capabilities |
+| 🔄 **NTSync** | Universal NT synchronization primitives for gaming |
+| 🛂 **WireGuard** | Fast, modern, and secure kernel-level VPN |
+| 🏗️ **HMBIRD SCX** | Scheduler extensions for SM8750 devices |
+| ✅ **LTO** | Link Time Optimization (thin/full/none configurable) |
+| ⚡️ **TMPFS XATTR** | Extended attributes for Mountify and Meta support |
+| 🚀 **Optimization patches** | Memory, I/O, CPU scheduler, network tuning |
+| </> **Unicode Bypass Fix** | Prevent path traversal using non-printable Unicode codepoints |
+| 🖥️ **Droidspaces Support** | Support for Portable Linux containers |
+
+<br>
 - Toolchain: Clang (AOSP r450784d), Full LTO
-- Root: KernelSU (tiann) + SUSFS4KSU
 
-## Kernel patches
-
-### Power management
-- Dynamic alarm wakeup timing: replaces a fixed 2s wakeup window with
-  the actual time until the next pending alarm
-- Avoid redundant s2idle wake attempts: prevents duplicate sync work
-  on concurrent wakeup events
-- Reduced freeze timeout: 20s → 1s for Android's process freezer
-  (a 20s wait on a deadlocked freeze was pure battery waste)
-- Silenced non-actionable IRQ affinity and system log spam
-  (healthd/logd/dashd), reducing log I/O overhead
-
-### CPU / scheduler
-- Disabled CACHE_HOT_BUDDY: this SoC's DSU shares L3 cache across
-  cores within a cluster, making the original cache-locality
-  restriction unnecessary and limiting to the scheduler
-- Optimized CPU scan order in select_idle_capacity (skips re-checking
-  a CPU already evaluated by the caller)
-- Added a hard 768MHz floor on `scaling_min_freq` requests, on top of
-  a runtime-adjustable ceiling (`scaling_min_freq_limit`, exposed via
-  sysfs) to stop misbehaving apps/tools from pinning the CPU to an
-  unnecessarily high minimum frequency
-
-### Filesystem (F2FS)
-- Reduced I/O congestion timeout: 20ms → 6ms
-- Increased min fsync blocks: 8 → 20 (fewer forced syncs, better
-  write batching)
-- Reduced GC urgent sleep time: 500ms → 50ms (aligns with what
-  Android's `vold` already tries to configure via IdleMaintenance)
-
-### Memory
-- zstd as the default zram compression algorithm (better ratio than
-  the stock lzo-rle, worthwhile given typical available RAM on this
-  device)
-- MGLRU (Multi-Gen LRU) confirmed active — modern page reclaim
-  already backported to this GKI base
-- PSI (Pressure Stall Information) confirmed active — used by modern
-  LMKD for smarter low-memory kill decisions
-
-### Low-level / arch
-- 16-byte alignment for `clear_page()`
-- 8-byte alignment for `struct file`
-
-### Security
-- SELinux hide enabled by default (KernelSU's native anti-detection
-  feature, backed by a clean sepolicy snapshot)
 
 ## What's intentionally NOT changed
 Some areas were investigated and left untouched because they were
