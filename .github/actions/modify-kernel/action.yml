@@ -12,12 +12,17 @@ inputs:
     description: "Enable Baseband Guard"
   enable-netsch:
     description: "Enable more NET schedulers"
+  enable-wireguard:
+    description: "Enable Wireguard"
   enable-bbrv3:
     description: "Enable BBR & BBRv3"
+  mountify-support:
+    description: "Enable Mountify Support"
   vfs-support:
-    description: "Add VFS support for Hybrid Mount MetaModule"
+    description: "Add VFS support for selected MetaModule"
   battery-tweak:
     description: "EXPERIMENTAL battery tweak"
+  
 runs:
   using: composite
   steps:
@@ -28,20 +33,26 @@ runs:
         DEFCONFIG="$KERNEL_DIR/arch/arm64/configs/s5e8835-a35xjvxx_defconfig"
 
         echo "Disabling Samsung security features..."
-        "$KERNEL_DIR/scripts/config" \
-          --file "$DEFCONFIG" \
+        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" \
           --disable CONFIG_UH \
+          --disable CONFIG_UH_RKP \
+          --disable CONFIG_UH_LKMAUTH \
+          --disable CONFIG_UH_LKM_BLOCK \
           --disable CONFIG_RKP \
+          --disable CONFIG_RKP_CFP \
+          --disable CONFIG_RKP_CFP_JOPP \
+          --disable CONFIG_RKP_CFP_ROPP \
           --disable CONFIG_KDP \
+          --disable CONFIG_KDP_NS \
           --disable CONFIG_SECURITY_DEFEX \
           --disable CONFIG_FIVE \
           --disable CONFIG_PROCA
         echo "Done :v"
-
+        
         echo "Disabling check defconfig..."
         sed -i 's/check_defconfig//' "$KERNEL_DIR/build.config.gki"
         echo "Done :v"
-
+    
     - name: Install KernelSU variant
       if: ${{ inputs['kernel-variant'] != 'Puck' }}
       shell: bash
@@ -49,21 +60,21 @@ runs:
         cd "$KERNEL_DIR"
         case "${{ inputs['kernel-variant'] }}" in
           Zodd)
-            echo "Zodd variant selected. Installing KernelSU from tiann"
+            echo "Zodd variant selected. Installing KernelSU from tiann..."
             curl -fLSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
             ;;
           Femto)
-            echo "Femto variant selected. Installing KernelSU-Next"
+            echo "Femto variant selected. Installing KernelSU-Next..."
             if [[ "${{ inputs.enable-susfs }}" == "true" ]]; then
-              echo "Using pershoot repo"
+              echo "Using pershoot repo."
               curl -fLSs "https://raw.githubusercontent.com/pershoot/KernelSU-Next/refs/heads/dev-susfs/kernel/setup.sh" | bash -
               echo "SUSFS enabled"
             fi
-            echo "Using official repo"
+            echo "Using official repo."
             curl -fLSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -
             ;;
           Zoro)
-            echo "Zoro variant selected. Installing Baka-SU"
+            echo "Zoro variant selected. Installing Baka-SU..."
             curl -fLSs "https://raw.githubusercontent.com/Baka-SU/BakaSU/main/kernel/setup.sh" | bash
             ;;
           *)
@@ -71,6 +82,9 @@ runs:
             ;;
         esac
         
+        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_KSU
+        echo "Done :v"
+    
     - name: Enable SUSFS
       if: ${{ inputs.enable-susfs }}
       shell: bash
@@ -101,7 +115,7 @@ runs:
         cd "$SUSFS_DIR"
         
         if [ "$KERNEL_VARIANT" = "Zodd" ]; then
-            echo "Zodd variant detected. Using stable SUSFS."
+            echo "Zodd variant detected. Using stable SUSFS commit: $STABLECOMMIT"
             git init
             git remote add origin "$SUSFS_REPO"
             git fetch --depth=1 origin "$STABLECOMMIT"
@@ -125,13 +139,13 @@ runs:
         
         if [ "$ONEUI_VERSION" = "8.5" ]; then
           patch -p1 < "$GITHUB_ACTION_PATH/susfs_prepare_a35_1ui85.patch"
-          echo "Adjusting SUSFS patch context..."
+          echo "Adjusting SUSFS patch context."
           python3 "$GITHUB_ACTION_PATH/adjust_susfs_patch_a35.py" "$KERNEL_DIR/50_add_susfs_in_gki-android13-5.15.patch" || exit 1
         else
             echo "Unsupported One UI version: $ONEUI_VERSION. SUSFS installation skipped."
             exit 1
         fi
-
+        
         patch -p1 < "50_add_susfs_in_gki-android13-5.15.patch"
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_KSU_SUSFS
         echo "SUSFS Installed."
@@ -145,23 +159,16 @@ runs:
         echo "Applying kernel optimization patches..."
         cd "$KERNEL_DIR"
         for patch in "$KPATCHES_DIR"/*.patch; do
-          # Skip SUSFS patches.
-          case "$(basename "$patch")" in
-            susfs_prepare_a35_1ui85.patch | \
-            susfs_prepare_a35_1ui8.patch | \
-            net-tcp-backport-BBRv3-to-android13-5.15.patch)
-              continue
-              ;;
-          esac
           echo "Applying patch: $patch"
           patch -p1 < "$patch"
         done
         echo "Done :v"
-
+    
     - name: Enable Baseband Guard
       if: ${{ inputs.enable-bbg }}
       shell: bash
       run: |
+        echo "Enabling Baseband Guard..."
         cd "$KERNEL_DIR"
         curl -LSs https://github.com/vc-teahouse/Baseband-guard/raw/main/setup.sh | bash
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_BBG
@@ -169,49 +176,79 @@ runs:
         sed -i '/^config LSM$/,/^help$/{ /^[[:space:]]*default/ { /baseband_guard/! s/selinux/selinux,baseband_guard/ } }' security/Kconfig
         echo "CONFIG_LSM after enabling BBG:"
         grep '^CONFIG_LSM=' "$DEFCONFIG"
+        echo "Done :v"
     
-    - name: Enable more NET schedulers & wireguard
+    - name: Enable more NET schedulers
       if: ${{ inputs.enable-netsch }}
       shell: bash
       run: |
-        # NET SCHEDULERS
-        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_NET_SCH_FQ
-        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_NET_SCH_FQ_CODEL
-        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_NET_SCH_PIE
-        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_NET_SCH_FQ_PIE
-        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_NET_SCH_CAKE
-        
-        #WIREGUARD
+        echo "Enabling more Network Schedulers..."
+        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" \
+          --enable CONFIG_NET_SCH_FQ \
+          --enable CONFIG_NET_SCH_FQ_CODEL \
+          --enable CONFIG_NET_SCH_PIE \
+          --enable CONFIG_NET_SCH_FQ_PIE \
+          --enable CONFIG_NET_SCH_CAKE
+        echo "Done :v"
+    
+    - name: Enable Wireguard
+      if: ${{ inputs.enable-wireguard }}
+      shell: bash
+      run: |
+        echo "Enabling Wireguard..."
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_WIREGUARD
-        echo "Enabled network scheduler and WireGuard configs:"
+        echo "Done :v"
         
         grep -E '^CONFIG_(NET_SCH_(FQ|FQ_CODEL|PIE|FQ_PIE|CAKE)|WIREGUARD)=' "$DEFCONFIG"
-
+    
     - name: Enable BBR & BBRv3
       if: ${{ inputs.enable-bbrv3 }}
       shell: bash
       run: |
         cd "$KERNEL_DIR"
         patch -p1 < "$GITHUB_ACTION_PATH/net-tcp-backport-BBRv3-to-android13-5.15.patch"
-        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_TCP_CONG_ADVANCED
-        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_TCP_CONG_BBR
-        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_TCP_CONG_BBR3
+        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" \
+          --enable CONFIG_TCP_CONG_ADVANCED \
+          --enable CONFIG_TCP_CONG_BBR \
+          --enable CONFIG_TCP_CONG_BBR3
         echo "Done :v"
-
-    - name: Add VFS support for Hybrid Mount MetaModule
-      if: ${{ inputs.vfs-support }}
+    
+    - name: Enable Mountify Support
+      if: ${{ inputs.mountify-support }}
       shell: bash
       run: |
+        echo "Adding Mountify Support..."
+        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" \
+          --enable CONFIG_OVERLAY_FS \
+          --enable CONFIG_TMPFS_XATTR \
+          --enable CONFIG_TMPFS_POSIX_ACL
+        echo "Done :v"
+    
+    - name: Add VFS support for Hybrid Mount MetaModule
+      if: ${{ inputs.vfs-support != 'Disabled' }}
+      shell: bash
+      env:
+        METAMODULE: ${{ inputs.vfs-support }}
+      run: |
         cd "$KERNEL_DIR"
-        echo "Adding VFS support for Hybrid Mount MetaModule..."
-        curl -fLSs "https://raw.githubusercontent.com/Hybrid-Mount/meta-hybrid_mount/dev/module/vfs/setup.sh" | bash
-        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_HYBRIDMOUNT
+        if [[ "$METAMODULE" == "Hybrid-Mount" ]]; then
+          echo "Adding VFS support for Hybrid Mount..."
+          curl -fLSs "https://raw.githubusercontent.com/Hybrid-Mount/meta-hybrid_mount/dev/module/vfs/setup.sh" | bash
+          "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_HYBRIDMOUNT
+        elif [[ "$METAMODULE" == "NoMount" ]]; then
+          echo "Adding NoMount Built-In Integration..."
+          curl -fLSs "https://raw.githubusercontent.com/maxsteeel/nomount/refs/heads/dev/kernel/setup.sh" | bash -
+          "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_NOMOUNT
+        else
+          echo "Unsupported metamodule: $METAMODULE"
+          exit 1
+        fi
         echo "Done :v"
     
     - name: Apply EXPERIMENTAL battery tweak
       if: ${{ inputs.battery-tweak }}
       shell: bash
       run: |
-        echo "Enabling CONFIG_WQ_POWER_EFFICIENT_DEFAULT" 
+        echo "Enabling EXPERIMENTAL battery tweak..." 
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_WQ_POWER_EFFICIENT_DEFAULT
         echo "Done :v"
