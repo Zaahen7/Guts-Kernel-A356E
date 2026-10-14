@@ -22,7 +22,7 @@ inputs:
     description: "Add VFS support for selected MetaModule"
   battery-tweak:
     description: "EXPERIMENTAL battery tweak"
-  
+    
 runs:
   using: composite
   steps:
@@ -52,7 +52,7 @@ runs:
         echo "Disabling check defconfig..."
         sed -i 's/check_defconfig//' "$KERNEL_DIR/build.config.gki"
         echo "Done :v"
-    
+        
     - name: Install KernelSU variant
       if: ${{ inputs['kernel-variant'] != 'Puck' }}
       shell: bash
@@ -84,7 +84,7 @@ runs:
         
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_KSU
         echo "Done :v"
-    
+        
     - name: Enable SUSFS
       if: ${{ inputs.enable-susfs }}
       shell: bash
@@ -149,7 +149,7 @@ runs:
         patch -p1 < "50_add_susfs_in_gki-android13-5.15.patch"
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_KSU_SUSFS
         echo "SUSFS Installed."
-    
+        
     - name: Apply Kernel Optimization Patches
       if: ${{ inputs.apply-kpatches }}
       shell: bash
@@ -163,7 +163,7 @@ runs:
           patch -p1 < "$patch"
         done
         echo "Done :v"
-    
+        
     - name: Enable Baseband Guard
       if: ${{ inputs.enable-bbg }}
       shell: bash
@@ -177,7 +177,7 @@ runs:
         echo "CONFIG_LSM after enabling BBG:"
         grep '^CONFIG_LSM=' "$DEFCONFIG"
         echo "Done :v"
-    
+        
     - name: Enable more NET schedulers
       if: ${{ inputs.enable-netsch }}
       shell: bash
@@ -190,7 +190,7 @@ runs:
           --enable CONFIG_NET_SCH_FQ_PIE \
           --enable CONFIG_NET_SCH_CAKE
         echo "Done :v"
-    
+        
     - name: Enable Wireguard
       if: ${{ inputs.enable-wireguard }}
       shell: bash
@@ -199,8 +199,6 @@ runs:
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_WIREGUARD
         echo "Done :v"
         
-        grep -E '^CONFIG_(NET_SCH_(FQ|FQ_CODEL|PIE|FQ_PIE|CAKE)|WIREGUARD)=' "$DEFCONFIG"
-    
     - name: Enable BBR & BBRv3
       if: ${{ inputs.enable-bbrv3 }}
       shell: bash
@@ -212,7 +210,7 @@ runs:
           --enable CONFIG_TCP_CONG_BBR \
           --enable CONFIG_TCP_CONG_BBR3
         echo "Done :v"
-    
+        
     - name: Enable Mountify Support
       if: ${{ inputs.mountify-support }}
       shell: bash
@@ -223,7 +221,7 @@ runs:
           --enable CONFIG_TMPFS_XATTR \
           --enable CONFIG_TMPFS_POSIX_ACL
         echo "Done :v"
-    
+        
     - name: Add VFS support for Hybrid Mount MetaModule
       if: ${{ inputs.vfs-support != 'Disabled' }}
       shell: bash
@@ -244,7 +242,7 @@ runs:
           exit 1
         fi
         echo "Done :v"
-    
+        
     - name: Apply EXPERIMENTAL battery tweak
       if: ${{ inputs.battery-tweak }}
       shell: bash
