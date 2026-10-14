@@ -202,7 +202,3 @@ jobs:
         uses: ./.github/actions/artifacts2release
         with:
           prerelease: ${{ inputs.release-type == 'Prerelease' }}
-
-          # Release Details
-          release_name: "GutsKernel for A356E"
-          release_tag: "v1.0.${{ github.run_number }}"
