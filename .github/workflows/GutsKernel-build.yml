@@ -43,7 +43,7 @@ on:
             - 8.5
             #- 8
           default: "8.5"
-        
+          
         lto-mode:
           description: "Link Time Optimization(LTO) Mode"
           required: true
@@ -53,8 +53,8 @@ on:
             - Thin
             - Full
           default: Full
-                  
-# Kernel Modifications
+          
+    # Kernel Modifications
         
         kernel-patches:
           description: "Apply kernel optimization patches"
@@ -76,11 +76,16 @@ on:
           type: boolean
           default: true
           
+        wireguard:
+          description: "Enable Wireguard"
+          type: boolean
+          default: true
+          
         bbrv3:
           description: "Add BBR & BBRv3"
           type: boolean
           default: true
-
+          
         mountify:
           description: "Add Mountify Support"
           type: boolean
@@ -94,7 +99,7 @@ on:
             - NoMount
             - Hybrid-Mount
           default: Hybrid-Mount
-        
+          
         battery-tweak:
           description: "EXPERIMENTAL battery tweak"
           type: boolean
@@ -109,7 +114,7 @@ on:
               - Prerelease
               - Release
             default: Actions
-
+            
 concurrency:
     group: GutsKernels-${{ github.ref }}
     cancel-in-progress: true
@@ -163,6 +168,7 @@ jobs:
           enable-susfs: ${{ inputs.susfs }}
           enable-bbg: ${{ inputs.bbg }}
           enable-netsch: ${{ inputs.netsch }}
+          enable-wireguard: ${{ inputs.wireguard }}
           enable-bbrv3: ${{ inputs.bbrv3 }}
           mountify-support: ${{ inputs.mountify }}
           vfs-support: ${{ inputs.vfs-support }}
