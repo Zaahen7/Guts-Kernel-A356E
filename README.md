@@ -60,5 +60,5 @@
 - **simonpunk**, for [**SUSFS**](https://gitlab.com/simonpunk/susfs4ksu).
 - **vc-teahouse**, for [**Baseband-guard**](https://github.com/vc-teahouse/Baseband-guard).
 - **Hybrid-Mount**, for [**Hybrid-Mount**](https://github.com/Hybrid-Mount/meta-hybrid_mount)
-- **maxsteeel**, for [**NoMount**](ttps://github.com/maxsteeel/nomount)
+- **maxsteeel**, for [**NoMount**](https://github.com/maxsteeel/nomount)
 
