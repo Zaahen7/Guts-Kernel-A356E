@@ -45,18 +45,18 @@
 - **Choose Link-Time Optimization(LTO) Mode** - Full, Thin or Default
 - **Toggle Kernel Optimization Patches**
 - **Toggle SUSFS** [**(?)**](https://gitlab.com/simonpunk/susfs4ksu)
-- **Toggle Baseband-Guard** - [(?)](https://github.com/vc-teahouse/Baseband-guard)
+- **Toggle Baseband-Guard** - [**(?)**](https://github.com/vc-teahouse/Baseband-guard)
 - **Toggle Additional Network Schedulers** - Enables FQ, FQCODEL, PIE, FQPIE & CAKE net schedulers
 - **Toggle BBR & BBRv3 TCP Congestion Control Algorithms** - Manual configuration is still required
-- **Choose builtin VFS metamodule support** - [**Hybrid-Mount**](https://github.com/Hybrid-Mount/meta-hybrid_mount) or [NoMount](https://github.com/maxsteeel/nomount)
+- **Choose builtin VFS metamodule support** - [**Hybrid-Mount**](https://github.com/Hybrid-Mount/meta-hybrid_mount) or [**NoMount**](https://github.com/maxsteeel/nomount)
 
 ## ⭐ Special thanks!
 - **Samsung**, for the base kernel source.
-- **tiann**, for [KernelSU](https://github.com/tiann/KernelSU).
-- **rifsxd**, for [KernelSU-Next](https://github.com/KernelSU-Next/KernelSU-Next).
-- **pershoot**, for [KernelSU-Next SUSFS fork](https://github.com/pershoot/KernelSU-Next/tree/dev-susfs).
-- **Baka-SU** for [Baka-SU](https://github.com/Baka-SU/BakaSU).
-- **WildKernels** for [Kernel Patches](https://github.com/WildKernels/kernel_patches).
-- **simonpunk**, for [SUSFS](https://gitlab.com/simonpunk/susfs4ksu).
+- **tiann**, for [**KernelSU**](https://github.com/tiann/KernelSU).
+- **rifsxd**, for [**KernelSU-Next**](https://github.com/KernelSU-Next/KernelSU-Next).
+- **pershoot**, for [**KernelSU-Next SUSFS fork**](https://github.com/pershoot/KernelSU-Next/tree/dev-susfs).
+- **Baka-SU** for [**Baka-SU**](https://github.com/Baka-SU/BakaSU).
+- **WildKernels** for [**Kernel Patches**](https://github.com/WildKernels/kernel_patches).
+- **simonpunk**, for [**SUSFS**](https://gitlab.com/simonpunk/susfs4ksu).
 - ****
 
