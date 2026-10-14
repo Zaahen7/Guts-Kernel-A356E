@@ -19,22 +19,22 @@
   <tr>
     <td>🌸 <strong>Puck</strong></td>
     <td><strong>No root</strong></td>
-    <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, HM VFS Support</td>
+    <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, Mountify & HM VFS Support</td>
   </tr>
   <tr>
     <td>🗿 <strong>Zodd</strong></td>
     <td><strong>KSU + SUSFS</strong></td>
-    <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, HM VFS Support</td>
+    <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, Mountify & HM VFS Support</td>
   </tr>
   <tr>
     <td>🥀 <strong>Femto</strong></td>
     <td><strong>KSU-Next + SUSFS</strong></td>
-    <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, HM VFS Support</td>
+    <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, Mountify & HM VFS Support</td>
   </tr>
   <tr>
     <td>❓ <strong>Zoro</strong></td>
     <td><strong>Baka-SU + SUSFS</strong></td>
-    <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, HM VFS Support</td>
+    <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, Mountify & HM VFS Support</td>
   </tr>
 </table>
 </div>
