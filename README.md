@@ -44,11 +44,12 @@
 - **Choose One UI Version** - Only One UI 8.5 for now
 - **Choose Link-Time Optimization(LTO) Mode** - Full, Thin or Default
 - **Toggle Kernel Optimization Patches**
-- **Toggle SUSFS** [**(?)**](https://gitlab.com/simonpunk/susfs4ksu)
+- **Toggle SUSFS** - [**(?)**](https://gitlab.com/simonpunk/susfs4ksu)
 - **Toggle Baseband-Guard** - [**(?)**](https://github.com/vc-teahouse/Baseband-guard)
 - **Toggle Additional Network Schedulers** - Enables FQ, FQCODEL, PIE, FQPIE & CAKE net schedulers
 - **Toggle Wireguard** - It will remain enabled because its enabled by default on the A35 :p
 - **Toggle BBR & BBRv3 TCP Congestion Control Algorithms** - Manual configuration is still required
+- **Toggle Mountify Support** - [**(?)**](https://github.com/backslashxx/mountify)
 - **Choose builtin VFS metamodule support** - [**Hybrid-Mount**](https://github.com/Hybrid-Mount/meta-hybrid_mount) or [**NoMount**](https://github.com/maxsteeel/nomount)
 
 ## ⭐ Special thanks!
@@ -60,6 +61,7 @@
 - **WildKernels** for [**Kernel Patches**](https://github.com/WildKernels/kernel_patches)
 - **simonpunk**, for [**SUSFS**](https://gitlab.com/simonpunk/susfs4ksu)
 - **vc-teahouse**, for [**Baseband-guard**](https://github.com/vc-teahouse/Baseband-guard)
+- **backslashxx**, for [**Mountify**](https://github.com/backslashxx/mountify)
 - **Hybrid-Mount**, for [**Hybrid-Mount**](https://github.com/Hybrid-Mount/meta-hybrid_mount)
 - **maxsteeel**, for [**NoMount**](https://github.com/maxsteeel/nomount)
 
