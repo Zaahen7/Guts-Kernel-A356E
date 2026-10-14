@@ -52,14 +52,14 @@
 - **Choose builtin VFS metamodule support** - [**Hybrid-Mount**](https://github.com/Hybrid-Mount/meta-hybrid_mount) or [**NoMount**](https://github.com/maxsteeel/nomount)
 
 ## ⭐ Special thanks!
-- **Samsung**, for the base kernel source.
-- **tiann**, for [**KernelSU**](https://github.com/tiann/KernelSU).
-- **rifsxd**, for [**KernelSU-Next**](https://github.com/KernelSU-Next/KernelSU-Next).
-- **pershoot**, for [**KernelSU-Next SUSFS fork**](https://github.com/pershoot/KernelSU-Next/tree/dev-susfs).
-- **Baka-SU** for [**Baka-SU**](https://github.com/Baka-SU/BakaSU).
-- **WildKernels** for [**Kernel Patches**](https://github.com/WildKernels/kernel_patches).
-- **simonpunk**, for [**SUSFS**](https://gitlab.com/simonpunk/susfs4ksu).
-- **vc-teahouse**, for [**Baseband-guard**](https://github.com/vc-teahouse/Baseband-guard).
+- **Samsung**, for the base kernel source
+- **tiann**, for [**KernelSU**](https://github.com/tiann/KernelSU)
+- **rifsxd**, for [**KernelSU-Next**](https://github.com/KernelSU-Next/KernelSU-Next)
+- **pershoot**, for [**KernelSU-Next SUSFS fork**](https://github.com/pershoot/KernelSU-Next/tree/dev-susfs)
+- **Baka-SU** for [**Baka-SU**](https://github.com/Baka-SU/BakaSU)
+- **WildKernels** for [**Kernel Patches**](https://github.com/WildKernels/kernel_patches)
+- **simonpunk**, for [**SUSFS**](https://gitlab.com/simonpunk/susfs4ksu)
+- **vc-teahouse**, for [**Baseband-guard**](https://github.com/vc-teahouse/Baseband-guard)
 - **Hybrid-Mount**, for [**Hybrid-Mount**](https://github.com/Hybrid-Mount/meta-hybrid_mount)
 - **maxsteeel**, for [**NoMount**](https://github.com/maxsteeel/nomount)
 
