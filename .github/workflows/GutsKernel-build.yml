@@ -25,10 +25,10 @@ on:
           type: boolean
           default: true
           
-        #femto-variant:
-          #description: "Femto / KernelSU-Next"
-          #type: boolean
-          #default: true
+        femto-variant:
+          description: "Femto / KernelSU-Next"
+          type: boolean
+          default: true
           
         zoro-variant:
           description: "Zoro / Baka-SU"
@@ -80,12 +80,21 @@ on:
           description: "Add BBR & BBRv3"
           type: boolean
           default: true
-        
-        vfs-support:
-          description: "Add VFS support for Hybrid Mount MetaModule"
+
+        mountify:
+          description: "Add Mountify Support"
           type: boolean
           default: true
-
+          
+        vfs-support:
+          description: "Add VFS support for selected MetaModule"
+          type: choice
+          options:
+            - Disabled
+            - NoMount
+            - Hybrid-Mount
+          default: Hybrid-Mount
+        
         battery-tweak:
           description: "EXPERIMENTAL battery tweak"
           type: boolean
@@ -155,6 +164,7 @@ jobs:
           enable-bbg: ${{ inputs.bbg }}
           enable-netsch: ${{ inputs.netsch }}
           enable-bbrv3: ${{ inputs.bbrv3 }}
+          mountify-support: ${{ inputs.mountify }}
           vfs-support: ${{ inputs.vfs-support }}
           battery-tweak: ${{ inputs.battery-tweak }}
 
