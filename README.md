@@ -28,7 +28,7 @@
   </tr>
   <tr>
     <td>🥀 <strong>Femto</strong></td>
-    <td>KSU-Next+SUSFS</td>
+    <td><strong>KSU-Next</strong> + <strong>SUSFS</strong><</td>
     <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, VFS Support</td>
   </tr>
   <tr>
