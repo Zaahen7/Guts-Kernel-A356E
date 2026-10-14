@@ -12,9 +12,14 @@ runs:
       shell: bash
       run: cp "$KERNEL_DIR/arch/arm64/boot/Image" "$ANYKERNEL3_DIR"
 
-    - name: Get build date
+    - name: Export metadata
+      id: meta
       shell: bash
-      run: echo "BUILD_DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+      run: |
+        BUILD_DATE=$(date +'%Y%m%d')
+        echo "BUILD_DATE=$BUILD_DATE" >> "$GITHUB_ENV"
+        echo "oneui_version=$ONEUI_VERSION" >> "$GITHUB_OUTPUT"
+        echo "build_date=$BUILD_DATE" >> "$GITHUB_OUTPUT"
 
     - name: Upload Kernel in Actions
       uses: actions/upload-artifact@v4
