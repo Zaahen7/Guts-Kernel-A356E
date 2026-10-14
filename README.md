@@ -47,6 +47,7 @@
 - **Toggle SUSFS** [**(?)**](https://gitlab.com/simonpunk/susfs4ksu)
 - **Toggle Baseband-Guard** - [**(?)**](https://github.com/vc-teahouse/Baseband-guard)
 - **Toggle Additional Network Schedulers** - Enables FQ, FQCODEL, PIE, FQPIE & CAKE net schedulers
+- **Toggle Wireguard**
 - **Toggle BBR & BBRv3 TCP Congestion Control Algorithms** - Manual configuration is still required
 - **Choose builtin VFS metamodule support** - [**Hybrid-Mount**](https://github.com/Hybrid-Mount/meta-hybrid_mount) or [**NoMount**](https://github.com/maxsteeel/nomount)
 
