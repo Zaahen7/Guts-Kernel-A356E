@@ -2,7 +2,6 @@
 name: Build GutsKernel
 permissions:
   contents: write
-  actions: write
   
 on:
   workflow_dispatch:
@@ -124,8 +123,17 @@ defaults:
     shell: bash
 
 jobs:
+  get-date:
+    runs-on: ubuntu-latest
+    outputs:
+      build_date: ${{ steps.date.outputs.build_date }}
+    steps:
+      - id: date
+        run: echo "build_date=$(date +'%Y%m%d')" >> "$GITHUB_OUTPUT"
+        
   build-kernel:
     name: GutsKernel One UI ${{ inputs.oneui-version }} - ${{ matrix.variant }}
+    needs: get-date
     if: ${{ inputs.puck-variant || inputs.zodd-variant || inputs.femto-variant || inputs.zoro-variant }}
     runs-on: ubuntu-latest
     strategy:
@@ -144,6 +152,7 @@ jobs:
           )) }}
     
     env:
+      BUILD_DATE: ${{ needs.get-date.outputs.build_date }}
       KERNEL_DIR: ${{ github.workspace }}/GutsKernel
       TOOLCHAIN_DIR: ${{ github.workspace }}/Toolchain
       ANYKERNEL3_DIR: ${{ github.workspace }}/Anykernel3
@@ -184,21 +193,37 @@ jobs:
         uses: ./.github/actions/upload-artifacts
         with:
           variant: ${{ matrix.variant }}
-
+          
   Artifacts2Release:
     name: Upload Artifacts to Release
-    needs: build-kernel
+    needs: [get-date, build-kernel]
     if: |
       inputs.release-type != 'Actions' &&
       needs.build-kernel.result == 'success'
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ github.token }}
+    permissions:
+      contents: write
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        
-      - name: Publish Artifacts to Release
-        uses: ./.github/actions/release-artifacts
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
         with:
+          pattern: GutsKernel*
+          path: build-artifacts
+
+      - name: Zip artifacts
+        run: |
+          cd build-artifacts
+          for d in */; do (cd "$d" && zip -r9 "../${d%/}.zip" .); done
+          
+      - name: Publish Artifacts to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v0.${{ inputs.oneui-version }}-${{ needs.get-date.outputs.build_date }}
+          target_commitish: ${{ github.sha }}
+          name: GutsKernel for A356E Oneui ${{ inputs.oneui-version }}
           prerelease: ${{ inputs.release-type == 'Prerelease' }}
+          make_latest: ${{ inputs.release-type == 'Release' }}
+          overwrite_files: true
+          fail_on_unmatched_files: true
+          files: build-artifacts/*.zip
+          
