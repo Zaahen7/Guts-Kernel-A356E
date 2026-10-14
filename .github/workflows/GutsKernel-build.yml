@@ -72,7 +72,7 @@ on:
           default: true
           
         netsch:
-          description: "Enable more NET schedulers & Wireguard support"
+          description: "Enable more NET schedulers"
           type: boolean
           default: true
           
