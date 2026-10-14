@@ -23,7 +23,7 @@
   </tr>
   <tr>
     <td>🗿 <strong>Zodd</strong></td>
-    <td><strong>KSU</strong> + SUSFS</strong></td>
+    <td><strong>KSU</strong> + <strong>SUSFS</strong></td>
     <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, VFS Support</td>
   </tr>
   <tr>
@@ -33,7 +33,7 @@
   </tr>
   <tr>
     <td>❓ <strong>Zoro</strong></td>
-    <td><strong>Baka-SU</strong> + SUSFS</strong></td>
+    <td><strong>Baka-SU</strong> + <strong>SUSFS</strong></td>
     <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, VFS Support</td>
   </tr>
 </table>
