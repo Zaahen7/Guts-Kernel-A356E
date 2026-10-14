@@ -18,22 +18,22 @@
   </tr>
   <tr>
     <td>🌸 <strong>Puck</strong></td>
-    <td>No root</td>
+    <td><strong>No root</strong></td>
     <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, VFS Support</td>
   </tr>
   <tr>
     <td>🗿 <strong>Zodd</strong></td>
-    <td>KSU+SUSFS</td>
+    <td><strong>KSU</strong> + SUSFS</strong></td>
     <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, VFS Support</td>
   </tr>
   <tr>
     <td>🥀 <strong>Femto</strong></td>
-    <td><strong>KSU-Next</strong> + <strong>SUSFS</strong><</td>
+    <td><strong>KSU-Next</strong> + <strong>SUSFS</strong></td>
     <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, VFS Support</td>
   </tr>
   <tr>
     <td>❓ <strong>Zoro</strong></td>
-    <td>Baka-SU+SUSFS</td>
+    <td><strong>Baka-SU</strong> + SUSFS</strong></td>
     <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, VFS Support</td>
   </tr>
 </table>
