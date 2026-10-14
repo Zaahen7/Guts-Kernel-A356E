@@ -12,12 +12,6 @@ runs:
       shell: bash
       run: cp "$KERNEL_DIR/arch/arm64/boot/Image" "$ANYKERNEL3_DIR"
 
-    - name: Get Build Date
-      shell: bash
-      run: |
-        BUILD_DATE=$(date +'%Y%m%d')
-        echo "BUILD_DATE=$BUILD_DATE" >> "$GITHUB_ENV"
-
     - name: Upload Kernel in Actions
       uses: actions/upload-artifact@v4
       with:
