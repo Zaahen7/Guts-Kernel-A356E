@@ -63,8 +63,8 @@ runs:
             echo "Zodd variant selected. Installing KernelSU from tiann..."
             curl -fLSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
             ;;
-          Femto)
-            echo "Femto variant selected. Installing KernelSU-Next..."
+          Griff)
+            echo "Griff variant selected. Installing KernelSU-Next..."
             if [[ "${{ inputs.enable-susfs }}" == "true" ]]; then
               echo "Using pershoot repo."
               curl -fLSs "https://raw.githubusercontent.com/pershoot/KernelSU-Next/refs/heads/dev-susfs/kernel/setup.sh" | bash -
@@ -100,7 +100,7 @@ runs:
             echo "Puck variant selected. SUSFS is not supported for Puck."
             exit 0
             ;;
-          Zodd|Femto|Zoro)
+          Zodd|Griff|Zoro)
             echo "Installing SUSFS..."
             ;;
           *)
