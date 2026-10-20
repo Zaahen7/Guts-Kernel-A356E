@@ -85,7 +85,7 @@ on:
           type: boolean
           default: true
           
-        extended-tmpfs:
+        ext-tmpfs:
           description: "Add Mountify Support"
           type: boolean
           default: true
@@ -179,7 +179,7 @@ jobs:
           enable-netsch: ${{ inputs.netsch }}
           enable-wireguard: ${{ inputs.wireguard }}
           enable-bbrv3: ${{ inputs.bbrv3 }}
-          enable-extended-tmpfs: ${{ inputs.extended-tmpfs }}
+          extended-tmpfs: ${{ inputs.ext-tmpfs }}
           vfs-support: ${{ inputs.vfs-support }}
           battery-tweak: ${{ inputs.battery-tweak }}
 
