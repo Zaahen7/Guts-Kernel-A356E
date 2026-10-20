@@ -7,7 +7,7 @@
 </div>
 
 > [!CAUTION]
-> I am not responsible for any bricked devices, hardware damage, data loss, or other issues that may occur while using or flashing this kernel. By choosing to flash this kernel, you acknowledge and accept all associated risks. You are solely responsible for any consequences resulting from its use. Flash at your own risk!
+> **I am not responsible for any bricked devices, hardware damage, data loss, or other issues that may occur while using or flashing this kernel. By choosing to flash this kernel, you acknowledge and accept all associated risks. You are solely responsible for any consequences resulting from its use. Flash at your own risk!**
 
 <div align="center">
 <table>
@@ -25,12 +25,12 @@
     <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, Extended-tmpfs & HM VFS Support</td>
   </tr>
   <tr>
-    <td>🗿 <strong>Zodd</strong></td>
+    <td>👹 <strong>Zodd</strong></td>
     <td><strong>KSU + SUSFS</strong></td>
     <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, Extended-tmpfs & HM VFS Support</td>
   </tr>
   <tr>
-    <td>🥀 <strong>Femto</strong></td>
+    <td>🦅 <strong>Griff</strong></td>
     <td><strong>KSU-Next + SUSFS</strong></td>
     <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, Extended-tmpfs & HM VFS Support</td>
   </tr>
