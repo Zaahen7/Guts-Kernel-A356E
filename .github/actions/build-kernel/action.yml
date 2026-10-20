@@ -76,8 +76,8 @@ runs:
         export TARGET_SOC=s5e8835
 
         case "${{ inputs.variant }}" in
-          Puck|Zodd|Femto|Zoro)
-            export LOCALVERSION="-GutsKernel-${{ inputs.variant }}"
+          Puck|Zodd|Griff|Zoro)
+            export LOCALVERSION="-GK-${{ inputs.variant }}"
             ;;
           *)
             echo "Error: Unknown kernel variant: ${{ inputs.variant }}"
