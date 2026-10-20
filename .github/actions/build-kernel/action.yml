@@ -77,7 +77,7 @@ runs:
 
         case "${{ inputs.variant }}" in
           Puck|Zodd|Griff|Zoro)
-            export LOCALVERSION="-GK-${{ inputs.variant }}"
+            export LOCALVERSION="-GutsKernel-${{ inputs.variant }}"
             ;;
           *)
             echo "Error: Unknown kernel variant: ${{ inputs.variant }}"
