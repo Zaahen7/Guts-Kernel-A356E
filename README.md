@@ -22,22 +22,22 @@
   <tr>
     <td>🌸 <strong>Puck</strong></td>
     <td><strong>No root</strong></td>
-    <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, Extended-tmpfs & HM VFS Support</td>
+    <td>Removed Securities, Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, Extended-tmpfs & HM VFS Support</td>
   </tr>
   <tr>
     <td>👹 <strong>Zodd</strong></td>
     <td><strong>KSU + SUSFS</strong></td>
-    <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, Extended-tmpfs & HM VFS Support</td>
+    <td>Removed Securities, Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, Extended-tmpfs & HM VFS Support</td>
   </tr>
   <tr>
     <td>🦅 <strong>Griff</strong></td>
     <td><strong>KSU-Next + SUSFS</strong></td>
-    <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, Extended-tmpfs & HM VFS Support</td>
+    <td>Removed Securities, Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, Extended-tmpfs & HM VFS Support</td>
   </tr>
   <tr>
     <td>❓ <strong>Zoro</strong></td>
     <td><strong>Baka-SU + SUSFS</strong></td>
-    <td>Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, Extended-tmpfs & HM VFS Support</td>
+    <td>Removed Securities, Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, Extended-tmpfs & HM VFS Support</td>
   </tr>
 </table>
 </div>
