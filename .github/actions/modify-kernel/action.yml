@@ -16,8 +16,8 @@ inputs:
     description: "Enable Wireguard"
   enable-bbrv3:
     description: "Enable BBR & BBRv3"
-  mountify-support:
-    description: "Enable Mountify Support"
+  extended-tmpfs:
+    description: "Enable extended TMPFS support for meta modules and Mountify"
   vfs-support:
     description: "Add VFS support for selected MetaModule"
   battery-tweak:
@@ -211,11 +211,11 @@ runs:
           --enable CONFIG_TCP_CONG_BBR3
         echo "Done :v"
         
-    - name: Enable Mountify Support
-      if: ${{ inputs.mountify-support }}
+    - name: Enable extended TMPFS support for meta modules and Mountify
+      if: ${{ inputs.extended-tmpfs }}
       shell: bash
       run: |
-        echo "Adding Mountify Support..."
+        echo "Adding extended TMPFS support for meta modules and Mountify..."
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" \
           --enable CONFIG_OVERLAY_FS \
           --enable CONFIG_TMPFS_XATTR \
