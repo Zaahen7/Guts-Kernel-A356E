@@ -24,8 +24,8 @@ on:
           type: boolean
           default: true
           
-        femto-variant:
-          description: "Femto / KernelSU-Next"
+        griff-variant:
+          description: "Griff / KernelSU-Next"
           type: boolean
           default: true
           
@@ -134,7 +134,7 @@ jobs:
   build-kernel:
     name: GutsKernel One UI ${{ inputs.oneui-version }} - ${{ matrix.variant }}
     needs: get-date
-    if: ${{ inputs.puck-variant || inputs.zodd-variant || inputs.femto-variant || inputs.zoro-variant }}
+    if: ${{ inputs.puck-variant || inputs.zodd-variant || inputs.griff-variant || inputs.zoro-variant }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -144,11 +144,11 @@ jobs:
             '[{0}{1}{2}{3}]',
             inputs.puck-variant && '"Puck"' ||
               inputs.zodd-variant && '"Zodd"' ||
-              inputs.femto-variant && '"Femto"' ||
+              inputs.griff-variant && '"Griff"' ||
               inputs.zoro-variant && '"Zoro"' || '"Puck"',
             inputs.zodd-variant && inputs.puck-variant && ',"Zodd"' || '',
-            inputs.femto-variant && (inputs.puck-variant || inputs.zodd-variant) && ',"Femto"' || '',
-            inputs.zoro-variant && (inputs.puck-variant || inputs.zodd-variant || inputs.femto-variant) && ',"Zoro"' || ''
+            inputs.griff-variant && (inputs.puck-variant || inputs.zodd-variant) && ',"Griff"' || '',
+            inputs.zoro-variant && (inputs.puck-variant || inputs.zodd-variant || inputs.griff-variant) && ',"Zoro"' || ''
           )) }}
     
     env:
