@@ -137,14 +137,9 @@ runs:
         cp -v "$SUSFS_DIR/kernel_patches/include/linux/"*.h "$KERNEL_DIR/include/linux/"
         cp -v "$SUSFS_DIR/kernel_patches/50_add_susfs_in_gki-android13-5.15.patch" "$KERNEL_DIR"
         
-        if [ "$ONEUI_VERSION" = "8.5" ]; then
-          patch -p1 < "$GITHUB_ACTION_PATH/susfs_prepare_a35_1ui85.patch"
-          echo "Adjusting SUSFS patch context."
-          python3 "$GITHUB_ACTION_PATH/adjust_susfs_patch_a35.py" "$KERNEL_DIR/50_add_susfs_in_gki-android13-5.15.patch" || exit 1
-        else
-            echo "Unsupported One UI version: $ONEUI_VERSION. SUSFS installation skipped."
-            exit 1
-        fi
+        python3 "$GITHUB_ACTION_PATH/adjust_susfs_patch_a35.py" \
+          "$KERNEL_DIR" \
+          "$KERNEL_DIR/50_add_susfs_in_gki-android13-5.15.patch"
         
         patch -p1 < "50_add_susfs_in_gki-android13-5.15.patch"
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_KSU_SUSFS
