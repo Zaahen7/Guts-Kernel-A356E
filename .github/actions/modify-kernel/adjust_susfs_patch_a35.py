@@ -148,9 +148,9 @@ def main():
         parser.error("ONEUI_VERSION environment variable is required")
 
     try:
-        patch_content = prepare_susfs_patch(susfs_patch.read_text())
         if oneui_version == "8.5":
             prepare_oneui_85_kernel(kernel_dir)
+        patch_content = prepare_susfs_patch(susfs_patch.read_text())
         susfs_patch.write_text(patch_content)
     except (OSError, ValueError) as error:
         print(f"ERROR: Failed to prepare SUSFS: {error}", file=sys.stderr)
