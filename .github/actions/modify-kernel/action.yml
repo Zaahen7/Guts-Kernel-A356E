@@ -138,9 +138,22 @@ runs:
         cp -v "$SUSFS_DIR/kernel_patches/50_add_susfs_in_gki-android13-5.15.patch" "$KERNEL_DIR"
         
         #python3 "$GITHUB_ACTION_PATH/adjust_susfs_patch_a35.py" "$KERNEL_DIR" "$KERNEL_DIR/50_add_susfs_in_gki-android13-5.15.patch"
-        python3 "$GITHUB_ACTION_PATH/check.py" "$KERNEL_DIR"
         
-        patch -p1 < "50_add_susfs_in_gki-android13-5.15.patch"
+        PATCH_STATUS=0
+        patch -p1 < "50_add_susfs_in_gki-android13-5.15.patch" || PATCH_STATUS=$?
+        echo "patch terminó con código: $PATCH_STATUS"
+
+        # Mostrar los .rej (se ejecuta aunque patch haya fallado)
+        echo "::group::Archivos .rej"
+        python3 "$GITHUB_ACTION_PATH/find_rej.py" "$KERNEL_DIR"
+        echo "::endgroup::"
+
+        # Ahora sí, fallar el paso si el patch falló
+        if [ "$PATCH_STATUS" -ne 0 ]; then
+            echo "::error::El patch de SUSFS falló, revisa los .rej arriba"
+            exit 1
+        fi
+        
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_KSU_SUSFS
         echo "SUSFS Installed."
         
