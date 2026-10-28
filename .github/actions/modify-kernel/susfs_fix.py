@@ -32,9 +32,14 @@ edit("50_add_susfs_in_gki-android13-5.15.patch",
 edit("50_add_susfs_in_gki-android13-5.15.patch",
     '#include "internal.h"\n #include <trace/hooks/blk.h>',
     '#include "internal.h"')
+
 edit("50_add_susfs_in_gki-android13-5.15.patch",
-    "hlist_for_each_entry_rcu(p, head, mnt_hash)\n\t\tif (&p->mnt_parent->mnt == mnt && p->mnt_mountpoint == dentry)\n\t\t\treturn p;",
-    "hlist_for_each_entry_rcu(p, head, mnt_hash)\n #ifdef CONFIG_KDP_NS\n\t\tif (((struct kdp_mount *)(p->mnt_parent))->mnt == mnt && p->mnt_mountpoint == dentry)\n #else")
+"""hlist_for_each_entry_rcu(p, head, mnt_hash)
+ \t\tif (&p->mnt_parent->mnt == mnt && p->mnt_mountpoint == dentry)
+ \t\t\treturn p;""",
+"""hlist_for_each_entry_rcu(p, head, mnt_hash)
+ #ifdef CONFIG_KDP_NS
+ \t\tif (((struct kdp_mount *)(p->mnt_parent))->mnt == mnt && p->mnt_mountpoint == dentry)""")
 edit("50_add_susfs_in_gki-android13-5.15.patch",
     "struct super_block *sb = old->mnt.mnt_sb;",
     "#endif")
