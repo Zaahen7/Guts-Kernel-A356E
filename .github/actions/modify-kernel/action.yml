@@ -125,6 +125,15 @@ runs:
             KSU_PATCH_STATUS=0
             patch -p1 < "10_enable_susfs_for_ksu.patch" || KSU_PATCH_STATUS=$?
             echo "10_enable_susfs_for_ksu.patch ended code: $KSU_PATCH_STATUS"
+
+            if [ "$KSU_PATCH_STATUS" -ne 0 ]; then
+                echo "::group::Archivos .rej"
+                python3 "$GITHUB_ACTION_PATH/rej-files-check.py" "$KERNEL_DIR"
+                echo "::endgroup::"
+                
+                echo "::error::KSU patch failed, review the .rej files above."
+                exit 1
+            fi
         else
             echo "${{ inputs['kernel-variant'] }} variant detected. Using latest SUSFS."
             git init
@@ -147,16 +156,11 @@ runs:
         patch -p1 < "50_add_susfs_in_gki-android13-5.15.patch" || PATCH_STATUS=$?
         echo "50_add_susfs_in_gki-android13-5.15.patch ended code: $PATCH_STATUS"
         
-        echo "::group::Archivos .rej"
-        python3 "$GITHUB_ACTION_PATH/rej-files-check.py" "$KERNEL_DIR"
-        echo "::endgroup::"
-        
-        if [ "$KSU_PATCH_STATUS" -ne 0 ]; then
-            echo "::error::KSU patch failed, review the .rej files above."
-            exit 1
-        fi
-        
         if [ "$PATCH_STATUS" -ne 0 ]; then
+            echo "::group::Archivos .rej"
+            python3 "$GITHUB_ACTION_PATH/rej-files-check.py" "$KERNEL_DIR"
+            echo "::endgroup::"
+            
             echo "::error::SUSFS patch failed, Review the .rej files above."
             exit 1
         fi
