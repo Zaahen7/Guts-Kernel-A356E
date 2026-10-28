@@ -145,7 +145,7 @@ runs:
 
         # Mostrar los .rej (se ejecuta aunque patch haya fallado)
         echo "::group::Archivos .rej"
-        python3 "$GITHUB_ACTION_PATH/find_rej.py" "$KERNEL_DIR"
+        python3 "$GITHUB_ACTION_PATH/check.py" "$KERNEL_DIR"
         echo "::endgroup::"
 
         # Ahora sí, fallar el paso si el patch falló
