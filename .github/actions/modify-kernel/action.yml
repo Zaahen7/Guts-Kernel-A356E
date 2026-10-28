@@ -122,18 +122,9 @@ runs:
             
             cp "$SUSFS_DIR/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch" "$KERNEL_DIR/KernelSU/"
             cd "$KERNEL_DIR/KernelSU"
-            PATCH_STATUS=0
-            patch -p1 < "10_enable_susfs_for_ksu.patch" || PATCH_STATUS=$?
-            echo "10_enable_susfs_for_ksu.patch ended code: $PATCH_STATUS"
-
-            echo "::group::Archivos .rej"
-            python3 "$GITHUB_ACTION_PATH/rej-files-check.py" "$KERNEL_DIR"
-            echo "::endgroup::"
-
-            if [ "$PATCH_STATUS" -ne 0 ]; then
-              echo "::error::KSU SUSFS patch failed, Review the .rej files above."
-              exit 1
-            fi
+            KSU_PATCH_STATUS=0
+            patch -p1 < "10_enable_susfs_for_ksu.patch" || KSU_PATCH_STATUS=$?
+            echo "10_enable_susfs_for_ksu.patch ended code: $KSU_PATCH_STATUS"
         else
             echo "${{ inputs['kernel-variant'] }} variant detected. Using latest SUSFS."
             git init
@@ -142,25 +133,29 @@ runs:
             git checkout FETCH_HEAD
         fi
         echo "::endgroup::"
-
-        echo "::group::Installing SUSFS :v"
+        
         cd "$KERNEL_DIR"
         cp "$SUSFS_DIR/kernel_patches/fs/"*.c "$KERNEL_DIR/fs/" && echo "Copied SUSFS .c files successfully"
         cp "$SUSFS_DIR/kernel_patches/include/linux/"*.h "$KERNEL_DIR/include/linux/" && echo "Copied SUSFS .h files successfully"
         cp "$SUSFS_DIR/kernel_patches/50_add_susfs_in_gki-android13-5.15.patch" "$KERNEL_DIR" && echo "Copied SUSFS patch successfully"
-
-        echo "Adjusting SUSFS patch for kernel compatibility..."
+        
+        echo "::group::Adjusting SUSFS patch for kernel compatibility..."
         python3 "$GITHUB_ACTION_PATH/susfs_fix.py"
-        echo "Done :y"
+        echo "::endgroup::"
         
         PATCH_STATUS=0
         patch -p1 < "50_add_susfs_in_gki-android13-5.15.patch" || PATCH_STATUS=$?
         echo "50_add_susfs_in_gki-android13-5.15.patch ended code: $PATCH_STATUS"
-
+        
         echo "::group::Archivos .rej"
         python3 "$GITHUB_ACTION_PATH/rej-files-check.py" "$KERNEL_DIR"
         echo "::endgroup::"
-
+        
+        if [ "$KSU_PATCH_STATUS" -ne 0 ]; then
+            echo "::error::KSU patch failed, review the .rej files above."
+            exit 1
+        fi
+        
         if [ "$PATCH_STATUS" -ne 0 ]; then
             echo "::error::SUSFS patch failed, Review the .rej files above."
             exit 1
@@ -168,7 +163,6 @@ runs:
         
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_KSU_SUSFS
         echo "SUSFS Installed."
-        echo "::endgroup::"
         
     - name: Apply Kernel Optimization Patches
       if: ${{ inputs.apply-kpatches }}
