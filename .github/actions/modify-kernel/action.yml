@@ -136,7 +136,9 @@ runs:
         cp -v "$SUSFS_DIR/kernel_patches/fs/"*.c "$KERNEL_DIR/fs/"
         cp -v "$SUSFS_DIR/kernel_patches/include/linux/"*.h "$KERNEL_DIR/include/linux/"
         cp -v "$SUSFS_DIR/kernel_patches/50_add_susfs_in_gki-android13-5.15.patch" "$KERNEL_DIR"
-        
+
+        echo "Prepare Kernel Source for SUSFS"
+        python3 "$GITHUB_ACTION_PATH/susfs_fix.py" "$KERNEL_DIR"
         #python3 "$GITHUB_ACTION_PATH/adjust_susfs_patch_a35.py" "$KERNEL_DIR" "$KERNEL_DIR/50_add_susfs_in_gki-android13-5.15.patch"
         
         PATCH_STATUS=0
