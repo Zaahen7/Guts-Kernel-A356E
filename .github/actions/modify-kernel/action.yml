@@ -83,7 +83,7 @@ runs:
             ;;
           FINASU)
             echo "Installing Fina-SU..."
-            curl -fLSs "https://raw.githubusercontent.com/LyraVoid/FinaSU/maaster/kernel/setup.sh" | bash
+            curl -fLSs "https://raw.githubusercontent.com/LyraVoid/FinaSU/refs/heads/master/kernel/setup.sh" | bash
             ;;
           *)
             echo "No KernelSU variant selected or unknown variant."
