@@ -86,7 +86,7 @@ runs:
         echo "Done :v"
         
     - name: Enable SUSFS
-      if: ${{ inputs.enable-susfs }}
+      if: ${{ inputs.enable-susfs == 'true' }}
       shell: bash
       env:
         SUSFS_DIR: ${{ github.workspace }}/susfs4ksu
@@ -169,7 +169,7 @@ runs:
         echo "SUSFS Installed."
         
     - name: Apply Kernel Optimization Patches
-      if: ${{ inputs.apply-kpatches }}
+      if: ${{ inputs.apply-kpatches == 'true' }}
       shell: bash
       env:
         KPATCHES_DIR: ${{ github.workspace }}/patches
@@ -183,7 +183,7 @@ runs:
         echo "Done :v"
         
     - name: Enable Baseband Guard
-      if: ${{ inputs.enable-bbg }}
+      if: ${{ inputs.enable-bbg == 'true' }}
       shell: bash
       run: |
         echo "Enabling Baseband Guard..."
@@ -197,7 +197,7 @@ runs:
         echo "Done :v"
         
     - name: Enable more NET schedulers
-      if: ${{ inputs.enable-netsch }}
+      if: ${{ inputs.enable-netsch == 'true' }}
       shell: bash
       run: |
         echo "Enabling more Network Schedulers..."
@@ -210,7 +210,7 @@ runs:
         echo "Done :v"
         
     - name: Enable Wireguard
-      if: ${{ inputs.enable-wireguard }}
+      if: ${{ inputs.enable-wireguard == 'true' }}
       shell: bash
       run: |
         echo "Enabling Wireguard..."
@@ -218,7 +218,7 @@ runs:
         echo "Done :v"
         
     - name: Enable BBR & BBRv3
-      if: ${{ inputs.enable-bbrv3 }}
+      if: ${{ inputs.enable-bbrv3 == 'true' }}
       shell: bash
       run: |
         cd "$KERNEL_DIR"
@@ -230,7 +230,7 @@ runs:
         echo "Done :v"
         
     - name: Enable extended TMPFS support for meta modules and Mountify
-      if: ${{ inputs.extended-tmpfs }}
+      if: ${{ inputs.extended-tmpfs == 'true' }}
       shell: bash
       run: |
         echo "Adding extended TMPFS support for meta modules and Mountify..."
@@ -262,7 +262,7 @@ runs:
         echo "Done :v"
         
     - name: Apply EXPERIMENTAL battery tweak
-      if: ${{ inputs.battery-tweak }}
+      if: ${{ inputs.battery-tweak == 'true' }}
       shell: bash
       run: |
         echo "Enabling EXPERIMENTAL battery tweak..." 
