@@ -14,26 +14,31 @@ on:
           default: "Check the kernel variant below"
           required: true
 
-        puck-variant:
-          description: "Puck / Clean"
+        clean-variant:
+          description: "Clean"
           type: boolean
           default: true
           
-        zodd-variant:
-          description: "Zodd / KernelSU from tiann"
+        ksu-variant:
+          description: "KernelSU from tiann"
           type: boolean
           default: true
           
-        griff-variant:
-          description: "Griff / KernelSU-Next"
+        ksun-variant:
+          description: "KernelSU-Next"
           type: boolean
           default: true
           
-        zoro-variant:
-          description: "Zoro / Baka-SU"
+        bakasu-variant:
+          description: "Baka-SU"
           type: boolean
           default: true
-          
+
+        finasu-variant:
+          description: "Fina-SU"
+          type: boolean
+          default: true
+        
         oneui-version:
           description: "One UI Version"
           required: true
@@ -134,21 +139,23 @@ jobs:
   build-kernel:
     name: GutsKernel One UI ${{ inputs.oneui-version }} - ${{ matrix.variant }}
     needs: get-date
-    if: ${{ inputs.puck-variant || inputs.zodd-variant || inputs.griff-variant || inputs.zoro-variant }}
+    if: ${{ inputs.clean-variant || inputs.ksu-variant || inputs.ksun-variant || inputs.bakasu-variant || inputs.finasu-variant }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         variant: >-
           ${{ fromJSON(format(
-            '[{0}{1}{2}{3}]',
-            inputs.puck-variant && '"Puck"' ||
-              inputs.zodd-variant && '"Zodd"' ||
-              inputs.griff-variant && '"Griff"' ||
-              inputs.zoro-variant && '"Zoro"' || '"Puck"',
-            inputs.zodd-variant && inputs.puck-variant && ',"Zodd"' || '',
-            inputs.griff-variant && (inputs.puck-variant || inputs.zodd-variant) && ',"Griff"' || '',
-            inputs.zoro-variant && (inputs.puck-variant || inputs.zodd-variant || inputs.griff-variant) && ',"Zoro"' || ''
+            '[{0}{1}{2}{3}{4}]',
+            inputs.clean-variant && '"CLEAN"' ||
+              inputs.ksu-variant && '"KSU"' ||
+              inputs.ksun-variant && '"KSUN"' ||
+              inputs.bakasu-variant && '"BAKASU"' ||
+              inputs.finasu-variant && '"FINASU"' ||  '"CLEAN"',
+            inputs.ksu-variant && inputs.clean-variant && ',"KSU"' || '',
+            inputs.ksun-variant && (inputs.clean-variant || inputs.ksu-variant) && ',"KSUN"' || '',
+            inputs.bakasu-variant && (inputs.clean-variant || inputs.ksu-variant || inputs.ksun-variant) && ',"BAKASU"' || '',
+            inputs.finasu-variant && (inputs['clean-variant'] || inputs['ksu-variant'] || inputs['ksun-variant'] || inputs['bakasu-variant']) && ',"FINASU"' || ''
           )) }}
     
     env:
