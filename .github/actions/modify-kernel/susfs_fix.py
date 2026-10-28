@@ -20,16 +20,16 @@ edit("50_add_susfs_in_gki-android13-5.15.patch",
     "@@ -65,6 +65,9 @@",
     "@@ -65,7 +65,10 @@")
 edit("50_add_susfs_in_gki-android13-5.15.patch",
-    "#include <linux/syscall_user_dispatch.h>\n",
-    "#include <linux/syscall_user_dispatch.h>\n #include <linux/task_integrity.h>\n")
+    "#include <linux/syscall_user_dispatch.h>",
+    "#include <linux/syscall_user_dispatch.h>\n #include <linux/task_integrity.h>")
 
 # --- fs/namespace.c ---
 edit("50_add_susfs_in_gki-android13-5.15.patch",
     "@@ -32,11 +32,21 @@",
     "@@ -32,15 +32,25 @@")
 edit("50_add_susfs_in_gki-android13-5.15.patch",
-    "#include <linux/mnt_idmapping.h>\n",
-    "#include <linux/mnt_idmapping.h>\n #include <linux/delay.h>\n #include <linux/fslog.h>\n #ifdef CONFIG_KDP_NS\n #include <linux/kdp.h>\n #endif\n")
+    "#include <linux/mnt_idmapping.h>",
+    "#include <linux/mnt_idmapping.h>\n #include <linux/delay.h>\n #include <linux/fslog.h>\n #ifdef CONFIG_KDP_NS\n #include <linux/kdp.h>\n #endif")
 edit("50_add_susfs_in_gki-android13-5.15.patch",
-    '#include "internal.h"\n #include <trace/hooks/blk.h>\n',
-    '#include "internal.h"\n')
+    '#include "internal.h"\n #include <trace/hooks/blk.h>',
+    '#include "internal.h"')
