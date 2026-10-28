@@ -158,6 +158,8 @@ runs:
         
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_KSU_SUSFS
         echo "SUSFS Installed."
+        echo "LOL"
+        exit 1
         
     - name: Apply Kernel Optimization Patches
       if: ${{ inputs.apply-kpatches }}
