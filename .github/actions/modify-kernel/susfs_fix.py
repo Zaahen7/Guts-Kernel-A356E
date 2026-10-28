@@ -66,9 +66,9 @@ edit("50_add_susfs_in_gki-android13-5.15.patch",
 
 # --- fs/proc/task_mmu.c ---
 # Hunk #1
-edit("",
+edit("50_add_susfs_in_gki-android13-5.15.patch",
     "#include <linux/pkeys.h>\n #include <trace/hooks/mm.h>",
     "#include <linux/pkeys.h>")
-edit("",
+edit("50_add_susfs_in_gki-android13-5.15.patch",
     "#include <asm/tlb.h>",
     "#include <asm/tlb.h>\n #include <asm/tlbflush.h>")
