@@ -26,16 +26,10 @@ edit("50_add_susfs_in_gki-android13-5.15.patch",
 # --- fs/namespace.c ---
 edit("50_add_susfs_in_gki-android13-5.15.patch",
     "@@ -32,11 +32,21 @@",
-    "@@ -32,15 +32,21 @@")
+    "@@ -32,15 +32,25 @@")
 edit("50_add_susfs_in_gki-android13-5.15.patch",
     "#include <linux/mnt_idmapping.h>\n",
-    """#include <linux/mnt_idmapping.h>\n
-    #include <linux/delay.h>\n
-    #include <linux/fslog.h>\n
-    #ifdef CONFIG_KDP_NS\n
-    #include <linux/kdp.h>\n
-    #endif\n
-    """)
+    "#include <linux/mnt_idmapping.h>\n #include <linux/delay.h>\n #include <linux/fslog.h>\n #ifdef CONFIG_KDP_NS\n #include <linux/kdp.h>\n #endif\n")
 edit("50_add_susfs_in_gki-android13-5.15.patch",
-    '#include "internal.h"\n #include <trace/hooks/blk.h>',
+    '#include "internal.h"\n #include <trace/hooks/blk.h>\n',
     '#include "internal.h"\n')
