@@ -9,6 +9,9 @@ def edit(path, old, new):
     if old not in t:
         print(f"[ERROR]  {path}:\n{old}")
         sys.exit(1)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(t.replace(old, new, 1))
+    print(f"[ok] {path}")
 
 
 # --------- KERNEL CHANGES ---------
@@ -29,6 +32,11 @@ edit("fs/namespace.c",
 edit("fs/namespace.c",
     "#include <linux/mnt_idmapping.h>\n" + blk,
     "#include <linux/mnt_idmapping.h>\n")
+
+# --- fs/open.c ---
+edit("fs/open.c",
+    "struct file *f = do_filp_open(dfd, tmp, &op);\n\n#ifdef CONFIG_SECURITY_DEFEX",
+    "struct file *f = do_filp_open(dfd, tmp, &op);\n#ifdef CONFIG_SECURITY_DEFEX")
 
 # --- fs/proc/base.c ---
 edit("fs/proc/base.c",
