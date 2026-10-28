@@ -37,5 +37,5 @@ edit("50_add_susfs_in_gki-android13-5.15.patch",
     #endif\n
     """)
 edit("50_add_susfs_in_gki-android13-5.15.patch",
-    '#include "internal.h"\n #include <trace/hooks/blk.h>'
+    '#include "internal.h"\n #include <trace/hooks/blk.h>',
     '#include "internal.h"\n')
