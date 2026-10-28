@@ -58,3 +58,17 @@ edit("50_add_susfs_in_gki-android13-5.15.patch",
  \tnew = copy_tree(old, ((struct kdp_mount *)old)->mnt->mnt_root, copy_flags);
  #else""")
 
+# --- fs/proc/base.c ---
+# Hunk #1
+edit("50_add_susfs_in_gki-android13-5.15.patch",
+    "#include <linux/resctrl.h>\n #include <linux/cn_proc.h>\n #include <linux/cpufreq_times.h>",
+    "#include <linux/proca.h>\n #include <linux/cpufreq_times.h>\n #include <linux/cn_proc.h>")
+
+# --- fs/proc/task_mmu.c ---
+# Hunk #1
+edit("",
+    "#include <linux/pkeys.h>\n #include <trace/hooks/mm.h>",
+    "#include <linux/pkeys.h>")
+edit("",
+    "#include <asm/tlb.h>",
+    "#include <asm/tlb.h>\n #include <asm/tlbflush.h>")
