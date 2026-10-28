@@ -43,5 +43,5 @@ edit("50_add_susfs_in_gki-android13-5.15.patch",
     "/* First pass: copy the tree topology */")
 edit("50_add_susfs_in_gki-android13-5.15.patch",
     "new = copy_tree(old, old->mnt.mnt_root, copy_flags);\n\tif (IS_ERR(new)) {\n\t\tnamespace_unlock();",
-    " #ifdef CONFIG_KDP_NS\n\tnew = copy_tree(old, ((struct kdp_mount *)old)->mnt->mnt_root, copy_flags);"
+    " #ifdef CONFIG_KDP_NS\n\tnew = copy_tree(old, ((struct kdp_mount *)old)->mnt->mnt_root, copy_flags);")
 
