@@ -6,11 +6,6 @@ inputs:
     description: "Link Time Optimization(LTO) Mode"
     required: true
 
-  variant:
-    description: "Kernel variant used in LOCALVERSION"
-    required: false
-    default: "stock"
-
 runs:
   using: composite
   steps:
@@ -66,7 +61,7 @@ runs:
         export HOSTLDFLAGS="-L $(pwd)/toolchain/prebuilts/kernel-build-tools/linux-x86/lib64 \
             -Wl,-rpath,$(pwd)/toolchain/prebuilts/kernel-build-tools/linux-x86/lib64 \
             -fuse-ld=lld --rtlib=compiler-rt"
-
+        
         export DTC_FLAGS="-@"
         export PLATFORM_VERSION=13
         export ANDROID_MAJOR_VERSION=t
@@ -74,17 +69,8 @@ runs:
         export DEPMOD=depmod
         export ARCH=arm64
         export TARGET_SOC=s5e8835
-
-        case "${{ inputs.variant }}" in
-          Puck|Zodd|Griff|Zoro)
-            export LOCALVERSION="-GutsKernel-${{ inputs.variant }}"
-            ;;
-          *)
-            echo "Error: Unknown kernel variant: ${{ inputs.variant }}"
-            exit 1
-            ;;
-        esac
-
+        export LOCALVERSION="-GutsKernel"
+        
         if [[ "${{ inputs.lto-mode }}" == "Full" ]]; then
           LTO=full make s5e8835-a35xjvxx_defconfig
           LTO=full make -j"$(nproc)" Image
