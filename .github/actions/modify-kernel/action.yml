@@ -66,12 +66,16 @@ runs:
           Griff)
             echo "Griff variant selected. Installing KernelSU-Next..."
             if [[ "${{ inputs.enable-susfs }}" == "true" ]]; then
-              echo "Using pershoot repo."
+              echo "Using pershoot repo for SUSFS support."
               curl -fLSs "https://raw.githubusercontent.com/pershoot/KernelSU-Next/refs/heads/dev-susfs/kernel/setup.sh" | bash -
-              echo "SUSFS enabled"
+            else
+              echo "Using official repo."
+              curl -fLSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -
             fi
-            echo "Using official repo."
-            curl -fLSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -
+            "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --disable CONFIG_KSU_SAMSUNG_KDP
+            "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --disable CONFIG_KSU_SAMSUNG_RKP
+            "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --disable CONFIG_KSU_SAMSUNG_DEFEX
+            "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --disable CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT
             ;;
           Zoro)
             echo "Zoro variant selected. Installing Baka-SU..."
