@@ -249,7 +249,7 @@ runs:
         echo "Done :v"
         
     - name: Add VFS support for Hybrid Mount MetaModule
-      if: ${{ inputs.vfs-support != 'Disabled' }}
+      if: ${{ inputs['vfs-support'] != 'Disabled' && inputs['kernel-variant'] != 'FINASU' }}
       shell: bash
       env:
         METAMODULE: ${{ inputs.vfs-support }}
