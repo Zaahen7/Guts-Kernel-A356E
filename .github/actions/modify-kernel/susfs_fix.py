@@ -14,34 +14,28 @@ def edit(path, old, new):
     print(f"[ok] {path}")
 
 
-# --------- KERNEL CHANGES ---------
+# --------- ADJUST SUSFS .PATCH ---------
 # --- fs/exec.c ---
-edit("fs/exec.c",
-    "#include <linux/binfmts.h>\n#include <linux/utsname.h>\n",
-    "#include <linux/binfmts.h>\n#include <linux/task_integrity.h>\n#include <linux/utsname.h>\n")
-edit("fs/exec.c",
-    "#include <linux/syscall_user_dispatch.h>\n#include <linux/task_integrity.h>\n",
-    "#include <linux/syscall_user_dispatch.h>\n")
+edit("50_add_susfs_in_gki-android13-5.15.patch",
+    "@@ -65,6 +65,9 @@",
+    "@@ -65,7 +65,10 @@")
+edit("50_add_susfs_in_gki-android13-5.15.patch",
+    "#include <linux/syscall_user_dispatch.h>\n",
+    "#include <linux/syscall_user_dispatch.h>\n #include <linux/task_integrity.h>\n")
 
 # --- fs/namespace.c ---
-blk = ("#include <linux/delay.h>\n#include <linux/fslog.h>\n"
-       "#ifdef CONFIG_KDP_NS\n#include <linux/kdp.h>\n#endif\n")
-edit("fs/namespace.c",
-    "#include <linux/security.h>\n#include <linux/cred.h>\n",
-    "#include <linux/security.h>\n" + blk + "#include <linux/cred.h>\n")
-edit("fs/namespace.c",
-    "#include <linux/mnt_idmapping.h>\n" + blk,
-    "#include <linux/mnt_idmapping.h>\n")
-
-# --- fs/open.c ---
-edit("fs/open.c",
-    "struct file *f = do_filp_open(dfd, tmp, &op);\n\n#ifdef CONFIG_SECURITY_DEFEX",
-    "struct file *f = do_filp_open(dfd, tmp, &op);\n#ifdef CONFIG_SECURITY_DEFEX")
-
-# --- fs/proc/base.c ---
-edit("fs/proc/base.c",
-    "#include <linux/resctrl.h>\n#include <linux/task_integrity.h>\n#include <linux/proca.h>\n#include <linux/cpufreq_times.h>\n#include <linux/cn_proc.h>\n",
-    "#include <linux/resctrl.h>\n#include <linux/cn_proc.h>\n#include <linux/cpufreq_times.h>\n")
-edit("fs/proc/base.c",
-    "#include <linux/tracehook.h>\n#include <linux/printk.h>\n",
-    "#include <linux/tracehook.h>\n#include <linux/task_integrity.h>\n#include <linux/proca.h>\n#include <linux/printk.h>\n")
+edit("50_add_susfs_in_gki-android13-5.15.patch",
+    "@@ -32,11 +32,21 @@",
+    "@@ -32,15 +32,21 @@")
+edit("50_add_susfs_in_gki-android13-5.15.patch",
+    "#include <linux/mnt_idmapping.h>\n",
+    """#include <linux/mnt_idmapping.h>\n
+    #include <linux/delay.h>\n
+    #include <linux/fslog.h>\n
+    #ifdef CONFIG_KDP_NS\n
+    #include <linux/kdp.h>\n
+    #endif\n
+    """)
+edit("50_add_susfs_in_gki-android13-5.15.patch",
+    "#include "internal.h"\n #include <trace/hooks/blk.h>"
+    "#include "internal.h"\n")
