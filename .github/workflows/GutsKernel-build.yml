@@ -167,7 +167,7 @@ jobs:
       - name: Prepare to build
         uses: ./.github/actions/build-setup
         with:
-          free-diskspace: false
+          free-diskspace: ""
      
       - name: Apply Kernel Modifications
         uses: ./.github/actions/modify-kernel
