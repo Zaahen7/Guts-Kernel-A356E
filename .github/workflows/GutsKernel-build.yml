@@ -203,9 +203,7 @@ jobs:
   Artifacts2Release:
     name: Upload Artifacts to Release
     needs: [get-date, build-kernel]
-    if: |
-      inputs.release-type != 'Actions' &&
-      needs.build-kernel.result == 'success'
+    if: ${{ inputs['release-type'] != 'Actions' && needs.build-kernel.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -213,13 +211,18 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: GutsKernel*
+          pattern: GK-A356E*
           path: build-artifacts
 
       - name: Zip artifacts
+        shell: bash
         run: |
+          set -e
           cd build-artifacts
-          for d in */; do (cd "$d" && zip -r9 "../${d%/}.zip" .); done
+          for d in */; do
+            [ -d "$d" ] || continue
+            (cd "$d" && zip -r9 "../${d%/}.zip" .)
+          done
           
       - name: Publish Artifacts to Release
         uses: softprops/action-gh-release@v2
