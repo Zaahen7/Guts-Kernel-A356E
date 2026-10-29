@@ -29,8 +29,6 @@ runs:
     - name: Create Kernel Info .txt
       shell: bash
       run: |
-          source "$GITHUB_ACTION_PATH/commit-hash-extractor.sh"
-
           # Absolute path: later steps cd into $KERNEL_DIR
           KERNEL_INFO="$GITHUB_WORKSPACE/kernel-info.txt"
 
@@ -54,30 +52,38 @@ runs:
       shell: bash
       run: |
         cd "$KERNEL_DIR"
-        DEFCONFIG="$KERNEL_DIR/arch/arm64/configs/s5e8835-a35xjvxx_defconfig"
-
-        echo "Disabling Samsung security features..."
-        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" \
-          --disable CONFIG_UH \
-          --disable CONFIG_UH_RKP \
-          --disable CONFIG_UH_LKMAUTH \
-          --disable CONFIG_UH_LKM_BLOCK \
-          --disable CONFIG_RKP \
-          --disable CONFIG_RKP_CFP \
-          --disable CONFIG_RKP_CFP_JOPP \
-          --disable CONFIG_RKP_CFP_ROPP \
-          --disable CONFIG_KDP \
-          --disable CONFIG_KDP_NS \
-          --disable CONFIG_SECURITY_DEFEX \
-          --disable CONFIG_FIVE \
-          --disable CONFIG_PROCA
-        echo "Done :v"
         
-        echo "Disabling check defconfig..."
-        sed -i 's/check_defconfig//' "$KERNEL_DIR/build.config.gki"
+        for config in \
+          CONFIG_UH \
+          CONFIG_UH_RKP \
+          CONFIG_UH_LKMAUTH \
+          CONFIG_UH_LKM_BLOCK \
+          CONFIG_RKP \
+          CONFIG_RKP_CFP \
+          CONFIG_RKP_CFP_JOPP \
+          CONFIG_RKP_CFP_ROPP \
+          CONFIG_KDP \
+          CONFIG_KDP_NS \
+          CONFIG_SECURITY_DEFEX \
+          CONFIG_FIVE CONFIG_PROCA
+        do
+          if "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --disable "$config"; then
+            echo "✅ Disabled $config"
+          else
+            echo "❌ Failed: $config"
+            exit 1
+          fi
+        done
 
-        
-        echo "Done :v"
+    - name: Disable Defconfig Check
+      shell: bash
+      run: |
+        if sed -i 's/check_defconfig//' "$KERNEL_DIR/build.config.gki"; then
+          echo "✅ Done :v"
+        else
+          echo "❌ Failed to modify build.config.gki"
+          exit 1
+        fi
         
     - name: Install KernelSU variant
       if: ${{ inputs['kernel-variant'] != 'CLEAN' }}
