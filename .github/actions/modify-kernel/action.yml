@@ -32,11 +32,10 @@ runs:
           {
             echo "===== KERNEL INFO ====="
             echo "Kernel Version: $KERNEL_VERSION"
-            echo "Device: SM-A356E"
+            echo "Device: SM-$DEVICE_MODEL"
             echo "One UI Version: $ONEUI_VERSION"
             echo "LTO: $LTO_MODE"
             echo "Root Variant: $ROOT_VARIANT"
-            echo ""
           } > kernel-info.txt
     - name: Disable Samsung security features
       shell: bash
@@ -114,6 +113,14 @@ runs:
         
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_KSU
         echo "Done :v"
+
+    - name: Extract ${{ inputs['kernel-variant'] }} Version
+      shell: bash
+      run: |
+        KSU_VERSION=$(grep -rhoE 'DKSU_VERSION=[0-9]+' "$KERNEL_DIR" \
+            --include='*.cmd' 2>/dev/null | head -n1 | cut -d= -f2)
+        echo "KernelSU version: $KSU_VERSION"
+        echo "KSU_VERSION=$KSU_VERSION" >> "$GITHUB_ENV"
         
     - name: Enable SUSFS
       if: ${{ inputs.enable-susfs == 'true' }}
