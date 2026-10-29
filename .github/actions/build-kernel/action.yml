@@ -5,6 +5,8 @@ inputs:
   lto-mode:
     description: "Link Time Optimization(LTO) Mode"
     required: true
+  kernel-variant:
+    description: "Selected root solution"
 
 runs:
   using: composite
@@ -51,7 +53,7 @@ runs:
         echo "Kernel Version: ${{ env.KERNEL_VERSION }}"
         echo "One UI: ${{ env.ONEUI_VERSION }}"
         echo "LTO: ${{ inputs.lto-mode }}"
-        echo "Variant: ${{ inputs.variant }}"
+        echo "Variant: ${{ inputs.kernel-variant }}"
 
         cd "$KERNEL_DIR"
 
