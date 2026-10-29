@@ -179,7 +179,6 @@ jobs:
      
       - name: Apply Kernel Modifications
         uses: ./.github/actions/modify-kernel
-        env: 
         with:
           apply-kpatches: ${{ inputs.kernel-patches }}
           kernel-variant: ${{ matrix.variant }}
