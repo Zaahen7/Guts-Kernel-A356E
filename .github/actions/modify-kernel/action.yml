@@ -2,6 +2,8 @@ name: Modify Kernel
 description: Modify Kernel
 
 inputs:
+  disable-securities:
+    description: "Disable Samsung Securities"
   kernel-variant:
     description: "Kernel variant"
   enable-susfs:
@@ -26,33 +28,19 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Create Kernel Info .txt
+    - name: Disable Defconfig Check
       shell: bash
       run: |
-          # Absolute path: later steps cd into $KERNEL_DIR
-          KERNEL_INFO="$GITHUB_WORKSPACE/kernel-info.txt"
-
-          {
-            echo "===== KERNEL INFO ====="
-            echo "Kernel Version: $KERNEL_VERSION"
-            echo "Device: SM-$DEVICE_MODEL"
-            echo "One UI Version: $ONEUI_VERSION"
-            echo "LTO: $LTO_MODE"
-            echo "Root Variant: $ROOT_VARIANT"
-            echo
-            echo "===== REPOSITORIES ====="
-          } > "$KERNEL_INFO"
-
-          export KERNEL_INFO
-          # Recorded before any modification. If $KERNEL_DIR is a plain folder
-          # inside the workflow repo, this is the commit of that whole repo.
-          record_commit Kernel "$(git -c safe.directory='*' -C "$KERNEL_DIR" rev-parse HEAD 2>/dev/null || echo unknown)"
+        if sed -i 's/check_defconfig//' "$KERNEL_DIR/build.config.gki"; then
+          echo "✅ Done :v"
+        else
+          echo "❌ Failed to modify build.config.gki"
+          exit 1
+        fi
 
     - name: Disable Samsung security features
       shell: bash
       run: |
-        cd "$KERNEL_DIR"
-        
         for config in \
           CONFIG_UH \
           CONFIG_UH_RKP \
@@ -65,7 +53,8 @@ runs:
           CONFIG_KDP \
           CONFIG_KDP_NS \
           CONFIG_SECURITY_DEFEX \
-          CONFIG_FIVE CONFIG_PROCA
+          CONFIG_FIVE \
+          CONFIG_PROCA
         do
           if "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --disable "$config"; then
             echo "✅ Disabled $config"
@@ -74,16 +63,6 @@ runs:
             exit 1
           fi
         done
-
-    - name: Disable Defconfig Check
-      shell: bash
-      run: |
-        if sed -i 's/check_defconfig//' "$KERNEL_DIR/build.config.gki"; then
-          echo "✅ Done :v"
-        else
-          echo "❌ Failed to modify build.config.gki"
-          exit 1
-        fi
         
     - name: Install KernelSU variant
       if: ${{ inputs['kernel-variant'] != 'CLEAN' }}
