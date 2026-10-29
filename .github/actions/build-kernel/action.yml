@@ -45,23 +45,14 @@ runs:
         echo "Removing -dirty from kernel uname"
         sed -i "s/printf '%s' -dirty/printf '%s' ''/g" "$KERNEL_DIR/scripts/setlocalversion"
     
+
     - name: Build kernel
       shell: bash
-      env:
-        FINASU_EXPECTED_SIZE: "27,981,852"
-        FINASU_EXPECTED_HASH: ""
       run: |
-        echo "Starting Kernel Build..."
-        echo "===== KERNEL INFO ====="
-        echo "Kernel Version: ${{ env.KERNEL_VERSION }}"
-        echo "One UI: ${{ env.ONEUI_VERSION }}"
-        echo "LTO: ${{ inputs.lto-mode }}"
-        echo "Variant: ${{ inputs.kernel-variant }}"
-
         cd "$KERNEL_DIR"
-
-        export PATH=$(pwd)/toolchain/clang/host/linux-x86/clang-r450784d/bin:$PATH
-        export PATH=$(pwd)/toolchain/build/kernel/build-tools/path/linux-x86/:$PATH
+        
+        export PATH="$(pwd)/toolchain/clang/host/linux-x86/clang-r450784d/bin:$PATH"
+        export PATH="$(pwd)/toolchain/build/kernel/build-tools/path/linux-x86/:$PATH"
         export HOSTCFLAGS="-I$(pwd)/toolchain/prebuilts/kernel-build-tools/linux-x86/include -isystem /usr/include"
         export HOSTLDFLAGS="-L $(pwd)/toolchain/prebuilts/kernel-build-tools/linux-x86/lib64 \
             -Wl,-rpath,$(pwd)/toolchain/prebuilts/kernel-build-tools/linux-x86/lib64 \
@@ -76,13 +67,31 @@ runs:
         export TARGET_SOC=s5e8835
         export LOCALVERSION="-GutsKernel"
         
-        if [[ "${{ inputs.lto-mode }}" == "Full" ]]; then
+        KSU_ARGS=(
+          KSU_REQUIRE_PREINIT=1
+          "KSU_EXPECTED_SIZE=$FINASU_EXPECTED_SIZE"
+          "KSU_EXPECTED_HASH=$FINASU_EXPECTED_HASH"
+        )
+        
+        if [[ "${{ inputs['lto-mode'] }}" == "Full" ]]; then
           LTO=full make s5e8835-a35xjvxx_defconfig
-          LTO=full make -j"$(nproc)" Image
-        elif [[ "${{ inputs.lto-mode }}" == "Thin" ]]; then
+          LTO=full make -j"$(nproc)" Image "${KSU_ARGS[@]}"
+        elif [[ "${{ inputs['lto-mode'] }}" == "Thin" ]]; then
           LTO=thin make s5e8835-a35xjvxx_defconfig
-          LTO=thin make -j"$(nproc)" Image
+          LTO=thin make -j"$(nproc)" Image "${KSU_ARGS[@]}"
         else
           make s5e8835-a35xjvxx_defconfig
-          make -j"$(nproc)" Image
+          make -j"$(nproc)" Image "${KSU_ARGS[@]}"
+        fi
+
+    - name: Extract KernelSU version
+      shell: bash
+      run: |
+        KSU_VERSION=$(grep -rhoE 'DKSU_VERSION=[0-9]+' "$KERNEL_DIR" \
+            --include='*.cmd' 2>/dev/null | head -n1 | cut -d= -f2 || true)
+        if [ -n "$KSU_VERSION" ]; then
+          echo "KernelSU Version: $KSU_VERSION" >> "$GITHUB_WORKSPACE/kernel-info.txt"
+          echo "KSU_VERSION=$KSU_VERSION" >> "$GITHUB_ENV"
+        else
+          echo "::warning::DKSU_VERSION not found (variant without KernelSU?)"
         fi
