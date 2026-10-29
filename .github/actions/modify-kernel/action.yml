@@ -101,7 +101,7 @@ runs:
             rm -rf "$FINASU_DIR"
             mkdir "$FINASU_DIR"
             cd "$FINASU_DIR"
-            git clone --depth 1 --branch master https://github.com/LyraVoid/FinaSU.git .
+            git clone --depth 1 --branch master "https://github.com/LyraVoid/FinaSU.git" .
 
             echo "Installing FinaSU..."
             cd "$KERNEL_DIR"
