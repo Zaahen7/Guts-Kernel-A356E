@@ -29,7 +29,7 @@ runs:
     - name: Create Kernel Info .txt
       shell: bash
       run: |
-          source "$GITHUB_ACTION_PATH/git-helpers.sh"
+          source "$GITHUB_ACTION_PATH/commit-hash-extractor.sh"
 
           # Absolute path: later steps cd into $KERNEL_DIR
           KERNEL_INFO="$GITHUB_WORKSPACE/kernel-info.txt"
@@ -75,13 +75,15 @@ runs:
         
         echo "Disabling check defconfig..."
         sed -i 's/check_defconfig//' "$KERNEL_DIR/build.config.gki"
+
+        
         echo "Done :v"
         
     - name: Install KernelSU variant
       if: ${{ inputs['kernel-variant'] != 'CLEAN' }}
       shell: bash
       run: |    
-        source "$GITHUB_ACTION_PATH/git-helpers.sh"
+        source "$GITHUB_ACTION_PATH/commit-hash-extractor.sh"
         cd "$KERNEL_DIR"
         case "${{ inputs['kernel-variant'] }}" in
           KSU)
@@ -148,7 +150,7 @@ runs:
         STABLECOMMIT: "23d85d2278f3e481644f809053868b6153715583"
         KERNEL_VARIANT: ${{ inputs['kernel-variant'] }}
       run: |
-        source "$GITHUB_ACTION_PATH/git-helpers.sh"
+        source "$GITHUB_ACTION_PATH/commit-hash-extractor.sh"
 
         case "${{ inputs['kernel-variant'] }}" in
           CLEAN)
@@ -243,7 +245,7 @@ runs:
       if: ${{ inputs.enable-bbg == 'true' }}
       shell: bash
       run: |
-        source "$GITHUB_ACTION_PATH/git-helpers.sh"
+        source "$GITHUB_ACTION_PATH/commit-hash-extractor.sh"
         echo "Enabling Baseband Guard..."
         cd "$KERNEL_DIR"
 
@@ -309,7 +311,7 @@ runs:
       env:
         METAMODULE: ${{ inputs.vfs-support }}
       run: |
-        source "$GITHUB_ACTION_PATH/git-helpers.sh"
+        source "$GITHUB_ACTION_PATH/commit-hash-extractor.sh"
         cd "$KERNEL_DIR"
         if [[ "$METAMODULE" == "Hybrid-Mount" ]]; then
           echo "Adding VFS support for Hybrid Mount..."
@@ -339,9 +341,4 @@ runs:
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_WQ_POWER_EFFICIENT_DEFAULT
         echo "Done :v"
 
-    - name: Show Kernel Info
-      shell: bash
-      run: |
-        echo "::group::kernel-info.txt"
-        cat "$GITHUB_WORKSPACE/kernel-info.txt"
-        echo "::endgroup::"
+        
