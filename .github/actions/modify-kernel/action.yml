@@ -26,6 +26,18 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Create Kernel Info .txt
+      shell: bash
+      run: |
+          {
+            echo "===== KERNEL INFO ====="
+            echo "Kernel Version: $KERNEL_VERSION"
+            echo "Device: SM-A356E"
+            echo "One UI Version: $ONEUI_VERSION"
+            echo "LTO: $LTO_MODE"
+            echo "Root Variant: $ROOT_VARIANT"
+            echo ""
+          } > kernel-info.txt
     - name: Disable Samsung security features
       shell: bash
       run: |
@@ -51,6 +63,8 @@ runs:
         
         echo "Disabling check defconfig..."
         sed -i 's/check_defconfig//' "$KERNEL_DIR/build.config.gki"
+
+        
         echo "Done :v"
         
     - name: Install KernelSU variant
