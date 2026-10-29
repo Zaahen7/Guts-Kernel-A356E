@@ -15,6 +15,6 @@ runs:
     - name: Upload Kernel in Actions
       uses: actions/upload-artifact@v4
       with:
-        name: GK-A356E-${{ inputs.variant }}-Oneui${{ env.ONEUI_VERSION }}-${{ env.BUILD_DATE }}
+        name: GK-${{ env.DEVICE_MODEL }}-${{ inputs.variant }}-Oneui${{ env.ONEUI_VERSION }}-${{ env.BUILD_DATE }}
         path: ${{ env.ANYKERNEL3_DIR }}
         compression-level: 9
