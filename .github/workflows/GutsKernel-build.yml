@@ -194,6 +194,7 @@ jobs:
         uses: ./.github/actions/build-kernel
         with:
           lto-mode: ${{ inputs.lto-mode }}
+          kernel-variant: ${{ matrix.variant }}
 
       - name: Upload files to artifacts
         uses: ./.github/actions/upload-artifacts
