@@ -59,6 +59,11 @@ on:
           default: Full
           
     # Kernel Modifications
+
+        disable-securities:
+          description: "Disable Samsung Securities"
+          type: boolean
+          default: true
         
         kernel-patches:
           description: "Apply kernel optimization patches"
@@ -180,6 +185,7 @@ jobs:
       - name: Apply Kernel Modifications
         uses: ./.github/actions/modify-kernel
         with:
+          disable-securities: ${{ inputs['disable-securities'] }}
           apply-kpatches: ${{ inputs.kernel-patches }}
           kernel-variant: ${{ matrix.variant }}
           enable-susfs: ${{ inputs.susfs }}
