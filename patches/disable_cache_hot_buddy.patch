@@ -26,4 +26,4 @@ index 980d92bab8abf..866feea517cdf 100644
 +SCHED_FEAT(CACHE_HOT_BUDDY, false)
  
  /*
-  * Allow wakeup-time preemption of the current task:
+  * Delay dequeueing tasks until they get selected or woken.
