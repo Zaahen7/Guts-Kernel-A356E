@@ -29,6 +29,11 @@ runs:
     - name: Create Kernel Info .txt
       shell: bash
       run: |
+          source "$GITHUB_ACTION_PATH/git-helpers.sh"
+
+          # Absolute path: later steps cd into $KERNEL_DIR
+          KERNEL_INFO="$GITHUB_WORKSPACE/kernel-info.txt"
+
           {
             echo "===== KERNEL INFO ====="
             echo "Kernel Version: $KERNEL_VERSION"
@@ -36,7 +41,15 @@ runs:
             echo "One UI Version: $ONEUI_VERSION"
             echo "LTO: $LTO_MODE"
             echo "Root Variant: $ROOT_VARIANT"
-          } > kernel-info.txt
+            echo
+            echo "===== REPOSITORIES ====="
+          } > "$KERNEL_INFO"
+
+          export KERNEL_INFO
+          # Recorded before any modification. If $KERNEL_DIR is a plain folder
+          # inside the workflow repo, this is the commit of that whole repo.
+          record_commit Kernel "$(git -c safe.directory='*' -C "$KERNEL_DIR" rev-parse HEAD 2>/dev/null || echo unknown)"
+
     - name: Disable Samsung security features
       shell: bash
       run: |
@@ -62,14 +75,13 @@ runs:
         
         echo "Disabling check defconfig..."
         sed -i 's/check_defconfig//' "$KERNEL_DIR/build.config.gki"
-
-        
         echo "Done :v"
         
     - name: Install KernelSU variant
-      if: ${{ inputs['kernel-variant'] != 'Puck' }}
+      if: ${{ inputs['kernel-variant'] != 'CLEAN' }}
       shell: bash
       run: |    
+        source "$GITHUB_ACTION_PATH/git-helpers.sh"
         cd "$KERNEL_DIR"
         case "${{ inputs['kernel-variant'] }}" in
           KSU)
@@ -95,12 +107,19 @@ runs:
             curl -fLSs "https://raw.githubusercontent.com/Baka-SU/BakaSU/main/kernel/setup.sh" | bash
             ;;
           FINASU)
-            echo "Prepare FinaSU directory % Clone repo"
-            FINASU_DIR= "${{ github.workspace }}/FinaSU"
+            echo "Prepare FinaSU directory & clone repo"
+            FINASU_REPO="https://github.com/LyraVoid/FinaSU.git"
+            FINASU_DIR="${{ github.workspace }}/FinaSU"
+            FINASU_COMMIT=$(latest_commit "$FINASU_REPO" master)
+
             rm -rf "$FINASU_DIR"
             mkdir "$FINASU_DIR"
             cd "$FINASU_DIR"
-            git clone --depth 1 --branch master "https://github.com/LyraVoid/FinaSU.git" .
+            git init -q
+            git remote add origin "$FINASU_REPO"
+            git fetch --depth=1 origin "$FINASU_COMMIT"
+            git checkout -q FETCH_HEAD
+            record_commit FinaSU "$FINASU_COMMIT"
 
             echo "Installing FinaSU..."
             cd "$KERNEL_DIR"
@@ -110,18 +129,15 @@ runs:
             echo "No KernelSU variant selected or unknown variant."
             ;;
         esac
+
+        # setup.sh clones the repo by itself, so record what actually ended up in the tree
+        if [ "${{ inputs['kernel-variant'] }}" != "FINASU" ]; then
+          record_linked_repo "${{ inputs['kernel-variant'] }}" "$KERNEL_DIR/drivers/kernelsu"
+        fi
         
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_KSU
         echo "Done :v"
 
-    - name: Extract ${{ inputs['kernel-variant'] }} Version
-      shell: bash
-      run: |
-        KSU_VERSION=$(grep -rhoE 'DKSU_VERSION=[0-9]+' "$KERNEL_DIR" \
-            --include='*.cmd' 2>/dev/null | head -n1 | cut -d= -f2)
-        echo "KernelSU version: $KSU_VERSION"
-        echo "KSU_VERSION=$KSU_VERSION" >> "$GITHUB_ENV"
-        
     - name: Enable SUSFS
       if: ${{ inputs.enable-susfs == 'true' }}
       shell: bash
@@ -132,6 +148,8 @@ runs:
         STABLECOMMIT: "23d85d2278f3e481644f809053868b6153715583"
         KERNEL_VARIANT: ${{ inputs['kernel-variant'] }}
       run: |
+        source "$GITHUB_ACTION_PATH/git-helpers.sh"
+
         case "${{ inputs['kernel-variant'] }}" in
           CLEAN)
             echo "Puck variant selected. SUSFS is not supported for Puck."
@@ -151,12 +169,20 @@ runs:
 
         echo "::group::GitCloning SUSFS :v"
         if [ "$KERNEL_VARIANT" = "KSU" ]; then
-            echo "Zodd variant detected. Using stable SUSFS commit: $STABLECOMMIT"
-            git init
-            git remote add origin "$SUSFS_REPO"
-            git fetch --depth=1 origin "$STABLECOMMIT"
-            git checkout FETCH_HEAD
-            
+            echo "KSU variant detected. Using stable SUSFS commit: $STABLECOMMIT"
+            SUSFS_COMMIT="$STABLECOMMIT"
+        else
+            echo "${{ inputs['kernel-variant'] }} variant detected. Using latest SUSFS."
+            SUSFS_COMMIT=$(latest_commit "$SUSFS_REPO" "$SUSFS_BRANCH")
+        fi
+
+        git init
+        git remote add origin "$SUSFS_REPO"
+        git fetch --depth=1 origin "$SUSFS_COMMIT"
+        git checkout FETCH_HEAD
+        record_commit susfs4ksu "$SUSFS_COMMIT"
+
+        if [ "$KERNEL_VARIANT" = "KSU" ]; then
             cp "$SUSFS_DIR/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch" "$KERNEL_DIR/KernelSU/"
             cd "$KERNEL_DIR/KernelSU"
             KSU_PATCH_STATUS=0
@@ -171,12 +197,6 @@ runs:
                 echo "::error::KSU patch failed, review the .rej files above."
                 exit 1
             fi
-        else
-            echo "${{ inputs['kernel-variant'] }} variant detected. Using latest SUSFS."
-            git init
-            git remote add origin "$SUSFS_REPO"
-            git fetch --depth=1 origin "$SUSFS_BRANCH"
-            git checkout FETCH_HEAD
         fi
         echo "::endgroup::"
         
@@ -223,9 +243,15 @@ runs:
       if: ${{ inputs.enable-bbg == 'true' }}
       shell: bash
       run: |
+        source "$GITHUB_ACTION_PATH/git-helpers.sh"
         echo "Enabling Baseband Guard..."
         cd "$KERNEL_DIR"
-        curl -LSs https://github.com/vc-teahouse/Baseband-guard/raw/main/setup.sh | bash
+
+        BBG_REPO="vc-teahouse/Baseband-guard"
+        BBG_COMMIT=$(latest_commit "https://github.com/$BBG_REPO.git" main)
+        record_commit Baseband-guard "$BBG_COMMIT"
+        curl -fLSs "https://raw.githubusercontent.com/$BBG_REPO/$BBG_COMMIT/setup.sh" | bash
+
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_BBG
         sed -i '/^CONFIG_LSM=/ s/"$/,baseband_guard"/' "$DEFCONFIG"
         sed -i '/^config LSM$/,/^help$/{ /^[[:space:]]*default/ { /baseband_guard/! s/selinux/selinux,baseband_guard/ } }' security/Kconfig
@@ -283,14 +309,21 @@ runs:
       env:
         METAMODULE: ${{ inputs.vfs-support }}
       run: |
+        source "$GITHUB_ACTION_PATH/git-helpers.sh"
         cd "$KERNEL_DIR"
         if [[ "$METAMODULE" == "Hybrid-Mount" ]]; then
           echo "Adding VFS support for Hybrid Mount..."
-          curl -fLSs "https://raw.githubusercontent.com/Hybrid-Mount/meta-hybrid_mount/dev/module/vfs/setup.sh" | bash
+          HM_REPO="Hybrid-Mount/meta-hybrid_mount"
+          HM_COMMIT=$(latest_commit "https://github.com/$HM_REPO.git" dev)
+          record_commit Hybrid-Mount "$HM_COMMIT"
+          curl -fLSs "https://raw.githubusercontent.com/$HM_REPO/$HM_COMMIT/module/vfs/setup.sh" | bash
           "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_HYBRIDMOUNT
         elif [[ "$METAMODULE" == "NoMount" ]]; then
           echo "Adding NoMount Built-In Integration..."
-          curl -fLSs "https://raw.githubusercontent.com/maxsteeel/nomount/refs/heads/dev/kernel/setup.sh" | bash -
+          NM_REPO="maxsteeel/nomount"
+          NM_COMMIT=$(latest_commit "https://github.com/$NM_REPO.git" dev)
+          record_commit NoMount "$NM_COMMIT"
+          curl -fLSs "https://raw.githubusercontent.com/$NM_REPO/$NM_COMMIT/kernel/setup.sh" | bash -
           "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_NOMOUNT
         else
           echo "Unsupported metamodule: $METAMODULE"
@@ -305,3 +338,10 @@ runs:
         echo "Enabling EXPERIMENTAL battery tweak..." 
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_WQ_POWER_EFFICIENT_DEFAULT
         echo "Done :v"
+
+    - name: Show Kernel Info
+      shell: bash
+      run: |
+        echo "::group::kernel-info.txt"
+        cat "$GITHUB_WORKSPACE/kernel-info.txt"
+        echo "::endgroup::"
