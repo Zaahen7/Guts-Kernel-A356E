@@ -96,8 +96,16 @@ runs:
             curl -fLSs "https://raw.githubusercontent.com/Baka-SU/BakaSU/main/kernel/setup.sh" | bash
             ;;
           FINASU)
-            echo "Installing Fina-SU..."
-            curl -fLSs "https://raw.githubusercontent.com/LyraVoid/FinaSU/refs/heads/master/kernel/setup.sh" | bash
+            echo "Prepare FinaSU directory % Clone repo"
+            FINASU_DIR= "${{ github.workspace }}/FinaSU"
+            rm -rf "$FINASU_DIR"
+            mkdir "$FINASU_DIR"
+            cd "$FINASU_DIR"
+            git clone --depth 1 --branch master https://github.com/LyraVoid/FinaSU.git .
+
+            echo "Installing FinaSU..."
+            cd "$KERNEL_DIR"
+            "$FINASU_DIR/kernel/setup.sh" --dir "$FINASU_DIR"
             ;;
           *)
             echo "No KernelSU variant selected or unknown variant."
