@@ -166,7 +166,8 @@ jobs:
       LTO_MODE: ${{ inputs.lto-mode }}
       ONEUI_VERSION: ${{ inputs.oneui-version }}
       DEFCONFIG: ${{ github.workspace }}/GutsKernel/arch/arm64/configs/s5e8835-a35xjvxx_defconfig
-
+      DEVICE_MODEL: A356E
+      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
