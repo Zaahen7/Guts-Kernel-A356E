@@ -47,6 +47,9 @@ runs:
     
     - name: Build kernel
       shell: bash
+      env:
+        FINASU_EXPECTED_SIZE: "27,981,852"
+        FINASU_EXPECTED_HASH: ""
       run: |
         echo "Starting Kernel Build..."
         echo "===== KERNEL INFO ====="
