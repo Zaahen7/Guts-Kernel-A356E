@@ -232,13 +232,17 @@ jobs:
         with:
           tag_name: v0.${{ inputs['oneui-version'] }}
           target_commitish: ${{ github.sha }}
-          name: GutsKernel for A356E Oneui ${{ inputs['oneui-version'] }}
+          name: GutsKernel for A356E Oneui ${{ inputs['oneui-version'] }}-${{ needs['get-date'].outputs['build_date'] }}
           body: |
-              ### 📲 How to Flash:
-                Flash the kernel through a Custom Recovery. Alternatively, if you already have root access, you can flash it using the KernelSU-Next app by selecting the **AnyKernel3** installation method.
-              
-              ### 📝 Note:
-               Inside each kernel ZIP, you will find a `kernel-info.txt` file containing information about the kernel, applied modifications, and commit hashes of the repositories used during the build.
+             ### 📋 Changelog
+             - Initial public release of GutsKernel.
+             - Included prebuilt kernel packages.
+             
+             ### 📲 How to Flash:
+             - Flash the kernel through a Custom Recovery. Alternatively, if you already have root access, you can flash it using the KernelSU-Next app by selecting the **AnyKernel3** installation method.
+             
+             ### 📝 Note:
+             - Inside each kernel ZIP, you will find a `kernel-info.txt` file containing information about the kernel, applied modifications, and commit hashes of the repositories used during the build.
           prerelease: ${{ inputs['release-type'] == 'Prerelease' }}
           make_latest: ${{ inputs['release-type'] == 'Release' }}
           overwrite_files: true
