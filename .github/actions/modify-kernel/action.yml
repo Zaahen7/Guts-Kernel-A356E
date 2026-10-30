@@ -1,6 +1,3 @@
-# Save command:
-# ${{ inputs['kernel-variant'] }}_SHA=$(latest_commit "$KSU_REPO.git" "main")
-
 name: Modify Kernel
 description: Modify Kernel
 
@@ -286,7 +283,7 @@ runs:
         SUSFS_REPO: "https://gitlab.com/simonpunk/susfs4ksu"
         SUSFS_BRANCH: "gki-android13-5.15"
         # SUSFS commit for latest stable KernelSU from tiann
-        KSU_SUSFS_STABLECOMMIT: "23d85d2278f3e481644f809053868b6153715583"
+        KSU_SUSFS_STABLECOMMIT: "bd27d727b27fc90bfbb6eaccd28060a53c473266"
       run: |
         set -euo pipefail
         source "$GITHUB_ACTION_PATH/latest-commit-hash.sh" # loads latest_commit function
