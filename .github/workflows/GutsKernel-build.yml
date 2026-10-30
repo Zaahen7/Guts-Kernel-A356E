@@ -213,8 +213,9 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: GK-A356E*
+          pattern: GutsKernel*
           path: build-artifacts
+          if-no-files-found: error
 
       - name: Zip artifacts
         shell: bash
@@ -229,12 +230,17 @@ jobs:
       - name: Publish Artifacts to Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.${{ inputs['oneui-version'] }}-${{ needs['get-date'].outputs['build_date'] }}
+          tag_name: v0.${{ inputs['oneui-version'] }}
           target_commitish: ${{ github.sha }}
           name: GutsKernel for A356E Oneui ${{ inputs['oneui-version'] }}
+          body: |
+              ### 📲 How to Flash:
+                Flash the kernel through a Custom Recovery. Alternatively, if you already have root access, you can flash it using the KernelSU-Next app by selecting the **AnyKernel3** installation method.
+              
+              ### 📝 Note:
+               Inside each kernel ZIP, you will find a `kernel-info.txt` file containing information about the kernel, applied modifications, and commit hashes of the repositories used during the build.
           prerelease: ${{ inputs['release-type'] == 'Prerelease' }}
           make_latest: ${{ inputs['release-type'] == 'Release' }}
           overwrite_files: true
           fail_on_unmatched_files: true
           files: build-artifacts/*.zip
-          
