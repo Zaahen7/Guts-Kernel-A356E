@@ -255,7 +255,7 @@ runs:
       shell: bash
       env:
         SUSFS_DIR: "${{ github.workspace }}/susfs4ksu"
-        SUSFS_REPO: "https://gitlab.com/simonpunk/susfs4ksu.git"
+        SUSFS_REPO: "https://gitlab.com/simonpunk/susfs4ksu"
         SUSFS_BRANCH: "gki-android13-5.15"
       run: |
         set -euo pipefail
@@ -354,7 +354,7 @@ runs:
       shell: bash
       env:
         BBG_DIR: "$KERNEL_DIR/Baseband-guard"
-        BBG_REPO: "vc-teahouse/Baseband-guard"
+        BBG_REPO: "https://github.com/vc-teahouse/Baseband-guard"
         BBG_BRANCH: "main"
       run: |
         set -euo pipefail
@@ -364,7 +364,7 @@ runs:
         BBG_SHA=$(latest_commit "$BBG_REPO" "$BBG_BRANCH") || exit 1
         
         # Clone repository
-        if [ ! -d "$KERNEL_DIR/Baseband-guard" ]; then
+        if [ ! -d "$BBG_DIR" ]; then
             git clone "$BBG_REPO" "$BBG_DIR"
         fi
         
@@ -378,10 +378,15 @@ runs:
         
         # Run setup script from kernel root
         cd "$KERNEL_DIR"
-        bash "$KERNEL_DIR/Baseband-guard/setup.sh" "$BBG_SHA"
+        bash "$BBG_DIR/setup.sh" "$BBG_SHA"
         
         # Enable Baseband Guard
-        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_BBG
+        if "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_BBG; then
+            echo "✅ Enabled CONFIG_BBG"
+        else
+            echo "❌ Failed: CONFIG_BBG"
+            exit 1
+        fi
         
         # Update LSM configuration
         sed -i '/^CONFIG_LSM=/ s/"$/,baseband_guard"/' "$DEFCONFIG"
@@ -468,40 +473,100 @@ runs:
           fi
         done
         
-    - name: Add VFS support for Hybrid Mount MetaModule
-      if: ${{ inputs['vfs-support'] != 'Disabled' && inputs['kernel-variant'] != 'FINASU' }}
+    - name: Add built-in VFS support for Hybrid Mount MetaModule
+      if: ${{ inputs['vfs-support'] == 'Hybrid-Mount' && inputs['kernel-variant'] != 'FINASU' }}
       shell: bash
       env:
-        METAMODULE: ${{ inputs.vfs-support }}
+        HYBRIDMOUNT_DIR: "$KERNEL_DIR/meta-hybrid_mount"
+        HYBRIDMOUNT_REPO: "https://github.com/Hybrid-Mount/meta-hybrid_mount"
+        HYBRIDMOUNT_BRANCH: "dev"
       run: |
-        source "$GITHUB_ACTION_PATH/commit-hash-extractor.sh"
+        set -euo pipefail
+        source "$GITHUB_ACTION_PATH/latest-commit-hash.sh"
+
+        # Get latest commit SHA
         cd "$KERNEL_DIR"
-        if [[ "$METAMODULE" == "Hybrid-Mount" ]]; then
-          echo "Adding VFS support for Hybrid Mount..."
-          HM_REPO="Hybrid-Mount/meta-hybrid_mount"
-          HM_COMMIT=$(latest_commit "https://github.com/$HM_REPO.git" dev)
-          record_commit Hybrid-Mount "$HM_COMMIT"
-          curl -fLSs "https://raw.githubusercontent.com/$HM_REPO/$HM_COMMIT/module/vfs/setup.sh" | bash
-          "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_HYBRIDMOUNT
-        elif [[ "$METAMODULE" == "NoMount" ]]; then
-          echo "Adding NoMount Built-In Integration..."
-          NM_REPO="maxsteeel/nomount"
-          NM_COMMIT=$(latest_commit "https://github.com/$NM_REPO.git" dev)
-          record_commit NoMount "$NM_COMMIT"
-          curl -fLSs "https://raw.githubusercontent.com/$NM_REPO/$NM_COMMIT/kernel/setup.sh" | bash -
-          "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_NOMOUNT
-        else
-          echo "Unsupported metamodule: $METAMODULE"
-          exit 1
+        HYBRIDMOUNT_SHA=$(latest_commit "$HYBRIDMOUNT_REPO" "$HYBRIDMOUNT_BRANCH") || exit 1
+        
+        # Clone repository
+        if [ ! -d "$HYBRIDMOUNT_DIR" ]; then
+            git clone "$HYBRIDMOUNT_REPO" "$HYBRIDMOUNT_DIR"
         fi
-        echo "Done :v"
+        
+        # Update Repository
+        cd "$HYBRIDMOUNT_DIR"
+        git stash
+        git fetch origin "$HYBRIDMOUNT_BRANCH"
+
+        # Checkout selected commit
+        git checkout "$HYBRIDMOUNT_SHA"
+        
+        # Run setup script from kernel root
+        cd "$KERNEL_DIR"
+        bash "$HYBRIDMOUNT_DIR/module/vfs/setup.sh"
+        
+        # Enable Hybrid Mount
+        if "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_HYBRIDMOUNT; then
+            echo "✅ Enabled CONFIG_HYBRIDMOUNT"
+        else
+            echo "❌ Failed: CONFIG_HYBRIDMOUNT"
+            exit 1
+        fi
+        
+        echo "HYBRIDMOUNT_SHA=$HYBRIDMOUNT_SHA" >> "$GITHUB_ENV"
+        echo "✅ Hybrid Mount installed successfully."
+        
+    - name: Add built-in VFS support for NoMount MetaModule
+      if: ${{ inputs['vfs-support'] == 'NoMount' && inputs['kernel-variant'] != 'FINASU' }}
+      shell: bash
+      env:
+        NOMOUNT_DIR: "$KERNEL_DIR/nomount"
+        NOMOUNT_REPO: "https://github.com/maxsteeel/nomount"
+        NOMOUNT_BRANCH: "dev"
+      run: |
+        set -euo pipefail
+        source "$GITHUB_ACTION_PATH/latest-commit-hash.sh"
+        
+        # Get latest commit SHA
+        cd "$KERNEL_DIR"
+        NOMOUNT_SHA=$(latest_commit "$NOMOUNT_REPO" "$NOMOUNT_BRANCH") || exit 1
+        
+        # Clone repository
+        if [ ! -d "$NOMOUNT_DIR" ]; then
+            git clone "$NOMOUNT_REPO" "$NOMOUNT_DIR"
+        fi
+
+        # Update Repository
+        cd "$NOMOUNT_DIR"
+        git stash
+        git fetch origin "$NOMOUNT_BRANCH"
+
+        # Checkout selected commit
+        git checkout "$NOMOUNT_SHA"
+
+        # Run setup script from kernel root
+        cd "$KERNEL_DIR"
+        bash "$HYBRIDMOUNT_DIR/module/vfs/setup.sh"
+        
+        # Enable Hybrid Mount
+        if "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_NOMOUNT; then
+            echo "✅ Enabled CONFIG_NOMOUNT"
+        else
+            echo "❌ Failed: CONFIG_NOMOUNT"
+            exit 1
+        fi
+        
+        echo "HYBRIDMOUNT_SHA=$HYBRIDMOUNT_SHA" >> "$GITHUB_ENV"
+        echo "✅ Hybrid Mount installed successfully."
         
     - name: Apply EXPERIMENTAL battery tweak
       if: ${{ inputs.battery-tweak == 'true' }}
       shell: bash
       run: |
-        echo "Enabling EXPERIMENTAL battery tweak..." 
-        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_WQ_POWER_EFFICIENT_DEFAULT
-        echo "Done :v"
+        if "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_WQ_POWER_EFFICIENT_DEFAULT; then
+            echo "✅ Enabled CONFIG_WQ_POWER_EFFICIENT_DEFAULT"
+        else
+            echo "❌ Failed: CONFIG_WQ_POWER_EFFICIENT_DEFAULT"
+            exit 1
+        fi
 
-        
