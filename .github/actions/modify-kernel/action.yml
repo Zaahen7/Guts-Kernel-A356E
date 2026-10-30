@@ -249,6 +249,15 @@ runs:
             exit 1
         fi
 
+    - name: FinaSU manager certificate
+      if: ${{ inputs['kernel-variant'] == 'FINASU' }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}   # Optional
+      run: |
+        set -euo pipefail
+        python3 "$GITHUB_ACTION_PATH/extract-finasu-manager-cert.py" --ksu-dir "$KERNEL_DIR/FinaSU"
+        
     - name: Calculate KernelSU Version
       if: ${{ inputs['kernel-variant'] != 'CLEAN' }}
       shell: bash
