@@ -119,7 +119,7 @@ runs:
         
         echo "==============================" >> "$INFO_FILE"
         
-        echo "✅ Kernel information saved to $INFO_FILE
+        echo "✅ Kernel information saved to $INFO_FILE"
         
     - name: Build kernel
       shell: bash
