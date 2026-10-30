@@ -398,7 +398,7 @@ runs:
       shell: bash
       run: |
         for config in \
-          CONFIG_NET_SCH_FQ
+          CONFIG_NET_SCH_FQ \
           CONFIG_NET_SCH_FQ_CODEL \
           CONFIG_NET_SCH_PIE \
           CONFIG_NET_SCH_FQ_PIE \
