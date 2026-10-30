@@ -261,7 +261,7 @@ runs:
         set -euo pipefail
         source "$GITHUB_ACTION_PATH/latest-commit-hash.sh" # loads latest_commit function
 
-        if [ "$KERNEL_VARIANT" = "KSU" ]; then
+        if [ "${{ inputs['kernel-variant'] }}" == 'KSU' ]; then
           SUSFS_SHA="$KSU_SUSFS_STABLECOMMIT"
           echo "KSU variant detected. Using stable SUSFS commit: $SUSFS_SHA"
         else
@@ -282,7 +282,7 @@ runs:
         # Checkout SUSFS commit
         git checkout "$SUSFS_SHA"
 
-        if [ "$KERNEL_VARIANT" = "KSU" ]; then
+        if [ "${{ inputs['kernel-variant'] }}" == 'KSU' ]; then
             cp "$SUSFS_DIR/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch" "$KERNEL_DIR/KernelSU"
             cd "$KERNEL_DIR/KernelSU"
             KSU_PATCH_STATUS=0
