@@ -375,10 +375,7 @@ runs:
         
         BBG_TAG=$(git describe --abbrev=0 --tags)
         BBG_SHA=$(git rev-list -n 1 "$BBG_TAG")
-        
-        # Checkout BBG commit
-        git checkout "$BBG_SHA"
-        
+                
         # Run setup script from kernel root
         cd "$KERNEL_DIR"
         bash "$BBG_DIR/setup.sh" "$BBG_SHA"
@@ -476,7 +473,7 @@ runs:
           fi
         done
         
-    - name: Add built-in VFS support for Hybrid Mount MetaModule
+    - name: Add built-in VFS support for Hybrid-Mount MetaModule
       if: ${{ inputs['vfs-support'] == 'Hybrid-Mount' && inputs['kernel-variant'] != 'FINASU' }}
       shell: bash
       env:
