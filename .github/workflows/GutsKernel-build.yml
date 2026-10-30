@@ -194,13 +194,8 @@ jobs:
 
       - name: Build Kernel
         uses: ./.github/actions/build-kernel
-        env:
-          # Matching FinaSU Manager Signature 
-          FINASU_EXPECTED_SIZE: "27,985,948"
-          FINASU_EXPECTED_HASH: "d30a35ca0e952b0c5d713f9ad06068f0c0179a740c34cc6e997ea930a1a965aa"
         with:
           lto-mode: ${{ inputs['lto-mode'] }}
-          kernel-variant: ${{ matrix.variant }}
 
       - name: Upload files to artifacts
         uses: ./.github/actions/upload-artifacts
