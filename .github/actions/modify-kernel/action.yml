@@ -628,8 +628,9 @@ runs:
         BTWEAK_STATUS="NO"
         [[ "${{ inputs['battery-tweak'] }}" == "true" ]] && BTWEAK_STATUS="YES"
 
-        VFS_SUPPORT="${{ inputs['vfs-support'] }}"
-        VFS_SUPPORT="${VFS_SUPPORT:-Disabled}"
+        VFS_SUPPORT="Disabled"
+        [[ "${{ inputs['vfs-support'] }}" != "Disabled" ]] && VFS_SUPPORT="${{ inputs['vfs-support'] }}"
+        [[ "${{ inputs['kernel-variant'] }}" == "FINASU" ]] && VFS_SUPPORT="FINASU-NOMOUNT"
 
         # Create information file
         cat > "$INFO_FILE" <<EOF
