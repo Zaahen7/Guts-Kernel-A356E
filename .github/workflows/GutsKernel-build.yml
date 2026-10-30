@@ -200,7 +200,7 @@ jobs:
       - name: Upload files to artifacts
         uses: ./.github/actions/upload-artifacts
         with:
-          variant: ${{ matrix.variant }}
+          kernel-variant: ${{ matrix.variant }}
           
   Artifacts2Release:
     name: Upload Artifacts to Release
