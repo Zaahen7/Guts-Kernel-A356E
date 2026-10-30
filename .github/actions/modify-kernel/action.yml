@@ -77,6 +77,9 @@ runs:
         BAKASU_REPO: "https://github.com/Baka-SU/BakaSU"
         FINASU_REPO: "https://github.com/LyraVoid/FinaSU"
       run: | 
+        #!/usr/bin/env bash
+        set -euo pipefail
+        
         source "$GITHUB_ACTION_PATH/latest-commit-hash.sh" # loads latest_commit function
         
         cd "$KERNEL_DIR"
@@ -86,6 +89,7 @@ runs:
         
         case "${{ inputs['kernel-variant'] }}" in
           KSU)
+            # Clone KernelSU
             if [ ! -d "$KERNEL_DIR/KernelSU" ]; then
                 git clone "$KSU_REPO" "$KERNEL_DIR/KernelSU"
             fi
@@ -109,99 +113,181 @@ runs:
             if ! grep -q 'source "drivers/kernelsu/Kconfig"' "$DRIVER_KCONFIG"; then
                 sed -i '/endmenu/i\source "drivers/kernelsu/Kconfig"' "$DRIVER_KCONFIG"
             fi
+
+            echo "${{ inputs['kernel-variant'] }}_SHA=$KSU_SHA" >> "$GITHUB_ENV"
+            echo "✅ KernelSU installed successfully."
             ;;
           KSUN)
-            echo "Installing KernelSU-Next..."
-            if [[ "${{ inputs.enable-susfs }}" == "true" ]]; then
-              echo "Using pershoot repo for SUSFS support."
-              curl -fLSs "https://raw.githubusercontent.com/pershoot/KernelSU-Next/refs/heads/dev-susfs/kernel/setup.sh" | bash -
+            if [ "${{ inputs['enable-susfs'] }}" == 'true' ]; then
+                KSUN_REPO_URL="$KSUN_SUSFS_REPO"
             else
-              echo "Using official repo."
-              curl -fLSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -
+                KSUN_REPO_URL="$KSUN_REPO"
             fi
-            "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --disable CONFIG_KSU_SAMSUNG_KDP
-            "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --disable CONFIG_KSU_SAMSUNG_RKP
-            "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --disable CONFIG_KSU_SAMSUNG_DEFEX
-            "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --disable CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT
+        
+            # Get latest commit SHA
+            KSUN_SHA=$(latest_commit "$KSUN_REPO_URL" "dev") || exit 1
+        
+            # Clone repository
+            if [ ! -d "$KERNEL_DIR/KernelSU-Next" ]; then
+                git clone "$KSUN_REPO_URL" "$KERNEL_DIR/KernelSU-Next"
+            fi
+            
+            # Update repository
+            cd "$KERNEL_DIR/KernelSU-Next"
+            git stash
+            git fetch origin
+        
+            # Checkout selected commit
+            git checkout "$KSUN_SHA"
+        
+            # Create drivers symbolic link
+            ln -sf "$(realpath --relative-to="$DRIVER_DIR" "$KERNEL_DIR/KernelSU-Next/kernel")" "$DRIVER_DIR/kernelsu"
+        
+            # Modify Drivers Makefile
+            if ! grep -q "kernelsu" "$DRIVER_MAKEFILE"; then
+                printf '\nobj-$(CONFIG_KSU) += kernelsu/\n' >> "$DRIVER_MAKEFILE"
+            fi
+        
+            # Modify Drivers Kconfig
+            if ! grep -q 'source "drivers/kernelsu/Kconfig"' "$DRIVER_KCONFIG"; then
+                sed -i '/endmenu/i\source "drivers/kernelsu/Kconfig"' "$DRIVER_KCONFIG"
+            fi
+
+            echo "${{ inputs['kernel-variant'] }}_SHA=$KSUN_SHA" >> "$GITHUB_ENV"
+            echo "✅ KernelSU-Next installed successfully."
             ;;
           BAKASU)
-            echo "Installing Baka-SU..."
-            curl -fLSs "https://raw.githubusercontent.com/Baka-SU/BakaSU/main/kernel/setup.sh" | bash
+            # Get latest commit SHA
+            BAKASU_SHA=$(latest_commit "$BAKASU_REPO" "main") || exit 1
+          
+            # Clone BakaSU
+            if [ ! -d "$KERNEL_DIR/KernelSU" ]; then
+                git clone "$BAKASU_REPO" "$KERNEL_DIR/KernelSU"
+            fi
+          
+            cd "$KERNEL_DIR/KernelSU"
+          
+            # Update repository
+            git stash
+            git fetch origin
+          
+            # Checkout selected commit
+            git checkout "$BAKASU_SHA"
+          
+            # Create drivers symbolic link
+            ln -sf "$(realpath --relative-to="$DRIVER_DIR" "$KERNEL_DIR/KernelSU/kernel")" "$DRIVER_DIR/kernelsu"
+          
+            # Modify Drivers Makefile
+            if ! grep -q "kernelsu" "$DRIVER_MAKEFILE"; then
+                printf '\nobj-$(CONFIG_KSU) += kernelsu/\n' >> "$DRIVER_MAKEFILE"
+            fi
+          
+            # Modify Drivers Kconfig
+            if ! grep -q 'source "drivers/kernelsu/Kconfig"' "$DRIVER_KCONFIG"; then
+                sed -i '/endmenu/i\source "drivers/kernelsu/Kconfig"' "$DRIVER_KCONFIG"
+            fi
+
+            echo "${{ inputs['kernel-variant'] }}_SHA=$BAKASU_SHA" >> "$GITHUB_ENV"
+            echo "✅ BakaSU installed successfully."
             ;;
           FINASU)
-            echo "Prepare FinaSU directory & clone repo"
-            FINASU_REPO="https://github.com/LyraVoid/FinaSU.git"
-            FINASU_DIR="${{ github.workspace }}/FinaSU"
-            FINASU_COMMIT=$(latest_commit "$FINASU_REPO" master)
+            # Clone FinaSU
+            if [ ! -d "$KERNEL_DIR/FinaSU" ]; then
+                git clone "$FINASU_REPO" "$KERNEL_DIR/FinaSU"
+            fi
+            
+            # Update repository
+            cd "$KERNEL_DIR/FinaSU"
+            git stash
+            git fetch origin --tags
+          
+            # Checkout master branch
+            git checkout master
+            git pull --ff-only origin master
+          
+            # Get latest stable tag and SHA
+            FINASU_TAG=$(git describe --abbrev=0 --tags)
+            FINASU_SHA=$(git rev-list -n 1 "$FINASU_TAG")
+          
+            git checkout "$FINASU_SHA"
+          
+            # Create drivers symbolic link
+            ln -sf "$(realpath --relative-to="$DRIVER_DIR" "$KERNEL_DIR/FinaSU/kernel")" "$DRIVER_DIR/kernelsu"
+          
+            # Modify Drivers Makefile
+            if ! grep -q "kernelsu" "$DRIVER_MAKEFILE"; then
+                printf '\nobj-$(CONFIG_KSU) += kernelsu/\n' >> "$DRIVER_MAKEFILE"
+            fi
+          
+            # Modify Drivers Kconfig
+            if ! grep -q 'source "drivers/kernelsu/Kconfig"' "$DRIVER_KCONFIG"; then
+                sed -i '/endmenu/i\source "drivers/kernelsu/Kconfig"' "$DRIVER_KCONFIG"
+            fi
 
-            rm -rf "$FINASU_DIR"
-            mkdir "$FINASU_DIR"
-            cd "$FINASU_DIR"
-            git init -q
-            git remote add origin "$FINASU_REPO"
-            git fetch --depth=1 origin "$FINASU_COMMIT"
-            git checkout -q FETCH_HEAD
-            record_commit FinaSU "$FINASU_COMMIT"
-
-            echo "Installing FinaSU..."
-            cd "$KERNEL_DIR"
-            "$FINASU_DIR/kernel/setup.sh" --dir "$FINASU_DIR"
-            ;;
-          *)
-            echo "No KernelSU variant selected or unknown variant."
+            echo "${{ inputs['kernel-variant'] }}_SHA=$FINASU_SHA" >> "$GITHUB_ENV"
+            echo "✅ FinaSU installed successfully."
             ;;
         esac
 
-        # setup.sh clones the repo by itself, so record what actually ended up in the tree
-        if [ "${{ inputs['kernel-variant'] }}" != "FINASU" ]; then
-          record_linked_repo "${{ inputs['kernel-variant'] }}" "$KERNEL_DIR/drivers/kernelsu"
+        echo "::group::Disable Samsung KSU-related security restrictions"
+        for config in \
+          CONFIG_KSU_SAMSUNG_KDP \
+          CONFIG_KSU_SAMSUNG_RKP \
+          CONFIG_KSU_SAMSUNG_DEFEX \
+          CONFIG_KSU_SAMSUNG_NO_PATCH_TEXT
+        do
+          if "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --disable "$config"; then
+            echo "✅ Disabled $config"
+          else
+            echo "❌ Failed: $config"
+            exit 1
+          fi
+        done
+        echo "::endgroup::"
+
+        if "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_KSU; then
+            echo "✅ Enabled CONFIG_KSU"
+        else
+            echo "❌ Failed: CONFIG_KSU"
+            exit 1
         fi
         
-        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_KSU
-        echo "Done :v"
-
     - name: Enable SUSFS
       if: ${{ inputs['kernel-variant'] != 'CLEAN' && inputs['enable-susfs'] == 'true' }}
       shell: bash
       env:
-        SUSFS_DIR: ${{ github.workspace }}/susfs4ksu
+        SUSFS_DIR: "${{ github.workspace }}/susfs4ksu"
         SUSFS_REPO: "https://gitlab.com/simonpunk/susfs4ksu.git"
         SUSFS_BRANCH: "gki-android13-5.15"
       run: |
-        source "$GITHUB_ACTION_PATH/commit-hash-extractor.sh"
+        #!/usr/bin/env bash
+        set -euo pipefail
+        
+        source "$GITHUB_ACTION_PATH/latest-commit-hash.sh" # loads latest_commit function
 
-        # Prepare SUSFS directory
-        rm -rf "$SUSFS_DIR"
-        mkdir "$SUSFS_DIR"
-        cd "$SUSFS_DIR"
-
-        case "${{ inputs['kernel-variant'] }}" in
-          KSU|KSUN|BAKASU|FINASU)
-
-            ;;
-          *)
-            echo "Unknown kernel variant: ${{ inputs['kernel-variant'] }}. SUSFS installation skipped."
-            exit 1
-            ;;
-        esac
-
-        echo "::group::GitCloning SUSFS :v"
         if [ "$KERNEL_VARIANT" = "KSU" ]; then
-            echo "KSU variant detected. Using stable SUSFS commit: $STABLECOMMIT"
-            SUSFS_COMMIT="$KSU_SUSFS_STABLECOMMIT"
+          SUSFS_SHA="$KSU_SUSFS_STABLECOMMIT"
+          echo "KSU variant detected. Using stable SUSFS commit: $SUSFS_SHA"
         else
-            echo "${{ inputs['kernel-variant'] }} variant detected. Using latest SUSFS."
-            SUSFS_COMMIT=$(latest_commit "$SUSFS_REPO" "$SUSFS_BRANCH")
+          SUSFS_SHA=$(latest_commit "$SUSFS_REPO" "$SUSFS_BRANCH") || exit 1
+          echo "${{ inputs['kernel-variant'] }} variant detected. Using latest SUSFS commit: $SUSFS_SHA"
         fi
 
-        git init
-        git remote add origin "$SUSFS_REPO"
-        git fetch --depth=1 origin "$SUSFS_COMMIT"
-        git checkout FETCH_HEAD
-        record_commit susfs4ksu "$SUSFS_COMMIT"
+        # Clone SUSFS repo
+        if [ ! -d "$SUSFS_DIR" ]; then
+            git clone "$SUSFS_REPO" "$SUSFS_DIR"
+        fi
+
+        # Update repository
+        cd "$SUSFS_DIR"
+        git stash
+        git fetch origin
+
+        # Checkout SUSFS commit
+        git checkout "$SUSFS_SHA"
 
         if [ "$KERNEL_VARIANT" = "KSU" ]; then
-            cp "$SUSFS_DIR/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch" "$KERNEL_DIR/KernelSU/"
+            cp "$SUSFS_DIR/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch" "$KERNEL_DIR/KernelSU"
             cd "$KERNEL_DIR/KernelSU"
             KSU_PATCH_STATUS=0
             patch -p1 < "10_enable_susfs_for_ksu.patch" || KSU_PATCH_STATUS=$?
@@ -216,13 +302,12 @@ runs:
                 exit 1
             fi
         fi
-        echo "::endgroup::"
         
-        cd "$KERNEL_DIR"
         cp "$SUSFS_DIR/kernel_patches/fs/"*.c "$KERNEL_DIR/fs/" && echo "Copied SUSFS .c files successfully"
         cp "$SUSFS_DIR/kernel_patches/include/linux/"*.h "$KERNEL_DIR/include/linux/" && echo "Copied SUSFS .h files successfully"
         cp "$SUSFS_DIR/kernel_patches/50_add_susfs_in_gki-android13-5.15.patch" "$KERNEL_DIR" && echo "Copied SUSFS patch successfully"
-        
+
+        cd "$KERNEL_DIR"
         echo "::group::Adjusting SUSFS patch for kernel compatibility..."
         python3 "$GITHUB_ACTION_PATH/susfs-fix.py"
         echo "::endgroup::"
@@ -239,9 +324,16 @@ runs:
             echo "::error::SUSFS patch failed, Review the .rej files above."
             exit 1
         fi
-        
-        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_KSU_SUSFS
-        echo "SUSFS Installed."
+
+        if "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_KSU_SUSFS; then
+            echo "✅ Enabled CONFIG_KSU_SUSFS"
+        else
+            echo "❌ Failed: CONFIG_KSU_SUSFS"
+            exit 1
+        fi
+
+        echo "SUSFS_SHA=$SUSFS_SHA" >> "$GITHUB_ENV"
+        echo "✅ SUSFS installed successfully."
         
     - name: Apply Kernel Optimization Patches
       if: ${{ inputs.apply-kpatches == 'true' }}
@@ -264,14 +356,18 @@ runs:
     - name: Enable Baseband Guard
       if: ${{ inputs.enable-bbg == 'true' }}
       shell: bash
+      env:
+        BBG_REPO: "vc-teahouse/Baseband-guard"
+        BBG_BRANCH: "main"
       run: |
-        source "$GITHUB_ACTION_PATH/commit-hash-extractor.sh"
-        echo "Enabling Baseband Guard..."
+        #!/usr/bin/env bash
+        set -euo pipefail
+        
+        source "$GITHUB_ACTION_PATH/latest-commit-hash.sh" # loads latest_commit function
+        
         cd "$KERNEL_DIR"
 
-        BBG_REPO="vc-teahouse/Baseband-guard"
-        BBG_COMMIT=$(latest_commit "https://github.com/$BBG_REPO.git" main)
-        record_commit Baseband-guard "$BBG_COMMIT"
+        BBG_SHA=$(latest_commit "$BBG_REPO" "$BBG_BRANCH") || exit 1
         curl -fLSs "https://raw.githubusercontent.com/$BBG_REPO/$BBG_COMMIT/setup.sh" | bash
 
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_BBG
@@ -279,7 +375,6 @@ runs:
         sed -i '/^config LSM$/,/^help$/{ /^[[:space:]]*default/ { /baseband_guard/! s/selinux/selinux,baseband_guard/ } }' security/Kconfig
         echo "CONFIG_LSM after enabling BBG:"
         grep '^CONFIG_LSM=' "$DEFCONFIG"
-        echo "Done :v"
         
     - name: Enable more NET schedulers
       if: ${{ inputs.enable-netsch == 'true' }}
