@@ -1,3 +1,6 @@
+# Save command:
+# ${{ inputs['kernel-variant'] }}_SHA=$(latest_commit "$KSU_REPO.git" "main")
+
 name: Modify Kernel
 description: Modify Kernel
 
@@ -67,13 +70,45 @@ runs:
     - name: Install ${{ inputs['kernel-variant'] }}
       if: ${{ inputs['kernel-variant'] != 'CLEAN' }}
       shell: bash
-      run: |    
-        source "$GITHUB_ACTION_PATH/commit-hash-extractor.sh"
+      env:
+        KSU_REPO: "https://github.com/tiann/KernelSU"
+        KSUN_REPO: "https://github.com/KernelSU-Next/KernelSU-Next"
+        KSUN_SUSFS_REPO: "https://github.com/pershoot/KernelSU-Next"
+        BAKASU_REPO: "https://github.com/Baka-SU/BakaSU"
+        FINASU_REPO: "https://github.com/LyraVoid/FinaSU"
+      run: | 
+        source "$GITHUB_ACTION_PATH/latest-commit-hash.sh" # loads latest_commit function
+        
         cd "$KERNEL_DIR"
+        DRIVER_DIR="$KERNEL_DIR/drivers"
+        DRIVER_MAKEFILE="$DRIVER_DIR/Makefile"
+        DRIVER_KCONFIG="$DRIVER_DIR/Kconfig"
+        
         case "${{ inputs['kernel-variant'] }}" in
           KSU)
-            echo "Installing KernelSU from tiann..."
-            curl -fLSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+            if [ ! -d "$KERNEL_DIR/KernelSU" ]; then
+                git clone "$KSU_REPO" "$KERNEL_DIR/KernelSU"
+            fi
+            cd "$KERNEL_DIR/KernelSU"
+            git stash
+            git pull
+            
+            KSU_TAG=$(git describe --abbrev=0 --tags)
+            KSU_SHA=$(git rev-list -n 1 "$KSU_TAG")
+            git checkout "$KSU_SHA"
+
+            # Create drivers symbolic link
+            ln -sf "$(realpath --relative-to="$DRIVER_DIR" "$KERNEL_DIR/KernelSU/kernel")" "$DRIVER_DIR/kernelsu"
+
+            # Modify Drivers Makefile
+            if ! grep -q "kernelsu" "$DRIVER_MAKEFILE"; then
+                printf '\nobj-$(CONFIG_KSU) += kernelsu/\n' >> "$DRIVER_MAKEFILE"
+            fi
+
+            # Modify Drivers Kconfig
+            if ! grep -q 'source "drivers/kernelsu/Kconfig"' "$DRIVER_KCONFIG"; then
+                sed -i '/endmenu/i\source "drivers/kernelsu/Kconfig"' "$DRIVER_KCONFIG"
+            fi
             ;;
           KSUN)
             echo "Installing KernelSU-Next..."
@@ -132,21 +167,17 @@ runs:
         SUSFS_DIR: ${{ github.workspace }}/susfs4ksu
         SUSFS_REPO: "https://gitlab.com/simonpunk/susfs4ksu.git"
         SUSFS_BRANCH: "gki-android13-5.15"
-        STABLECOMMIT: "23d85d2278f3e481644f809053868b6153715583"
-        KERNEL_VARIANT: ${{ inputs['kernel-variant'] }}
       run: |
         source "$GITHUB_ACTION_PATH/commit-hash-extractor.sh"
 
+        # Prepare SUSFS directory
+        rm -rf "$SUSFS_DIR"
+        mkdir "$SUSFS_DIR"
+        cd "$SUSFS_DIR"
+
         case "${{ inputs['kernel-variant'] }}" in
-          CLEAN)
-            echo "Puck variant selected. SUSFS is not supported for Puck."
-            exit 0
-            ;;
           KSU|KSUN|BAKASU|FINASU)
-            # Prepare SUSFS directory
-            rm -rf "$SUSFS_DIR"
-            mkdir "$SUSFS_DIR"
-            cd "$SUSFS_DIR"
+
             ;;
           *)
             echo "Unknown kernel variant: ${{ inputs['kernel-variant'] }}. SUSFS installation skipped."
@@ -157,7 +188,7 @@ runs:
         echo "::group::GitCloning SUSFS :v"
         if [ "$KERNEL_VARIANT" = "KSU" ]; then
             echo "KSU variant detected. Using stable SUSFS commit: $STABLECOMMIT"
-            SUSFS_COMMIT="$STABLECOMMIT"
+            SUSFS_COMMIT="$KSU_SUSFS_STABLECOMMIT"
         else
             echo "${{ inputs['kernel-variant'] }} variant detected. Using latest SUSFS."
             SUSFS_COMMIT=$(latest_commit "$SUSFS_REPO" "$SUSFS_BRANCH")
