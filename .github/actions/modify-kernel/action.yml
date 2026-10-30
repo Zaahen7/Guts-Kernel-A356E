@@ -427,7 +427,7 @@ runs:
       if: ${{ inputs.enable-bbrv3 == 'true' }}
       shell: bash
       env:
-        BBRV3_BBR_PATCH: "$GITHUB_ACTION_PATH/net-tcp-backport-BBRv3-to-android13-5.15.patch"
+        BBRV3_BBR_PATCH: "${{ github.action_path }}/net-tcp-backport-BBRv3-to-android13-5.15.patch"
       run: |
         cd "$KERNEL_DIR"
         
