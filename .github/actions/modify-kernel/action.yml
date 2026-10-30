@@ -77,9 +77,7 @@ runs:
         BAKASU_REPO: "https://github.com/Baka-SU/BakaSU"
         FINASU_REPO: "https://github.com/LyraVoid/FinaSU"
       run: | 
-        #!/usr/bin/env bash
         set -euo pipefail
-        
         source "$GITHUB_ACTION_PATH/latest-commit-hash.sh" # loads latest_commit function
         
         cd "$KERNEL_DIR"
@@ -260,9 +258,7 @@ runs:
         SUSFS_REPO: "https://gitlab.com/simonpunk/susfs4ksu.git"
         SUSFS_BRANCH: "gki-android13-5.15"
       run: |
-        #!/usr/bin/env bash
         set -euo pipefail
-        
         source "$GITHUB_ACTION_PATH/latest-commit-hash.sh" # loads latest_commit function
 
         if [ "$KERNEL_VARIANT" = "KSU" ]; then
@@ -357,24 +353,45 @@ runs:
       if: ${{ inputs.enable-bbg == 'true' }}
       shell: bash
       env:
+        BBG_DIR: "$KERNEL_DIR/Baseband-guard"
         BBG_REPO: "vc-teahouse/Baseband-guard"
         BBG_BRANCH: "main"
       run: |
-        #!/usr/bin/env bash
         set -euo pipefail
-        
-        source "$GITHUB_ACTION_PATH/latest-commit-hash.sh" # loads latest_commit function
+        source "$GITHUB_ACTION_PATH/latest-commit-hash.sh"
         
         cd "$KERNEL_DIR"
-
         BBG_SHA=$(latest_commit "$BBG_REPO" "$BBG_BRANCH") || exit 1
-        curl -fLSs "https://raw.githubusercontent.com/$BBG_REPO/$BBG_COMMIT/setup.sh" | bash
-
+        
+        # Clone repository
+        if [ ! -d "$KERNEL_DIR/Baseband-guard" ]; then
+            git clone "$BBG_REPO" "$BBG_DIR"
+        fi
+        
+        # Update Repository
+        cd "$BBG_DIR"
+        git stash
+        git fetch origin
+        
+        # Checkout BBG commit
+        git checkout "$BBG_SHA"
+        
+        # Run setup script from kernel root
+        cd "$KERNEL_DIR"
+        bash "$KERNEL_DIR/Baseband-guard/setup.sh" "$BBG_SHA"
+        
+        # Enable Baseband Guard
         "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_BBG
+        
+        # Update LSM configuration
         sed -i '/^CONFIG_LSM=/ s/"$/,baseband_guard"/' "$DEFCONFIG"
         sed -i '/^config LSM$/,/^help$/{ /^[[:space:]]*default/ { /baseband_guard/! s/selinux/selinux,baseband_guard/ } }' security/Kconfig
+        
         echo "CONFIG_LSM after enabling BBG:"
         grep '^CONFIG_LSM=' "$DEFCONFIG"
+
+        echo "BBG_SHA=$BBG_SHA" >> "$GITHUB_ENV"
+        echo "✅ Baseband Guard enabled successfully."
         
     - name: Enable more NET schedulers
       if: ${{ inputs.enable-netsch == 'true' }}
@@ -409,10 +426,18 @@ runs:
     - name: Enable BBR & BBRv3
       if: ${{ inputs.enable-bbrv3 == 'true' }}
       shell: bash
+      env:
+        BBRV3_BBR_PATCH: "$GITHUB_ACTION_PATH/net-tcp-backport-BBRv3-to-android13-5.15.patch"
       run: |
         cd "$KERNEL_DIR"
-        patch -p1 < "$GITHUB_ACTION_PATH/net-tcp-backport-BBRv3-to-android13-5.15.patch"
-
+        
+        if patch -p1 < "$BBRV3_BBR_PATCH"; then
+          echo "✅ Successfully applied: $(basename "$BBRV3_BBR_PATCH")"
+        else
+          echo "❌ Failed to apply: $(basename "$BBRV3_BBR_PATCH")"
+          exit 1
+        fi
+        
         for config in \
           CONFIG_TCP_CONG_ADVANCED \
           CONFIG_TCP_CONG_BBR \
@@ -430,12 +455,18 @@ runs:
       if: ${{ inputs.extended-tmpfs == 'true' }}
       shell: bash
       run: |
-        echo "Adding extended TMPFS support for meta modules and Mountify..."
-        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" \
-          --enable CONFIG_OVERLAY_FS \
-          --enable CONFIG_TMPFS_XATTR \
-          --enable CONFIG_TMPFS_POSIX_ACL
-        echo "Done :v"
+        for config in \
+          CONFIG_OVERLAY_FS \
+          CONFIG_TMPFS_XATTR \
+          CONFIG_TMPFS_POSIX_ACL
+        do
+          if "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable "$config"; then
+            echo "✅ Enabled $config"
+          else
+            echo "❌ Failed: $config"
+            exit 1
+          fi
+        done
         
     - name: Add VFS support for Hybrid Mount MetaModule
       if: ${{ inputs['vfs-support'] != 'Disabled' && inputs['kernel-variant'] != 'FINASU' }}
