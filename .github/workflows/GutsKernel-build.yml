@@ -20,7 +20,7 @@ on:
           default: true
           
         ksu-variant:
-          description: "KernelSU from tiann"
+          description: "KernelSU"
           type: boolean
           default: true
           
@@ -185,9 +185,6 @@ jobs:
      
       - name: Apply Kernel Modifications
         uses: ./.github/actions/modify-kernel
-        env:
-          # SUSFS commit for latest stable KernelSU from tiann
-          KSU_SUSFS_STABLECOMMIT: "23d85d2278f3e481644f809053868b6153715583"
         with:
           disable-securities: ${{ inputs['disable-securities'] }}
           apply-kpatches: ${{ inputs['kernel-patches'] }}
