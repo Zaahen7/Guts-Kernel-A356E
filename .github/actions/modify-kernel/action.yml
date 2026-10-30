@@ -32,7 +32,7 @@ runs:
       shell: bash
       run: |
         if sed -i 's/check_defconfig//' "$KERNEL_DIR/build.config.gki"; then
-          echo "✅ Done :v"
+          echo "✅ Disabled"
         else
           echo "❌ Failed to modify build.config.gki"
           exit 1
@@ -64,7 +64,7 @@ runs:
           fi
         done
         
-    - name: Install KernelSU variant
+    - name: Install ${{ inputs['kernel-variant'] }}
       if: ${{ inputs['kernel-variant'] != 'CLEAN' }}
       shell: bash
       run: |    
@@ -126,7 +126,7 @@ runs:
         echo "Done :v"
 
     - name: Enable SUSFS
-      if: ${{ inputs.enable-susfs == 'true' }}
+      if: ${{ inputs['kernel-variant'] != 'CLEAN' && inputs['enable-susfs'] == 'true' }}
       shell: bash
       env:
         SUSFS_DIR: ${{ github.workspace }}/susfs4ksu
@@ -218,13 +218,17 @@ runs:
       env:
         KPATCHES_DIR: ${{ github.workspace }}/patches
       run: |
-        echo "Applying kernel optimization patches..."
         cd "$KERNEL_DIR"
         for patch in "$KPATCHES_DIR"/*.patch; do
-          echo "Applying patch: $patch"
-          patch -p1 < "$patch"
+          echo "Applying patch: $(basename "$patch")"
+        
+          if patch -p1 < "$patch"; then
+            echo "✅ Successfully applied: $(basename "$patch")"
+          else
+            echo "❌ Failed to apply: $(basename "$patch")"
+            exit 1
+          fi
         done
-        echo "Done :v"
         
     - name: Enable Baseband Guard
       if: ${{ inputs.enable-bbg == 'true' }}
@@ -250,22 +254,31 @@ runs:
       if: ${{ inputs.enable-netsch == 'true' }}
       shell: bash
       run: |
-        echo "Enabling more Network Schedulers..."
-        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" \
-          --enable CONFIG_NET_SCH_FQ \
-          --enable CONFIG_NET_SCH_FQ_CODEL \
-          --enable CONFIG_NET_SCH_PIE \
-          --enable CONFIG_NET_SCH_FQ_PIE \
-          --enable CONFIG_NET_SCH_CAKE
-        echo "Done :v"
+        for config in \
+          CONFIG_NET_SCH_FQ
+          CONFIG_NET_SCH_FQ_CODEL \
+          CONFIG_NET_SCH_PIE \
+          CONFIG_NET_SCH_FQ_PIE \
+          CONFIG_NET_SCH_CAKE
+        do
+          if "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable "$config"; then
+            echo "✅ Enabled $config"
+          else
+            echo "❌ Failed: $config"
+            exit 1
+          fi
+        done
         
     - name: Enable Wireguard
       if: ${{ inputs.enable-wireguard == 'true' }}
       shell: bash
       run: |
-        echo "Enabling Wireguard..."
-        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_WIREGUARD
-        echo "Done :v"
+        if "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_WIREGUARD; then
+            echo "✅ Enabled CONFIG_WIREGUARD"
+        else
+            echo "❌ Failed: CONFIG_WIREGUARD"
+            exit 1
+        fi
         
     - name: Enable BBR & BBRv3
       if: ${{ inputs.enable-bbrv3 == 'true' }}
@@ -273,11 +286,19 @@ runs:
       run: |
         cd "$KERNEL_DIR"
         patch -p1 < "$GITHUB_ACTION_PATH/net-tcp-backport-BBRv3-to-android13-5.15.patch"
-        "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" \
-          --enable CONFIG_TCP_CONG_ADVANCED \
-          --enable CONFIG_TCP_CONG_BBR \
-          --enable CONFIG_TCP_CONG_BBR3
-        echo "Done :v"
+
+        for config in \
+          CONFIG_TCP_CONG_ADVANCED \
+          CONFIG_TCP_CONG_BBR \
+          CONFIG_TCP_CONG_BBR3
+        do
+          if "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable "$config"; then
+            echo "✅ Enabled $config"
+          else
+            echo "❌ Failed: $config"
+            exit 1
+          fi
+        done
         
     - name: Enable extended TMPFS support for meta modules and Mountify
       if: ${{ inputs.extended-tmpfs == 'true' }}
