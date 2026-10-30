@@ -257,6 +257,8 @@ runs:
         SUSFS_DIR: "${{ github.workspace }}/susfs4ksu"
         SUSFS_REPO: "https://gitlab.com/simonpunk/susfs4ksu"
         SUSFS_BRANCH: "gki-android13-5.15"
+        # SUSFS commit for latest stable KernelSU from tiann
+        KSU_SUSFS_STABLECOMMIT: "23d85d2278f3e481644f809053868b6153715583"
       run: |
         set -euo pipefail
         source "$GITHUB_ACTION_PATH/latest-commit-hash.sh" # loads latest_commit function
