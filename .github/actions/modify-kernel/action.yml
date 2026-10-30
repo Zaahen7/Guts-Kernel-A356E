@@ -359,7 +359,7 @@ runs:
         echo "✅ SUSFS installed successfully."
         
     - name: Apply Kernel Optimization Patches
-      if: ${{ inputs.apply-kpatches == 'true' }}
+      if: ${{ inputs['apply-kpatches'] == 'true' }}
       shell: bash
       env:
         KPATCHES_DIR: ${{ github.workspace }}/patches
@@ -377,7 +377,7 @@ runs:
         done
         
     - name: Enable Baseband Guard
-      if: ${{ inputs.enable-bbg == 'true' }}
+      if: ${{ inputs['enable-bbg'] == 'true' }}
       shell: bash
       env:
         BBG_DIR: "${{ env.KERNEL_DIR }}/Baseband-guard"
@@ -440,7 +440,7 @@ runs:
         done
         
     - name: Enable BBR & BBRv3
-      if: ${{ inputs.enable-bbrv3 == 'true' }}
+      if: ${{ inputs['enable-bbrv3'] == 'true' }}
       shell: bash
       env:
         BBRV3_BBR_PATCH: "${{ github.action_path }}/net-tcp-backport-BBRv3-to-android13-5.15.patch"
@@ -468,7 +468,7 @@ runs:
         done
         
     - name: Enable extended TMPFS support for meta modules and Mountify
-      if: ${{ inputs.extended-tmpfs == 'true' }}
+      if: ${{ inputs['extended-tmpfs'] == 'true' }}
       shell: bash
       run: |
         for config in \
@@ -576,9 +576,12 @@ runs:
         echo "✅ NoMount installed successfully."
         
     - name: Apply EXPERIMENTAL battery tweak
-      if: ${{ inputs.battery-tweak == 'true' }}
+      if: ${{ inputs['battery-tweak'] == 'true' }}
       shell: bash
       run: |
+        echo "::notice::This tweak is experimental because I have not personally tested it yet. \
+        While it is not expected to cause any issues, I cannot guarantee that it will improve battery life. \
+        Use it at your own discretion, do your own research, and please share your results!"
         if "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_WQ_POWER_EFFICIENT_DEFAULT; then
             echo "✅ Enabled CONFIG_WQ_POWER_EFFICIENT_DEFAULT"
         else
