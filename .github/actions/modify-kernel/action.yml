@@ -371,7 +371,10 @@ runs:
         # Update Repository
         cd "$BBG_DIR"
         git stash
-        git fetch origin
+        git pull
+        
+        BBG_TAG=$(git describe --abbrev=0 --tags)
+        BBG_SHA=$(git rev-list -n 1 "$BBG_TAG")
         
         # Checkout BBG commit
         git checkout "$BBG_SHA"
