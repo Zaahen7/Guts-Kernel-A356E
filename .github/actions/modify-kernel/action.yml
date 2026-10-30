@@ -353,7 +353,7 @@ runs:
       if: ${{ inputs.enable-bbg == 'true' }}
       shell: bash
       env:
-        BBG_DIR: "$KERNEL_DIR/Baseband-guard"
+        BBG_DIR: "${{ env.KERNEL_DIR }}/Baseband-guard"
         BBG_REPO: "https://github.com/vc-teahouse/Baseband-guard"
         BBG_BRANCH: "main"
       run: |
@@ -472,7 +472,7 @@ runs:
       if: ${{ inputs['vfs-support'] == 'Hybrid-Mount' && inputs['kernel-variant'] != 'FINASU' }}
       shell: bash
       env:
-        HYBRIDMOUNT_DIR: "$KERNEL_DIR/meta-hybrid_mount"
+        HYBRIDMOUNT_DIR: "${{ env.KERNEL_DIR }}/meta-hybrid_mount"
         HYBRIDMOUNT_REPO: "https://github.com/Hybrid-Mount/meta-hybrid_mount"
         HYBRIDMOUNT_BRANCH: "dev"
       run: |
@@ -515,7 +515,7 @@ runs:
       if: ${{ inputs['vfs-support'] == 'NoMount' && inputs['kernel-variant'] != 'FINASU' }}
       shell: bash
       env:
-        NOMOUNT_DIR: "$KERNEL_DIR/nomount"
+        NOMOUNT_DIR: "${{ env.KERNEL_DIR }}/nomount"
         NOMOUNT_REPO: "https://github.com/maxsteeel/nomount"
         NOMOUNT_BRANCH: "dev"
       run: |
