@@ -60,8 +60,16 @@ runs:
         set -euo pipefail
 
         case "${{ inputs['kernel-variant'] }}" in
-          KSU|KSUN|FINASU)
+          KSU)
             KSU_DIR="$KERNEL_DIR/KernelSU"
+            VERSION_OFFSET=30000
+            ;;
+          KSUN)
+            KSU_DIR="$KERNEL_DIR/KernelSU-Next"
+            VERSION_OFFSET=30000
+            ;;
+          FINASU)
+            KSU_DIR="$KERNEL_DIR/FinaSU"
             VERSION_OFFSET=30000
             ;;
           BAKASU)
