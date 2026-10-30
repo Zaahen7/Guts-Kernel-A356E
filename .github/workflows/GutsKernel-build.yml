@@ -134,15 +134,16 @@ defaults:
 
 jobs:
   get-date:
+    name: Get todays date for zip names xD
     runs-on: ubuntu-latest
     outputs:
-      build_date: ${{ steps.date.outputs.build_date }}
+      build_date: ${{ steps.date.outputs['build_date'] }}
     steps:
       - id: date
         run: echo "build_date=$(date +'%Y%m%d')" >> "$GITHUB_OUTPUT"
         
   build-kernel:
-    name: GutsKernel One UI ${{ inputs.oneui-version }} - ${{ matrix.variant }}
+    name: GutsKernel One UI ${{ inputs['oneui-version'] }} - ${{ matrix.variant }}
     needs: get-date
     if: ${{ inputs['clean-variant'] || inputs['ksu-variant'] || inputs['ksun-variant'] || inputs['bakasu-variant'] || inputs['finasu-variant'] }}
     runs-on: ubuntu-latest
@@ -164,14 +165,14 @@ jobs:
           )) }}
     
     env:
-      BUILD_DATE: ${{ needs.get-date.outputs.build_date }}
+      BUILD_DATE: ${{ needs.get-date.outputs['build_date'] }}
       KERNEL_DIR: ${{ github.workspace }}/GutsKernel
       TOOLCHAIN_DIR: ${{ github.workspace }}/Toolchain
       ANYKERNEL3_DIR: ${{ github.workspace }}/Anykernel3
-      LTO_MODE: ${{ inputs.lto-mode }}
-      ONEUI_VERSION: ${{ inputs.oneui-version }}
+      LTO_MODE: ${{ inputs['lto-mode'] }}
+      ONEUI_VERSION: ${{ inputs['oneui-version'] }}
       DEFCONFIG: ${{ github.workspace }}/GutsKernel/arch/arm64/configs/s5e8835-a35xjvxx_defconfig
-      DEVICE_MODEL: A356E
+      DEVICE_MODEL: "A356E"
       
     steps:
       - name: Checkout repository
@@ -184,18 +185,21 @@ jobs:
      
       - name: Apply Kernel Modifications
         uses: ./.github/actions/modify-kernel
+        env:
+          # SUSFS commit for latest stable KernelSU from tiann
+          KSU_SUSFS_STABLECOMMIT: "23d85d2278f3e481644f809053868b6153715583"
         with:
           disable-securities: ${{ inputs['disable-securities'] }}
-          apply-kpatches: ${{ inputs.kernel-patches }}
+          apply-kpatches: ${{ inputs['kernel-patches'] }}
           kernel-variant: ${{ matrix.variant }}
           enable-susfs: ${{ inputs.susfs }}
           enable-bbg: ${{ inputs.bbg }}
           enable-netsch: ${{ inputs.netsch }}
           enable-wireguard: ${{ inputs.wireguard }}
           enable-bbrv3: ${{ inputs.bbrv3 }}
-          extended-tmpfs: ${{ inputs.ext-tmpfs }}
-          vfs-support: ${{ inputs.vfs-support }}
-          battery-tweak: ${{ inputs.battery-tweak }}
+          extended-tmpfs: ${{ inputs['ext-tmpfs'] }}
+          vfs-support: ${{ inputs['vfs-support'] }}
+          battery-tweak: ${{ inputs['battery-tweak'] }}
 
       - name: Build Kernel
         uses: ./.github/actions/build-kernel
@@ -204,7 +208,7 @@ jobs:
           FINASU_EXPECTED_SIZE: "27,985,948"
           FINASU_EXPECTED_HASH: "d30a35ca0e952b0c5d713f9ad06068f0c0179a740c34cc6e997ea930a1a965aa"
         with:
-          lto-mode: ${{ inputs.lto-mode }}
+          lto-mode: ${{ inputs['lto-mode'] }}
           kernel-variant: ${{ matrix.variant }}
 
       - name: Upload files to artifacts
@@ -215,7 +219,7 @@ jobs:
   Artifacts2Release:
     name: Upload Artifacts to Release
     needs: [get-date, build-kernel]
-    if: ${{ inputs['release-type'] != 'Actions' && needs.build-kernel.result == 'success' }}
+    if: ${{ inputs['release-type'] != 'Actions' && needs['build-kernel'].result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -239,11 +243,11 @@ jobs:
       - name: Publish Artifacts to Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.${{ inputs.oneui-version }}-${{ needs.get-date.outputs.build_date }}
+          tag_name: v0.${{ inputs['oneui-version'] }}-${{ needs['get-date'].outputs['build_date'] }}
           target_commitish: ${{ github.sha }}
-          name: GutsKernel for A356E Oneui ${{ inputs.oneui-version }}
-          prerelease: ${{ inputs.release-type == 'Prerelease' }}
-          make_latest: ${{ inputs.release-type == 'Release' }}
+          name: GutsKernel for A356E Oneui ${{ inputs['oneui-version'] }}
+          prerelease: ${{ inputs['release-type'] == 'Prerelease' }}
+          make_latest: ${{ inputs['release-type'] == 'Release' }}
           overwrite_files: true
           fail_on_unmatched_files: true
           files: build-artifacts/*.zip
