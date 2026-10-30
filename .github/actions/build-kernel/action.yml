@@ -50,8 +50,8 @@ runs:
       shell: bash
       run: |
         SIZE_BYTES="${FINASU_EXPECTED_SIZE//,/}"  # Remove comas
-        FINASU_EXPECTED_SIZE=$(printf '0x%04x' "$SIZE_BYTES") # Convert size
-        echo "FINASU_EXPECTED_SIZE=$FINASU_EXPECTED_SIZE" >> "$GITHUB_ENV"
+        FINASU_EXPECTED_SIZEE=$(printf '0x%04x' "$SIZE_BYTES") # Convert size
+        echo "FINASU_EXPECTED_SIZE=$FINASU_EXPECTED_SIZEE" >> "$GITHUB_ENV"
 
     - name: Calculate KernelSU Version
       if: ${{ inputs['kernel-variant'] != 'CLEAN' }}
