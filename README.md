@@ -9,41 +9,8 @@
 > [!CAUTION]
 > **I am not responsible for any bricked devices, hardware damage, data loss, or other issues that may occur while using or flashing this kernel. By choosing to flash this kernel, you acknowledge and accept all associated risks. You are solely responsible for any consequences resulting from its use. Flash at your own risk!**
 
-<div align="center">
-<table>
-  <tr>
-    <th colspan="3">Prebuilt Kernels Info</th>
-  </tr>
-  <tr>
-    <th>Variant</th>
-    <th>Root Solution</th>
-    <th>Features</th>
-  </tr>
-  <tr>
-    <td>🌸 <strong>Puck</strong></td>
-    <td><strong>No root</strong></td>
-    <td>Removed Securities, Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, Extended-tmpfs & HM VFS Support</td>
-  </tr>
-  <tr>
-    <td>👹 <strong>Zodd</strong></td>
-    <td><strong>KSU + SUSFS</strong></td>
-    <td>Removed Securities, Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, Extended-tmpfs & HM VFS Support</td>
-  </tr>
-  <tr>
-    <td>🦅 <strong>Griff</strong></td>
-    <td><strong>KSU-Next + SUSFS</strong></td>
-    <td>Removed Securities, Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, Extended-tmpfs & HM VFS Support</td>
-  </tr>
-  <tr>
-    <td>❓ <strong>Zoro</strong></td>
-    <td><strong>Baka-SU + SUSFS</strong></td>
-    <td>Removed Securities, Full LTO, Optimization patches, BBG, BBRv3, Net Scheds, Wireguard, Extended-tmpfs & HM VFS Support</td>
-  </tr>
-</table>
-</div>
-
 ## ⚙️ Kernel Build Workflow Features
-Clone the repository and build your kernel your way using the **GitHub Actions workflow**.
+Fork the repository and build your kernel your way using the **GitHub Actions workflow**.
 ### **🛠️ Available Features**
 - **Kernel Variants** — Select which kernel variants to build.
 - **One UI Version** — Choose your target One UI version. Currently, only One UI 8.5 is supported.
@@ -52,7 +19,6 @@ Clone the repository and build your kernel your way using the **GitHub Actions w
 - **SUSFS Support** — Toggle SUSFS integration. [**Learn more**](https://gitlab.com/simonpunk/susfs4ksu)
 - **Baseband-Guard Support (BBG)** — Toggle Baseband-Guard integration. [**Learn more**](https://github.com/vc-teahouse/Baseband-guard)
 - **Additional Network Schedulers** — Enable FQ, FQ-CoDel, PIE, FQ-PIE, and CAKE net schedulers.
-- **WireGuard Support** — WireGuard remains enabled by default, as it is already enabled on the Galaxy A35 :p
 - **BBR & BBRv3 TCP Congestion Control** — Add BBR and BBRv3 support. You still have to set it manually.
 - **TMPFS XATTR / POSIX ACL** — Extended TMPFS support for meta modules and [**Mountify**](https://github.com/backslashxx/mountify).
 - **Built-in VFS Metamodule Support** — Choose between [**Hybrid-Mount**](https://github.com/Hybrid-Mount/meta-hybrid_mount), [**NoMount**](https://github.com/maxsteeel/nomount) and disabled.
@@ -63,7 +29,8 @@ Clone the repository and build your kernel your way using the **GitHub Actions w
 - **rifsxd**, for [**KernelSU-Next**](https://github.com/KernelSU-Next/KernelSU-Next)
 - **pershoot**, for [**KernelSU-Next SUSFS fork**](https://github.com/pershoot/KernelSU-Next/tree/dev-susfs)
 - **Baka-SU** for [**Baka-SU**](https://github.com/Baka-SU/BakaSU)
-- **WildKernels** for [**Kernel Patches**](https://github.com/WildKernels/kernel_patches)
+- **LyraVoid** for [**Fina-SU**](https://github.com/LyraVoid/FinaSU)
+- **WildKernels** for [**Kernel Patches**](https://github.com/WildKernels/kernel_patches) & [**Samsung_KernelSU_SUSFS**](https://github.com/WildKernels/Samsung_KernelSU_SUSFS)
 - **simonpunk**, for [**SUSFS**](https://gitlab.com/simonpunk/susfs4ksu)
 - **vc-teahouse**, for [**Baseband-guard**](https://github.com/vc-teahouse/Baseband-guard)
 - **backslashxx**, for [**Mountify**](https://github.com/backslashxx/mountify)
