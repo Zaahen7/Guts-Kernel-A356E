@@ -358,23 +358,18 @@ runs:
         BBG_BRANCH: "main"
       run: |
         set -euo pipefail
-        source "$GITHUB_ACTION_PATH/latest-commit-hash.sh"
-        
-        cd "$KERNEL_DIR"
-        BBG_SHA=$(latest_commit "$BBG_REPO" "$BBG_BRANCH") || exit 1
         
         # Clone repository
         if [ ! -d "$BBG_DIR" ]; then
             git clone "$BBG_REPO" "$BBG_DIR"
         fi
         
-        # Update Repository
-        cd "$BBG_DIR"
-        git stash
-        git pull
+        # Update repository and tags
+        git -C "$BBG_DIR" fetch origin --tags
         
-        BBG_TAG=$(git describe --abbrev=0 --tags)
-        BBG_SHA=$(git rev-list -n 1 "$BBG_TAG")
+        # Get latest tag and its SHA
+        BBG_TAG=$(git -C "$BBG_DIR" describe --tags --abbrev=0 origin/main)
+        BBG_SHA=$(git -C "$BBG_DIR" rev-list -n 1 "$BBG_TAG")
                 
         # Run setup script from kernel root
         cd "$KERNEL_DIR"
