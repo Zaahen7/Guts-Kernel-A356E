@@ -17,8 +17,6 @@ inputs:
     description: "Enable Baseband Guard"
   enable-netsch:
     description: "Enable more NET schedulers"
-  enable-wireguard:
-    description: "Enable Wireguard"
   enable-bbrv3:
     description: "Enable BBR & BBRv3"
   extended-tmpfs:
@@ -42,6 +40,7 @@ runs:
         fi
 
     - name: Disable Samsung security features
+      if: ${{ inputs['disable-securities'] == 'true' }}
       shell: bash
       run: |
         for config in \
@@ -249,6 +248,26 @@ runs:
             echo "❌ Failed: CONFIG_KSU"
             exit 1
         fi
+
+    - name: Calculate KernelSU Version
+      if: ${{ inputs['kernel-variant'] != 'CLEAN' }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        
+        case "${{ inputs['kernel-variant'] }}" in
+          KSU|BAKASU) KSU_DIR="$KERNEL_DIR/KernelSU" ;;
+          KSUN)       KSU_DIR="$KERNEL_DIR/KernelSU-Next" ;;
+          FINASU)     KSU_DIR="$KERNEL_DIR/FinaSU" ;;
+        esac
+        
+        VERSION_OFFSET=30000
+        [[ "${{ inputs['kernel-variant'] }}" == "BAKASU" ]] && VERSION_OFFSET=30700
+        
+        KSU_COMMIT_COUNT=$(git -C "$KSU_DIR" rev-list --count HEAD)
+        KSU_VERSION=$((VERSION_OFFSET + KSU_COMMIT_COUNT))
+        
+        echo "${{ inputs['kernel-variant'] }}_VERSION=$KSU_VERSION" >> "$GITHUB_ENV"
         
     - name: Enable SUSFS
       if: ${{ inputs['kernel-variant'] != 'CLEAN' && inputs['enable-susfs'] == 'true' }}
@@ -414,17 +433,6 @@ runs:
           fi
         done
         
-    - name: Enable Wireguard
-      if: ${{ inputs.enable-wireguard == 'true' }}
-      shell: bash
-      run: |
-        if "$KERNEL_DIR/scripts/config" --file "$DEFCONFIG" --enable CONFIG_WIREGUARD; then
-            echo "✅ Enabled CONFIG_WIREGUARD"
-        else
-            echo "❌ Failed: CONFIG_WIREGUARD"
-            exit 1
-        fi
-        
     - name: Enable BBR & BBRv3
       if: ${{ inputs.enable-bbrv3 == 'true' }}
       shell: bash
@@ -567,3 +575,96 @@ runs:
             exit 1
         fi
 
+    - name: Create Kernel Info.txt & Place it into AnyKernel3
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        INFO_FILE="$ANYKERNEL3_DIR/kernel-info.txt"
+        VARIANT="${{ inputs['kernel-variant'] }}"
+
+        # KernelSU variant
+        case "$VARIANT" in
+          CLEAN)  KSU_VARIANT="None" ;;
+          KSU)    KSU_VARIANT="KernelSU" ;;
+          KSUN)   KSU_VARIANT="KernelSU-Next" ;;
+          BAKASU) KSU_VARIANT="BakaSU" ;;
+          FINASU) KSU_VARIANT="FinaSU" ;;
+          *)
+            echo "::error::Unknown KernelSU variant: $VARIANT"
+            exit 1
+            ;;
+        esac
+
+        # Get KernelSU version dynamically
+        VERSION_VAR="${VARIANT}_VERSION"
+        KSU_VERSION="${!VERSION_VAR:-}"
+
+        # Modification statuses
+        SECURITIES_STATUS="Enabled"
+        [[ "${{ inputs['disable-securities'] }}" == "true" ]] && SECURITIES_STATUS="Disabled"
+
+        SUSFS_STATUS="Unsupported"
+        [[ "${{ inputs['enable-susfs'] }}" == "true" ]] && SUSFS_STATUS="Supported"
+
+        KPATCHES_STATUS="NO"
+        [[ "${{ inputs['apply-kpatches'] }}" == "true" ]] && KPATCHES_STATUS="YES"
+
+        BBG_STATUS="NO"
+        [[ "${{ inputs['enable-bbg'] }}" == "true" ]] && BBG_STATUS="YES"
+
+        NETSCHED_STATUS="NO"
+        [[ "${{ inputs['enable-netsch'] }}" == "true" ]] && NETSCHED_STATUS="YES"
+
+        BBRV3_STATUS="NO"
+        [[ "${{ inputs['enable-bbrv3'] }}" == "true" ]] && BBRV3_STATUS="YES"
+
+        BTWEAK_STATUS="NO"
+        [[ "${{ inputs['battery-tweak'] }}" == "true" ]] && BTWEAK_STATUS="YES"
+
+        VFS_SUPPORT="${{ inputs['vfs-support'] }}"
+        VFS_SUPPORT="${VFS_SUPPORT:-Disabled}"
+
+        # Create information file
+        cat > "$INFO_FILE" <<EOF
+        ==========  KERNEL INFO  ==========
+        Device: $DEVICE_MODEL
+        Kernel Version: $KERNEL_VERSION
+        Build Date: $BUILD_DATE
+        One UI Version: $ONEUI_VERSION
+        LTO Mode: $LTO_MODE
+        KernelSU Variant: $KSU_VARIANT
+        EOF
+
+        if [ -n "$KSU_VERSION" ]; then
+          echo "$KSU_VARIANT Version: $KSU_VERSION" >> "$INFO_FILE"
+        fi
+
+        cat >> "$INFO_FILE" <<EOF
+
+        =====  MODIFICATIONS APPLIED  =====
+        Samsung Securities: $SECURITIES_STATUS
+        SUSFS: $SUSFS_STATUS
+        Optimization Patches: $KPATCHES_STATUS
+        Baseband Guard: $BBG_STATUS
+        More Net Schedulers: $NETSCHED_STATUS
+        BBRv3 & BBR: $BBRV3_STATUS
+        VFS Support: $VFS_SUPPORT
+        EXPERIMENTAL Battery Tweak: $BTWEAK_STATUS
+
+        ===========  GIT HASHES  ===========
+        EOF
+
+        # Add available Git hashes
+        if [[ "$VARIANT" != "CLEAN" ]]; then
+          SHA_VAR="${VARIANT}_SHA"
+          for var in "$SHA_VAR" SUSFS_SHA BBG_SHA HYBRIDMOUNT_SHA NOMOUNT_SHA; do
+            value="${!var:-}"
+            if [ -n "$value" ]; then
+              echo "$var: $value" >> "$INFO_FILE"
+            fi
+          done
+        fi
+
+        cat "$INFO_FILE"
+        echo "✅ Kernel information saved to $INFO_FILE"
