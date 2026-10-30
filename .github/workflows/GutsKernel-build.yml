@@ -45,7 +45,7 @@ on:
           type: choice
           options:
             - 8.5
-            #- 8
+            - 8
           default: "8.5"
           
         lto-mode:
@@ -82,11 +82,6 @@ on:
           
         netsch:
           description: "Enable more NET schedulers"
-          type: boolean
-          default: true
-          
-        wireguard:
-          description: "Enable Wireguard"
           type: boolean
           default: true
           
@@ -192,7 +187,6 @@ jobs:
           enable-susfs: ${{ inputs.susfs }}
           enable-bbg: ${{ inputs.bbg }}
           enable-netsch: ${{ inputs.netsch }}
-          enable-wireguard: ${{ inputs.wireguard }}
           enable-bbrv3: ${{ inputs.bbrv3 }}
           extended-tmpfs: ${{ inputs['ext-tmpfs'] }}
           vfs-support: ${{ inputs['vfs-support'] }}
