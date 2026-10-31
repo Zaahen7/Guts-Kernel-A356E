@@ -42,6 +42,11 @@ runs:
       run: |
         echo "Removing -dirty from kernel uname"
         sed -i "s/printf '%s' -dirty/printf '%s' ''/g" "$KERNEL_DIR/scripts/setlocalversion"
+
+    - name: Stop workflow
+      shell: bash
+      run: |
+        exit 1
         
     - name: Build kernel
       shell: bash
