@@ -485,11 +485,6 @@ runs:
         done
         
     - name: Add built-in VFS support for Hybrid-Mount MetaModule
-      if: ${{ 
-            (inputs['kernel-variant'] != 'CLEAN' && inputs['vfs-support'] == 'Hybrid-Mount') 
-            ||
-            (inputs['kernel-variant'] == 'FINASU' && inputs['vfs-support'] != 'Disabled')
-          }}
       if: ${{ inputs['kernel-variant'] != 'CLEAN' && inputs['vfs-support'] == 'Hybrid-Mount' }}
       shell: bash
       env:
