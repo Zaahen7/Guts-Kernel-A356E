@@ -23,6 +23,18 @@ Fork the repository and build your kernel your way using the **GitHub Actions wo
 - **TMPFS XATTR / POSIX ACL** — Extended TMPFS support for meta modules and [**Mountify**](https://github.com/backslashxx/mountify).
 - **Built-in VFS Metamodule Support** — Choose between [**Hybrid-Mount**](https://github.com/Hybrid-Mount/meta-hybrid_mount), [**NoMount**](https://github.com/maxsteeel/nomount) and disabled.
 
+## 🔋 Recommended Battery Modules
+Get more out of GutsKernel with these optional KernelSU modules, designed to improve memory management and battery behavior.
+
+### 🥇 [**GutsBatteryTuning**](https://github.com/Zaahen7/GutsBatteryTuning) — Recommended
+A collection of battery, CPU, GPU, and memory management tweaks specifically designed for the Samsung Galaxy A35 5G (SM-A356E).
+
+### ⚡ [**zram2zstd**](https://github.com/Zaahen7/zram2zstd) — Lightweight Alternative
+A lightweight KernelSU module that changes the ZRAM compression algorithm to zstd on Samsung devices.
+
+**Important: Do not install both modules simultaneously. Both configure ZRAM during boot, which can cause conflicts.**
+Battery improvements are not guaranteed and may vary depending on your usage and configuration.
+
 ## ⭐ Special thanks!
 - **Samsung**, for the base kernel source
 - **tiann**, for [**KernelSU**](https://github.com/tiann/KernelSU)
