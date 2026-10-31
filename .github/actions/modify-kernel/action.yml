@@ -611,15 +611,19 @@ runs:
         esac
 
         # Get KernelSU version dynamically
-        VERSION_VAR="${VARIANT}_VERSION"
-        KSU_VERSION="${!VERSION_VAR:-}"
+        KSU_VERSION=""
+        
+        if [[ "$VARIANT" != "CLEAN" ]]; then
+            VERSION_VAR="${VARIANT}_VERSION"
+            KSU_VERSION="${!VERSION_VAR:-}"
+        fi
 
         # Modification statuses
         SECURITIES_STATUS="Enabled"
         [[ "${{ inputs['disable-securities'] }}" == "true" ]] && SECURITIES_STATUS="Disabled"
 
         SUSFS_STATUS="Unsupported"
-        [[ "${{ inputs['enable-susfs'] }}" == "true" ]] && SUSFS_STATUS="Supported"
+        [[ "$VARIANT" != "CLEAN" && "${{ inputs['enable-susfs'] }}" == "true" ]] && SUSFS_STATUS="Supported"
 
         KPATCHES_STATUS="NO"
         [[ "${{ inputs['apply-kpatches'] }}" == "true" ]] && KPATCHES_STATUS="YES"
@@ -670,15 +674,20 @@ runs:
         EOF
 
         # Add available Git hashes
+        SHA_VARS=()
+        
         if [[ "$VARIANT" != "CLEAN" ]]; then
-          SHA_VAR="${VARIANT}_SHA"
-          for var in "$SHA_VAR" SUSFS_SHA BBG_SHA HYBRIDMOUNT_SHA NOMOUNT_SHA; do
-            value="${!var:-}"
-            if [ -n "$value" ]; then
-              echo "$var: $value" >> "$INFO_FILE"
-            fi
-          done
+            SHA_VARS+=("${VARIANT}_SHA")
         fi
+        
+        SHA_VARS+=(SUSFS_SHA BBG_SHA HYBRIDMOUNT_SHA NOMOUNT_SHA)
+        
+        for var in "${SHA_VARS[@]}"; do
+            value="${!var:-}"
+            if [[ -n "$value" ]]; then
+                echo "$var: $value" >> "$INFO_FILE"
+            fi
+        done
 
         cat "$INFO_FILE"
         echo "✅ Kernel information saved to $INFO_FILE"
