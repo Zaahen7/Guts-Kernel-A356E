@@ -15,6 +15,6 @@ runs:
     - name: Upload Kernel in Actions
       uses: actions/upload-artifact@v4
       with:
-        name: GutsKernel-${{ env['DEVICE_MODEL'] }}-${{ inputs['kernel-variant'] }}${{ env[format('{0}_VERSION', inputs['kernel-variant'])] }}-Oneui${{ env['ONEUI_VERSION'] }}-${{ env['BUILD_DATE'] }}
+        name: GutsKernel-${{ env['DEVICE_MODEL'] }}-${{ inputs['kernel-variant'] }}${{ env[format('{0}_VERSION', inputs['kernel-variant'])] || '' }}-Oneui${{ env['ONEUI_VERSION'] }}-${{ env['BUILD_DATE'] }}
         path: ${{ env['ANYKERNEL3_DIR'] }}
         compression-level: 9
