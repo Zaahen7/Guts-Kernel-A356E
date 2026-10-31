@@ -485,6 +485,11 @@ runs:
         done
         
     - name: Add built-in VFS support for Hybrid-Mount MetaModule
+      if: ${{ 
+            (inputs['kernel-variant'] != 'CLEAN' && inputs['vfs-support'] == 'Hybrid-Mount') 
+            ||
+            (inputs['kernel-variant'] == 'FINASU' && inputs['vfs-support'] != 'Disabled')
+          }}
       if: ${{ inputs['kernel-variant'] != 'CLEAN' && inputs['vfs-support'] == 'Hybrid-Mount' }}
       shell: bash
       env:
@@ -496,8 +501,9 @@ runs:
         source "$GITHUB_ACTION_PATH/latest-commit-hash.sh"
 
         if [ ${{ inputs['kernel-variant'] }} == "FINASU" ]; then
-          echo "::error::FinaSU VFS Support have to be NoMount"
-          exit 1
+          echo "::error::VFS Support in FinaSU has to be NoMount"
+          echo "::notice::VFS Support for NoMount will be installed"
+          exit 0
         fi
         
         # Get latest commit SHA
@@ -533,7 +539,11 @@ runs:
         echo "✅ Hybrid Mount installed successfully."
         
     - name: Add built-in VFS support for NoMount MetaModule
-      if: ${{ inputs['kernel-variant'] != 'CLEAN' && inputs['vfs-support'] == 'NoMount' }}
+      if: ${{ 
+            (inputs['kernel-variant'] != 'CLEAN' && inputs['vfs-support'] == 'NoMount') 
+            ||
+            (inputs['kernel-variant'] == 'FINASU' && inputs['vfs-support'] != 'Disabled')
+          }}
       shell: bash
       env:
         NOMOUNT_DIR: "${{ env.KERNEL_DIR }}/nomount"
