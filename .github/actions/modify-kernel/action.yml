@@ -641,7 +641,7 @@ runs:
         [[ "${{ inputs['battery-tweak'] }}" == "true" ]] && BTWEAK_STATUS="YES"
 
         VFS_SUPPORT="Disabled"
-        [[ "${{ inputs['vfs-support'] }}" != "Disabled" ]] && VFS_SUPPORT="${{ inputs['vfs-support'] }}"
+        [[ "$VARIANT" != "CLEAN" && "${{ inputs['vfs-support'] }}" != "Disabled" ]] && VFS_SUPPORT="${{ inputs['vfs-support'] }}"
 
         # Create information file
         cat > "$INFO_FILE" <<EOF
