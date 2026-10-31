@@ -468,7 +468,7 @@ runs:
         done
         
     - name: Enable extended TMPFS support for meta modules and Mountify
-      if: ${{ inputs['extended-tmpfs'] == 'true' }}
+      if: ${{ inputs['kernel-variant'] != 'CLEAN' && inputs['extended-tmpfs'] == 'true' }}
       shell: bash
       run: |
         for config in \
@@ -485,7 +485,7 @@ runs:
         done
         
     - name: Add built-in VFS support for Hybrid-Mount MetaModule
-      if: ${{ inputs['vfs-support'] == 'Hybrid-Mount' }}
+      if: ${{ inputs['kernel-variant'] != 'CLEAN' && inputs['vfs-support'] == 'Hybrid-Mount' }}
       shell: bash
       env:
         HYBRIDMOUNT_DIR: "${{ env.KERNEL_DIR }}/meta-hybrid_mount"
@@ -533,7 +533,7 @@ runs:
         echo "✅ Hybrid Mount installed successfully."
         
     - name: Add built-in VFS support for NoMount MetaModule
-      if: ${{ inputs['vfs-support'] == 'NoMount' }}
+      if: ${{ inputs['kernel-variant'] != 'CLEAN' && inputs['vfs-support'] == 'NoMount' }}
       shell: bash
       env:
         NOMOUNT_DIR: "${{ env.KERNEL_DIR }}/nomount"
